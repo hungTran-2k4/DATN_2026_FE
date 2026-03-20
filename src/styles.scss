@@ -1,1 +1,52 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'primeicons/primeicons.css';
+
+:root {
+    --admin-bg-soft: #f6f8fc;
+    --admin-border: #e7ebf3;
+    --admin-text-primary: #030229;
+    --admin-text-muted: #6a6f85;
+
+    --admin-primary: #5b93ff;
+    --admin-primary-weak: rgba(91, 147, 255, 0.12);
+
+    --kpi-blue: rgba(91, 147, 255, 0.15);
+    --kpi-yellow: rgba(255, 214, 107, 0.25);
+    --kpi-orange: rgba(255, 143, 107, 0.2);
+    --kpi-violet: rgba(96, 91, 255, 0.18);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+    font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--admin-text-primary);
+    background: var(--admin-bg-soft);
+}
+
+.p-component {
+    font-family: inherit;
+}
+
+.p-card {
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(12, 36, 73, 0.06);
+}
+
+.p-card .p-card-content {
+    padding-top: 0;
+}
+
+.p-datatable .p-datatable-thead>tr>th {
+    color: var(--admin-text-primary);
+    font-weight: 700;
+}
+
+.p-tag {
+    font-size: 0.78rem;
+}

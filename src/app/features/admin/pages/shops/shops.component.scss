@@ -1,0 +1,17 @@
+.admin-page {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.page-heading {
+    h3 {
+        margin: 0;
+        color: var(--admin-text-primary);
+    }
+
+    p {
+        margin: 6px 0 0;
+        color: var(--admin-text-muted);
+    }
+}

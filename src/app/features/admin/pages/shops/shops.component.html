@@ -1,0 +1,34 @@
+<section class="admin-page">
+  <header class="page-heading">
+    <h3>Quan ly shop</h3>
+    <p>Theo doi va kiem soat hoat dong shop tren san.</p>
+  </header>
+
+  <p-table
+    [value]="(shops$ | async) ?? []"
+    [tableStyle]="{ 'min-width': '50rem' }"
+    stripedRows
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Ten shop</th>
+        <th>Slug</th>
+        <th>Chu shop</th>
+        <th>Trang thai</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-shop>
+      <tr>
+        <td>{{ shop.name || "-" }}</td>
+        <td>{{ shop.slug || "-" }}</td>
+        <td>{{ shop.ownerId || "-" }}</td>
+        <td>
+          <p-tag
+            [severity]="shop.isActive ? 'success' : 'danger'"
+            [value]="shop.isActive ? 'Dang hoat dong' : 'Tam khoa'"
+          ></p-tag>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
