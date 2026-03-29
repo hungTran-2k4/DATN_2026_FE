@@ -1,4 +1,29 @@
 <section class="dashboard">
+  <header class="dashboard-head admin-panel">
+    <div>
+      <h3>Tong quan dieu hanh</h3>
+      <p>
+        Toi uu van hanh san da nguoi ban voi bo chi so de quan sat nhanh theo
+        ngay.
+      </p>
+    </div>
+
+    <div class="head-actions">
+      <p-tag severity="info" [value]="lastUpdatedLabel"></p-tag>
+      <p-button
+        icon="pi pi-refresh"
+        label="Lam moi"
+        [outlined]="true"
+        (click)="refreshDashboard()"
+      ></p-button>
+      <p-button
+        icon="pi pi-download"
+        label="Xuat bao cao"
+        (click)="exportDashboardReport()"
+      ></p-button>
+    </div>
+  </header>
+
   <div class="kpi-grid">
     @for (card of kpiCards; track card.title) {
       <p-card>
@@ -9,6 +34,23 @@
           <div class="content-wrap">
             <h3>{{ card.value }}</h3>
             <p>{{ card.title }}</p>
+          </div>
+        </div>
+      </p-card>
+    }
+  </div>
+
+  <div class="insight-grid">
+    @for (insight of quickInsights; track insight.title) {
+      <p-card>
+        <div class="insight-item">
+          <div>
+            <h4>{{ insight.title }}</h4>
+            <p>{{ insight.description }}</p>
+          </div>
+          <div class="insight-value">
+            <span>{{ insight.value }}</span>
+            <p-tag [severity]="insight.severity" value="Can theo doi"></p-tag>
           </div>
         </div>
       </p-card>

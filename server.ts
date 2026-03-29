@@ -17,13 +17,22 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', browserDistFolder);
 
-  // Example Express Rest API endpoints
-  // server.get('/api/**', (req, res) => { });
+  // Keep /api reserved for backend services. If backend is not mounted here,
+  // return JSON instead of SSR HTML to avoid Vite trying to load /api/main.js.
+  server.get('/api/**', (_req, res) => {
+    res.status(404).json({
+      message: 'API endpoint is not available on Angular SSR server.',
+    });
+  });
+
   // Serve static files from /browser
-  server.get('**', express.static(browserDistFolder, {
-    maxAge: '1y',
-    index: 'index.html',
-  }));
+  server.get(
+    '**',
+    express.static(browserDistFolder, {
+      maxAge: '1y',
+      index: 'index.html',
+    }),
+  );
 
   // All regular routes use the Angular engine
   server.get('**', (req, res, next) => {

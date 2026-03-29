@@ -40,3 +40,10 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Local environment and proxy configs (can contain internal endpoints/secrets)
+.env
+.env.*
+!.env.example
+proxy.conf.json
+proxy.conf.*.json

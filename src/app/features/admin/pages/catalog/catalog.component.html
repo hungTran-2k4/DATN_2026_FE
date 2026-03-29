@@ -7,6 +7,48 @@
     </p>
   </header>
 
+  <div class="admin-kpi-strip" *ngIf="catalogStats$ | async as stats">
+    <article class="admin-kpi-card is-info">
+      <h4>Tong danh muc</h4>
+      <p>{{ stats.categories }}</p>
+    </article>
+    <article class="admin-kpi-card is-success">
+      <h4>Tong thuong hieu</h4>
+      <p>{{ stats.brands }}</p>
+    </article>
+    <article class="admin-kpi-card is-warn">
+      <h4>Danh muc dang active</h4>
+      <p>{{ stats.activeCategories }}</p>
+    </article>
+  </div>
+
+  <div class="admin-toolbar admin-panel">
+    <div class="catalog-meta">
+      <p-tag severity="info" value="Dong bo catalog theo ngay"></p-tag>
+      <p-tag severity="success" value="Trang thai he thong: On dinh"></p-tag>
+    </div>
+    <div class="admin-toolbar-actions">
+      <p-button
+        icon="pi pi-refresh"
+        label="Lam moi"
+        [outlined]="true"
+        (click)="reloadCatalog()"
+      ></p-button>
+      <p-button
+        icon="pi pi-file-export"
+        label="Xuat danh muc"
+        [outlined]="true"
+        (click)="exportCurrentCategories()"
+      ></p-button>
+      <p-button
+        icon="pi pi-file-export"
+        label="Xuat thuong hieu"
+        severity="secondary"
+        (click)="exportCurrentBrands()"
+      ></p-button>
+    </div>
+  </div>
+
   <div class="catalog-grid">
     <p-card header="Danh muc">
       <p-table
@@ -19,13 +61,33 @@
             <th>Ten</th>
             <th>Slug</th>
             <th>Active</th>
+            <th style="width: 120px">Thao tac</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-category>
           <tr>
             <td>{{ category.name || "-" }}</td>
             <td>{{ category.slug || "-" }}</td>
-            <td>{{ category.isActive ? "Co" : "Khong" }}</td>
+            <td>
+              <p-tag
+                [severity]="category.isActive ? 'success' : 'danger'"
+                [value]="category.isActive ? 'Co' : 'Khong'"
+              ></p-tag>
+            </td>
+            <td>
+              <p-button
+                icon="pi pi-pencil"
+                size="small"
+                [text]="true"
+                (click)="notifyFeaturePending('Cap nhat danh muc')"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                size="small"
+                [text]="true"
+                (click)="notifyFeaturePending('Vo hieu hoa danh muc')"
+              ></p-button>
+            </td>
           </tr>
         </ng-template>
       </p-table>
@@ -42,13 +104,33 @@
             <th>Ten</th>
             <th>Slug</th>
             <th>Active</th>
+            <th style="width: 120px">Thao tac</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-brand>
           <tr>
             <td>{{ brand.name || "-" }}</td>
             <td>{{ brand.slug || "-" }}</td>
-            <td>{{ brand.isActive ? "Co" : "Khong" }}</td>
+            <td>
+              <p-tag
+                [severity]="brand.isActive ? 'success' : 'danger'"
+                [value]="brand.isActive ? 'Co' : 'Khong'"
+              ></p-tag>
+            </td>
+            <td>
+              <p-button
+                icon="pi pi-pencil"
+                size="small"
+                [text]="true"
+                (click)="notifyFeaturePending('Cap nhat thuong hieu')"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                size="small"
+                [text]="true"
+                (click)="notifyFeaturePending('Vo hieu hoa thuong hieu')"
+              ></p-button>
+            </td>
           </tr>
         </ng-template>
       </p-table>

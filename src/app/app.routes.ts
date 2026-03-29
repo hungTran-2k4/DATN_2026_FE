@@ -5,7 +5,45 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'admin/dashboard',
+    redirectTo: 'auth/login',
+  },
+  {
+    path: 'auth',
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'login',
+      },
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./features/auth/pages/login/login.component').then(
+            (m) => m.LoginComponent,
+          ),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./features/auth/pages/register/register.component').then(
+            (m) => m.RegisterComponent,
+          ),
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import(
+            './features/auth/pages/forgot-password/forgot-password.component'
+          ).then((m) => m.ForgotPasswordComponent),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import(
+            './features/auth/pages/reset-password/reset-password.component'
+          ).then((m) => m.ResetPasswordComponent),
+      },
+    ],
   },
   {
     path: 'admin',
@@ -59,6 +97,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'admin/dashboard',
+    redirectTo: 'auth/login',
   },
 ];

@@ -4,31 +4,99 @@
     <p>Theo doi va kiem soat hoat dong shop tren san.</p>
   </header>
 
-  <p-table
-    [value]="(shops$ | async) ?? []"
-    [tableStyle]="{ 'min-width': '50rem' }"
-    stripedRows
-  >
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Ten shop</th>
-        <th>Slug</th>
-        <th>Chu shop</th>
-        <th>Trang thai</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-shop>
-      <tr>
-        <td>{{ shop.name || "-" }}</td>
-        <td>{{ shop.slug || "-" }}</td>
-        <td>{{ shop.ownerId || "-" }}</td>
-        <td>
-          <p-tag
-            [severity]="shop.isActive ? 'success' : 'danger'"
-            [value]="shop.isActive ? 'Dang hoat dong' : 'Tam khoa'"
-          ></p-tag>
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+  <div class="admin-kpi-strip" *ngIf="shopStats$ | async as stats">
+    <article class="admin-kpi-card is-info">
+      <h4>Tong shop</h4>
+      <p>{{ stats.total }}</p>
+    </article>
+    <article class="admin-kpi-card is-success">
+      <h4>Shop dang hoat dong</h4>
+      <p>{{ stats.active }}</p>
+    </article>
+    <article class="admin-kpi-card is-warn">
+      <h4>Shop tam khoa</h4>
+      <p>{{ stats.inactive }}</p>
+    </article>
+  </div>
+
+  <div class="admin-toolbar admin-panel">
+    <p-iconfield iconPosition="left">
+      <p-inputicon class="pi pi-search"></p-inputicon>
+      <input
+        pInputText
+        type="text"
+        placeholder="Tim theo ten shop, slug, chu shop..."
+        [(ngModel)]="keyword"
+        (ngModelChange)="onKeywordChange()"
+      />
+    </p-iconfield>
+
+    <div class="admin-toolbar-actions">
+      <p-button
+        icon="pi pi-refresh"
+        label="Lam moi"
+        [outlined]="true"
+        (click)="reloadShops()"
+      ></p-button>
+      <p-button
+        icon="pi pi-filter-slash"
+        label="Bo loc"
+        [outlined]="true"
+        (click)="resetFilter()"
+      ></p-button>
+      <p-button
+        icon="pi pi-file-export"
+        label="Xuat CSV"
+        severity="secondary"
+        (click)="exportCurrentShops()"
+      ></p-button>
+    </div>
+  </div>
+
+  <div class="admin-panel admin-table-panel">
+    <p-table
+      [value]="(filteredShops$ | async) ?? []"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      stripedRows
+      [paginator]="true"
+      [rows]="8"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Ten shop</th>
+          <th>Slug</th>
+          <th>Chu shop</th>
+          <th>Trang thai</th>
+          <th style="width: 130px">Thao tac</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-shop>
+        <tr>
+          <td>{{ shop.name || "-" }}</td>
+          <td>{{ shop.slug || "-" }}</td>
+          <td>{{ shop.ownerId || "-" }}</td>
+          <td>
+            <p-tag
+              [severity]="getStatusSeverity(shop.isActive)"
+              [value]="shop.isActive ? 'Dang hoat dong' : 'Tam khoa'"
+            ></p-tag>
+          </td>
+          <td>
+            <p-button
+              icon="pi pi-copy"
+              size="small"
+              [text]="true"
+              (click)="copyShopId(shop.id)"
+            ></p-button>
+            <p-button
+              icon="pi pi-pencil"
+              size="small"
+              [text]="true"
+              (click)="notifyFeaturePending('Cap nhat thong tin shop')"
+            ></p-button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </section>

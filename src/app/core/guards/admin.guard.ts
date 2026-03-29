@@ -1,6 +1,16 @@
-import { CanActivateFn } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { AuthSessionService } from '../services/auth-session.service';
 
 export const adminGuard: CanActivateFn = () => {
-  // TODO: Thay logic mock nay bang kiem tra token/quyen admin tu auth service.
-  return true;
+  const sessionService = inject(AuthSessionService);
+  const router = inject(Router);
+
+  const token = sessionService.getAccessToken();
+  if (token) {
+    return true;
+  }
+
+  router.navigateByUrl('/auth/login');
+  return false;
 };
