@@ -10,7 +10,7 @@ import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 
 import { environment } from '../environments/environment';
-import { API_BASE_URL } from './data-access/api/api-service-base.service';
+import { API_BASE_URL } from './shared/api/generated/api-service-base.service';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 // [CSRF] Tạm tắt cho môi trường dev local. Bật lại khi deploy production.

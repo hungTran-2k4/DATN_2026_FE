@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AuthResponse } from '../../data-access/api/api-service-base.service';
+import { AuthResponse } from '../../shared/api/generated/api-service-base.service';
 
 interface StoredAuthSession {
   accessToken: string;
