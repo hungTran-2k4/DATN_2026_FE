@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { AuthResponse } from '../../../shared/api/generated/api-service-base.service';
 import { AuthRepository } from '../../../entities/auth/model/auth.repository';
 import { AuthSessionService } from '../../../core/services/auth-session.service';
@@ -12,6 +12,31 @@ export class AuthFacade {
     private readonly sessionService: AuthSessionService,
     private readonly router: Router,
   ) {}
+ 
+  get isLoggedIn$(): Observable<boolean> {
+    return this.sessionService.currentUser$.pipe(map(user => !!user));
+  }
+ 
+  initializeAuth(): Observable<boolean> {
+    const session = this.sessionService.getSession();
+    
+    // Always call getProfile to verify cookies and get latest user data
+    return this.authRepository.getProfile().pipe(
+      tap((result) => {
+        if (result) {
+          this.sessionService.saveSession(result);
+        }
+      }),
+      map(() => true),
+      catchError(() => {
+        // If we have local session but API fails (cookie expired), clear everything
+        if (session) {
+          this.sessionService.clearSession();
+        }
+        return of(false);
+      })
+    );
+  }
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.authRepository

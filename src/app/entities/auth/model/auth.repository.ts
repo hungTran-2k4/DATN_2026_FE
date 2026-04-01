@@ -8,12 +8,14 @@ import {
   RegisterRequest,
 } from '../../../shared/api/generated/api-service-base.service';
 import { environment } from '../../../../environments/environment';
+import { AuthSessionService } from '../../../core/services/auth-session.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthRepository {
   constructor(
     private readonly api: ApiBaseService,
     private readonly http: HttpClient,
+    private readonly sessionService: AuthSessionService,
   ) {}
 
   login(email: string, password: string): Observable<AuthResponse> {
@@ -87,6 +89,33 @@ export class AuthRepository {
           return {
             message: res.data ?? res.message ?? 'Đổi mật khẩu thành công!',
           };
+        }),
+      );
+  }
+  getProfile(): Observable<AuthResponse> {
+    return this.http
+      .get<{
+        success: boolean;
+        data: any;
+        message: string;
+      }>(`${environment.apiUrl}/api/me/profile`, { withCredentials: true })
+      .pipe(
+        map((res) => {
+          if (res.success === false || !res.data) {
+            throw new Error(res.message ?? 'Không thể lấy thông tin người dùng.');
+          }
+          
+          // Map to AuthResponse structure expected by sessionService.saveSession
+          const profile = res.data;
+          return {
+             accessToken: this.sessionService.getAccessToken() || '', 
+             user: {
+                 id: profile.userId || profile.id,
+                 email: profile.email,
+                 fullName: profile.fullName,
+                 roles: profile.roles
+             }
+          } as AuthResponse;
         }),
       );
   }

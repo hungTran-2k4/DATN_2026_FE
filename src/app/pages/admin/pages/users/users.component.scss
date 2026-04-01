@@ -1,5 +1,140 @@
 .admin-page {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.page-heading {
+  margin-bottom: 1rem;
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--surface-900, #1f2937);
+  }
+  p {
+    margin: 0;
+    color: var(--surface-500, #6b7280);
+    font-size: 0.95rem;
+  }
+}
+
+.admin-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+
+  .admin-kpi-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--surface-200, #e5e7eb);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    &.is-info::before { background-color: var(--blue-500, #3b82f6); }
+    &.is-success::before { background-color: var(--green-500, #22c55e); }
+    &.is-warn::before { background-color: var(--orange-500, #f97316); }
+
+    h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--surface-500, #6b7280);
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--surface-900, #1f2937);
+    }
+  }
+}
+
+.admin-panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--surface-200, #e5e7eb);
+  padding: 1.5rem;
+}
+
+.admin-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+
+  p-iconfield {
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+    input {
+      width: 100%;
+      border-radius: 8px;
+    }
+  }
+}
+
+.admin-toolbar-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.admin-table-panel {
+  padding: 0;
+  overflow: hidden;
+
+  // PrimeNG Table Overrides for SaaS look
+  ::ng-deep {
+    .p-datatable .p-datatable-thead > tr > th {
+      background: var(--surface-50, #f9fafb);
+      color: var(--surface-600, #4b5563);
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--surface-200, #e5e7eb);
+    }
+    
+    .p-datatable .p-datatable-tbody > tr > td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--surface-100, #f3f4f6);
+      color: var(--surface-800, #374151);
+    }
+
+    .p-datatable .p-datatable-tbody > tr:hover {
+      background: var(--surface-50, #f9fafb);
+    }
+  }
+}
+
+.bg-primary-reverse {
+  background: var(--primary-50, #eef2ff);
+}
+.text-primary {
+  color: var(--primary-600, #4f46e5);
+}
+.text-secondary {
+  color: var(--surface-500, #6b7280);
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-bold {
+  font-weight: 700;
 }

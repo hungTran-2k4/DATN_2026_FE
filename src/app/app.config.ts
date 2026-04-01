@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -11,7 +11,12 @@ import { provideClientHydration } from '@angular/platform-browser';
 
 import { environment } from '../environments/environment';
 import { API_BASE_URL } from './shared/api/generated/api-service-base.service';
+import { AuthFacade } from './pages/auth/services/auth.facade';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+ 
+export function initializeAuth(authFacade: AuthFacade) {
+  return () => authFacade.initializeAuth();
+}
 
 // [CSRF] Tạm tắt cho môi trường dev local. Bật lại khi deploy production.
 // export function initializeCsrfToken(http: HttpClient) {
@@ -28,6 +33,12 @@ export const appConfig: ApplicationConfig = {
     //   deps: [HttpClient],
     //   multi: true
     // },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuth,
+      deps: [AuthFacade],
+      multi: true
+    },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideHttpClient(
       // [CSRF] Tạm tắt cho môi trường dev local. Bật lại khi deploy production.

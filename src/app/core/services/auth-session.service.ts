@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthResponse } from '../../shared/api/generated/api-service-base.service';
 
 interface StoredAuthSession {
@@ -14,6 +15,9 @@ interface StoredAuthSession {
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {
   private readonly sessionKey = 'datn_auth_session';
+  
+  private userSubject = new BehaviorSubject<StoredAuthSession | null>(this.getSession());
+  public currentUser$ = this.userSubject.asObservable();
 
   saveSession(auth: AuthResponse): void {
     if (typeof localStorage === 'undefined' || !auth.accessToken) {
@@ -31,12 +35,14 @@ export class AuthSessionService {
     };
 
     localStorage.setItem(this.sessionKey, JSON.stringify(payload));
+    this.userSubject.next(payload);
   }
 
   clearSession(): void {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(this.sessionKey);
     }
+    this.userSubject.next(null);
   }
 
   getAccessToken(): string | null {
@@ -63,7 +69,7 @@ export class AuthSessionService {
     return roles.includes('Customer') || (!this.isAdmin() && !this.isSeller());
   }
 
-  private getSession(): StoredAuthSession | null {
+  public getSession(): StoredAuthSession | null {
     if (typeof localStorage === 'undefined') {
       return null;
     }

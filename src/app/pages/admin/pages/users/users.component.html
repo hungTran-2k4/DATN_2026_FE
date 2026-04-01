@@ -1,21 +1,21 @@
 <section class="admin-page">
   <header class="page-heading">
-    <h3>Quan ly nguoi dung</h3>
-    <p>Danh sach tai khoan trong he thong va role hien tai.</p>
+    <h3>Quản lý người dùng</h3>
+    <p>Danh sách tài khoản trong hệ thống, phân quyền và trạng thái.</p>
   </header>
 
   <div class="admin-kpi-strip" *ngIf="userStats$ | async as stats">
     <article class="admin-kpi-card is-info">
-      <h4>Tong tai khoan</h4>
+      <h4>Tổng tài khoản</h4>
       <p>{{ stats.total }}</p>
     </article>
     <article class="admin-kpi-card is-success">
-      <h4>Tai khoan co role Admin</h4>
-      <p>{{ stats.adminUsers }}</p>
+      <h4>Đã xác minh</h4>
+      <p>{{ stats.adminUsers || '-' }}</p>
     </article>
     <article class="admin-kpi-card is-warn">
-      <h4>Tai khoan chua gan role</h4>
-      <p>{{ stats.noRoleUsers }}</p>
+      <h4>Chưa gán quyền</h4>
+      <p>{{ stats.noRoleUsers || '-' }}</p>
     </article>
   </div>
 
@@ -25,7 +25,7 @@
       <input
         pInputText
         type="text"
-        placeholder="Tim theo email, ten, user id..."
+        placeholder="Tìm theo email, tên, user id..."
         [(ngModel)]="keyword"
         (ngModelChange)="onKeywordChange()"
       />
@@ -34,19 +34,19 @@
     <div class="admin-toolbar-actions">
       <p-button
         icon="pi pi-refresh"
-        label="Lam moi"
+        label="Làm mới"
         [outlined]="true"
         (click)="reloadUsers()"
       ></p-button>
       <p-button
         icon="pi pi-filter-slash"
-        label="Bo loc"
+        label="Bỏ lọc"
         [outlined]="true"
         (click)="resetFilter()"
       ></p-button>
       <p-button
         icon="pi pi-file-export"
-        label="Xuat CSV"
+        label="Xuất CSV"
         severity="secondary"
         (click)="exportCurrentUsers()"
       ></p-button>
@@ -58,7 +58,7 @@
       [value]="users"
       [lazy]="true"
       (onLazyLoad)="loadUsers($event)"
-      [tableStyle]="{ 'min-width': '50rem' }"
+      [tableStyle]="{ 'min-width': '60rem' }"
       stripedRows
       [paginator]="true"
       [rows]="rows"
@@ -69,32 +69,29 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Email</th>
-          <th>Ho ten</th>
-          <th>User ID</th>
-          <th>Role</th>
-          <th style="width: 140px">Thao tac</th>
+          <th>Họ tên</th>
+          <th>Trạng thái</th>
+          <th>Vai trò (Role)</th>
+          <th style="width: 100px; text-align: center">Thao tác</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-user>
         <tr>
-          <td>{{ user.email || "-" }}</td>
+          <td><span class="font-medium">{{ user.email || "-" }}</span></td>
           <td>{{ user.fullName || "-" }}</td>
-          <td>{{ user.id || "-" }}</td>
           <td>
-            <p-tag [value]="formatRoles(user.roles)"></p-tag>
+            <p-tag [severity]="user.status === 'active' ? 'success' : (user.status === 'locked' ? 'warn' : 'danger')" [value]="user.status || 'active'"></p-tag>
           </td>
           <td>
+            <p-tag severity="info" [value]="formatRoles(user.roles)" [rounded]="true"></p-tag>
+          </td>
+          <td style="text-align: center">
             <p-button
-              icon="pi pi-copy"
-              size="small"
+              icon="pi pi-ellipsis-v"
               [text]="true"
-              (click)="copyUserId(user.id)"
-            ></p-button>
-            <p-button
-              icon="pi pi-user-edit"
-              size="small"
-              [text]="true"
-              (click)="openEditDialog(user)"
+              [rounded]="true"
+              severity="secondary"
+              (click)="setRowUser(user); menu.toggle($event)"
             ></p-button>
           </td>
         </tr>
@@ -102,35 +99,145 @@
     </p-table>
   </div>
 
+  <!-- Reusable Menu for Table Rows -->
+  <p-menu #menu [model]="userMenu" [popup]="true" appendTo="body"></p-menu>
+
+  <!-- Confirm Dialog Global -->
+  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+  <!-- User Detail & Edit Dialog -->
   <p-dialog
-    header="Cap nhat Role"
+    header="Chi tiết người dùng"
     [modal]="true"
-    [(visible)]="editDialogVisible"
-    [style]="{ width: '400px' }"
+    [(visible)]="detailDialogVisible"
+    [style]="{ width: '750px' }"
+    [maximizable]="true"
   >
-    <div class="flex align-items-center" style="margin-bottom: 2rem;">
-      <span class="p-text-secondary" style="margin-right: 1rem;">Nguoi dung:</span>
-      <span class="font-bold">{{ selectedUser?.fullName || selectedUser?.email }}</span>
-    </div>
+    <div *ngIf="selectedUser">
+      <div class="flex align-items-center mb-3">
+        <div class="border-circle bg-primary-reverse text-primary flex align-items-center justify-content-center mr-3" style="width: 48px; height: 48px; font-size: 1.5rem; font-weight: bold;">
+          {{ selectedUser.email?.charAt(0) | uppercase }}
+        </div>
+        <div>
+          <h2 class="m-0 text-xl font-bold">{{ selectedUser.fullName || 'Người dùng ẩn danh' }}</h2>
+          <span class="text-secondary">{{ selectedUser.email }}</span>
+        </div>
+        <div class="ml-auto">
+        <div class="ml-auto">
+           <p-tag [severity]="selectedUser.status === 'active' ? 'success' : (selectedUser.status === 'locked' ? 'warn' : 'danger')" [value]="selectedUser.status || 'active'" size="large"></p-tag>
+        </div>
+        </div>
+      </div>
 
-    <div class="field" style="display: flex; flex-direction: column; gap: 0.5rem;">
-      <label for="roles" class="font-bold">Vai tro (Role)</label>
-      <!-- Option label can be name, value is id. Wait, selectedRoles needs to match update endpoint which receives roleIds -->
-      <p-multiSelect
-        id="roles"
-        [options]="availableRoles"
-        optionLabel="name"
-        optionValue="id"
-        [(ngModel)]="selectedRoles"
-        placeholder="Chon vai tro"
-        [style]="{ width: '100%' }"
-        appendTo="body"
-      ></p-multiSelect>
-    </div>
+      <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
+        <!-- TAB 1: OVERVIEW & ROLES -->
+        <p-tabPanel header="Tổng quan & Quyền">
+          <div class="grid mt-2">
+             <div class="col-6">
+                <p class="text-secondary mb-1">ID</p>
+                <p class="font-medium m-0">{{ selectedUser.id }}</p>
+             </div>
+             <div class="col-6">
+                <p class="text-secondary mb-1">Ngày tham gia</p>
+                <p class="font-medium m-0">{{ selectedUser.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+             </div>
+          </div>
+          
+          <p-divider></p-divider>
 
-    <ng-template pTemplate="footer">
-      <p-button label="Huy bo" icon="pi pi-times" [text]="true" severity="secondary" (click)="editDialogVisible = false"></p-button>
-      <p-button label="Luu lai" icon="pi pi-check" [text]="true" (click)="saveRoles()" [loading]="savingRoles"></p-button>
-    </ng-template>
+          <div class="field mt-4" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="roles" class="font-bold text-lg">Phân quyền vhệ thống</label>
+            <p-multiSelect
+              id="roles"
+              [options]="availableRoles"
+              optionLabel="name"
+              optionValue="id"
+              [(ngModel)]="selectedRoles"
+              placeholder="Chọn vai trò"
+              [style]="{ width: '100%' }"
+              appendTo="body"
+            ></p-multiSelect>
+          </div>
+          
+          <div class="text-right mt-4">
+             <p-button label="Lưu phân quyền" icon="pi pi-check" (click)="saveRoles()" [loading]="savingRoles"></p-button>
+          </div>
+        </p-tabPanel>
+
+        <!-- TAB 2: SESSIONS -->
+        <p-tabPanel header="Phiên hoạt động">
+           <div class="flex justify-content-between align-items-center mb-3 mt-2">
+              <span class="font-bold">Thiết bị đang đăng nhập</span>
+              <p-button label="Đăng xuất tất cả" icon="pi pi-power-off" severity="danger" [outlined]="true" size="small" (click)="revokeAllSessions()" [disabled]="userSessions.length === 0"></p-button>
+           </div>
+           
+           <p-table [value]="userSessions" [loading]="loadingSessions" [rows]="5" [paginator]="true">
+              <ng-template pTemplate="header">
+                 <tr>
+                    <th>Trạng thái</th>
+                    <th>IP</th>
+                    <th>Trình duyệt / Thiết bị</th>
+                    <th>HĐ cuối</th>
+                    <th style="width: 80px"></th>
+                 </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-ss>
+                 <tr>
+                    <td>
+                       <p-tag *ngIf="ss.isActive" severity="success" value="Đang kết nối"></p-tag>
+                       <p-tag *ngIf="!ss.isActive" severity="secondary" value="Đã ngắt"></p-tag>
+                    </td>
+                    <td>{{ ss.ipAddress || 'Ẩn' }}</td>
+                    <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" [title]="ss.userAgent">{{ ss.userAgent || 'App' }}</td>
+                    <td>{{ ss.lastActivityAt | date:'dd/MM HH:mm' }}</td>
+                    <td>
+                       <p-button *ngIf="ss.isActive" icon="pi pi-times" severity="danger" [text]="true" size="small" [rounded]="true" pTooltip="Hủy phiên này" (click)="revokeSession(ss.id)"></p-button>
+                    </td>
+                 </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                 <tr><td colspan="5" class="text-center p-4">Không có phiên đăng nhập nào (đã xóa hoặc chưa từng đăng nhập).</td></tr>
+              </ng-template>
+           </p-table>
+        </p-tabPanel>
+
+        <!-- TAB 3: AUDIT LOGS -->
+        <p-tabPanel header="Nhật ký truy cập">
+           <div class="mt-2">
+              <p-table 
+                [value]="auditLogs" 
+                [lazy]="true" 
+                (onLazyLoad)="loadUserAuditLogs($event)" 
+                [loading]="loadingAudit"
+                [paginator]="true"
+                [rows]="auditRows"
+                [first]="auditFirst"
+                [totalRecords]="auditTotalRecords"
+                styleClass="p-datatable-sm"
+              >
+                 <ng-template pTemplate="header">
+                    <tr>
+                       <th style="width: 150px">Thời gian</th>
+                       <th>Hành động</th>
+                       <th>Mục tiêu</th>
+                       <th>IP</th>
+                    </tr>
+                 </ng-template>
+                 <ng-template pTemplate="body" let-log>
+                    <tr>
+                       <td>{{ log.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+                       <td><span class="font-medium text-primary">{{ log.action }}</span></td>
+                       <td>{{ log.targetType }} {{ log.targetId ? '#' + log.targetId?.substring(0,6) : '' }}</td>
+                       <td><small class="text-secondary">{{ log.ipAddress }}</small></td>
+                    </tr>
+                 </ng-template>
+                 <ng-template pTemplate="emptymessage">
+                    <tr><td colspan="4" class="text-center p-4">Chưa có dữ liệu nhật ký.</td></tr>
+                 </ng-template>
+              </p-table>
+           </div>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
   </p-dialog>
 </section>

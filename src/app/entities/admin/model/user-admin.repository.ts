@@ -6,7 +6,10 @@ import {
   RoleDto,
   UpdateUserRolesRequest,
   UserDtoIEnumerablePagedResponse,
-  GetUsersQuery
+  GetUsersQuery,
+  LockUserRequest,
+  AuditLogDtoIEnumerablePagedResponse,
+  UserSessionDto
 } from '../../../shared/api/generated/api-service-base.service';
 
 @Injectable({ providedIn: 'root' })
@@ -21,7 +24,22 @@ export class UserAdminRepository {
     page?: number,
     pageSize?: number,
   ): Observable<UserDtoIEnumerablePagedResponse> {
-    return this.apiBase.paging2(new GetUsersQuery({ search, page, pageSize }));
+    const query = new GetUsersQuery({ page, pageSize });
+
+    if (search && search.trim()) {
+      // Define a basic filter descriptor structure manually as the api generated models
+      // expect any matching filter object.
+      (query as any).filter = {
+        logic: 'or',
+        filters: [
+          { field: 'email', operator: 'contains', value: search },
+          { field: 'fullName', operator: 'contains', value: search },
+          { field: 'id', operator: 'eq', value: search }
+        ]
+      };
+    }
+
+    return this.apiBase.paging2(query);
   }
 
   /**
@@ -46,5 +64,41 @@ export class UserAdminRepository {
       userId,
       new UpdateUserRolesRequest({ roleIds }),
     );
+  }
+
+  lockUser(userId: string, reason: string = 'Admin Action'): Observable<void> {
+    return this.apiBase.lock(userId, new LockUserRequest({ reason }));
+  }
+
+  unlockUser(userId: string): Observable<void> {
+    return this.apiBase.unlock(userId);
+  }
+
+  deactivateUser(userId: string, reason: string = 'Admin Action'): Observable<void> {
+    return this.apiBase.deactivate(userId, new LockUserRequest({ reason }));
+  }
+
+  activateUser(userId: string): Observable<void> {
+    return this.apiBase.activate(userId);
+  }
+
+  resetUserPassword(userId: string): Observable<void> {
+    return this.apiBase.resetPassword2(userId);
+  }
+
+  getUserSessions(userId: string): Observable<UserSessionDto[]> {
+    return this.apiBase.sessionsAll(userId);
+  }
+
+  revokeAllSessions(userId: string): Observable<void> {
+    return this.apiBase.sessions(userId);
+  }
+
+  revokeSession(userId: string, sessionId: string): Observable<void> {
+    return this.apiBase.sessions2(userId, sessionId);
+  }
+
+  getUserAuditLogs(userId: string, page?: number, pageSize?: number): Observable<AuditLogDtoIEnumerablePagedResponse> {
+    return this.apiBase.auditLogs(userId, page, pageSize);
   }
 }
