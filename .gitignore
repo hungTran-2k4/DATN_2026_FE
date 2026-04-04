@@ -45,5 +45,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+src/environments/environment*.ts
 proxy.conf.json
 proxy.conf.*.json
