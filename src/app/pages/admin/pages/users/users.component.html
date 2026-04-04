@@ -1,37 +1,75 @@
-<section class="admin-page">
-  <header class="page-heading">
-    <h3>Quản lý người dùng</h3>
-    <p>Danh sách tài khoản trong hệ thống, phân quyền và trạng thái.</p>
+<section class="admin-page users-page">
+  <header class="users-hero users-surface">
+    <div class="users-hero-copy">
+      <span class="users-eyebrow">Admin / Users</span>
+      <h3>Quản lý người dùng</h3>
+      <p>
+        Danh sách tài khoản, trạng thái đăng nhập và phân quyền được đặt theo bố
+        cục gọn, giống tinh thần màn Customer trong Figma.
+      </p>
+    </div>
+
+    <div class="users-hero-actions">
+      <div class="users-hero-pill">
+        <span class="users-hero-pill-dot"></span>
+        Đồng bộ theo trang
+      </div>
+      <div class="users-hero-pill">
+        <i class="pi pi-shield"></i>
+        PrimeNG + Tailwind
+      </div>
+    </div>
   </header>
 
-  <div class="admin-kpi-strip" *ngIf="userStats$ | async as stats">
-    <article class="admin-kpi-card is-info">
-      <h4>Tổng tài khoản</h4>
-      <p>{{ stats.total }}</p>
+  <div class="users-stats" *ngIf="userStats$ | async as stats">
+    <article class="users-stat-card users-stat-card--primary users-surface">
+      <div>
+        <p>Tổng tài khoản</p>
+        <h4>{{ stats.total }}</h4>
+      </div>
+      <span class="users-stat-icon">
+        <i class="pi pi-users"></i>
+      </span>
     </article>
-    <article class="admin-kpi-card is-success">
-      <h4>Đã xác minh</h4>
-      <p>{{ stats.adminUsers || '-' }}</p>
+
+    <article class="users-stat-card users-stat-card--success users-surface">
+      <div>
+        <p>Đang hoạt động</p>
+        <h4>{{ stats.activeUsers }}</h4>
+      </div>
+      <span class="users-stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </span>
     </article>
-    <article class="admin-kpi-card is-warn">
-      <h4>Chưa gán quyền</h4>
-      <p>{{ stats.noRoleUsers || '-' }}</p>
+
+    <article class="users-stat-card users-stat-card--warn users-surface">
+      <div>
+        <p>Chưa phân quyền</p>
+        <h4>{{ stats.noRoleUsers }}</h4>
+      </div>
+      <span class="users-stat-icon">
+        <i class="pi pi-exclamation-circle"></i>
+      </span>
     </article>
   </div>
 
-  <div class="admin-toolbar admin-panel">
-    <p-iconfield iconPosition="left">
-      <p-inputicon class="pi pi-search"></p-inputicon>
-      <input
-        pInputText
-        type="text"
-        placeholder="Tìm theo email, tên, user id..."
-        [(ngModel)]="keyword"
-        (ngModelChange)="onKeywordChange()"
-      />
-    </p-iconfield>
+  <section class="users-toolbar users-surface">
+    <div class="users-search-group">
+      <label for="user-search">Tìm kiếm</label>
+      <p-iconfield iconPosition="left" class="users-search-field">
+        <p-inputicon class="pi pi-search"></p-inputicon>
+        <input
+          id="user-search"
+          pInputText
+          type="text"
+          placeholder="Tìm theo email, tên, user id..."
+          [(ngModel)]="keyword"
+          (ngModelChange)="onKeywordChange()"
+        />
+      </p-iconfield>
+    </div>
 
-    <div class="admin-toolbar-actions">
+    <div class="users-toolbar-actions">
       <p-button
         icon="pi pi-refresh"
         label="Làm mới"
@@ -51,10 +89,19 @@
         (click)="exportCurrentUsers()"
       ></p-button>
     </div>
-  </div>
+  </section>
 
-  <div class="admin-panel admin-table-panel">
+  <section class="users-table-panel users-surface">
+    <div class="users-table-header">
+      <div>
+        <span class="users-panel-kicker">Danh sách</span>
+        <h4>Người dùng trong hệ thống</h4>
+      </div>
+      <span class="users-table-hint">{{ totalRecords }} bản ghi</span>
+    </div>
+
     <p-table
+      styleClass="users-datatable"
       [value]="users"
       [lazy]="true"
       (onLazyLoad)="loadUsers($event)"
@@ -68,24 +115,74 @@
     >
       <ng-template pTemplate="header">
         <tr>
-          <th>Email</th>
-          <th>Họ tên</th>
+          <th>Người dùng</th>
           <th>Trạng thái</th>
-          <th>Vai trò (Role)</th>
-          <th style="width: 100px; text-align: center">Thao tác</th>
+          <th>Vai trò</th>
+          <th>Tham gia</th>
+          <th class="users-actions-col">Thao tác</th>
         </tr>
       </ng-template>
+
       <ng-template pTemplate="body" let-user>
         <tr>
-          <td><span class="font-medium">{{ user.email || "-" }}</span></td>
-          <td>{{ user.fullName || "-" }}</td>
           <td>
-            <p-tag [severity]="user.status === 'active' ? 'success' : (user.status === 'locked' ? 'warn' : 'danger')" [value]="user.status || 'active'"></p-tag>
+            <div class="users-user-cell">
+              <div
+                class="users-avatar"
+                [class.users-avatar--image]="!!user.avatarUrl"
+              >
+                <img
+                  *ngIf="user.avatarUrl; else initialsAvatar"
+                  [src]="user.avatarUrl"
+                  [alt]="user.fullName || user.email || 'User avatar'"
+                />
+                <ng-template #initialsAvatar>{{
+                  getUserInitials(user)
+                }}</ng-template>
+              </div>
+
+              <div class="users-user-meta">
+                <strong>{{ user.fullName || "Người dùng ẩn danh" }}</strong>
+                <span>{{ user.email || "-" }}</span>
+              </div>
+            </div>
           </td>
+
           <td>
-            <p-tag severity="info" [value]="formatRoles(user.roles)" [rounded]="true"></p-tag>
+            <p-tag
+              [severity]="getStatusSeverity(user.status)"
+              [value]="getStatusLabel(user.status)"
+            ></p-tag>
           </td>
-          <td style="text-align: center">
+
+          <td>
+            <div class="users-role-list" [title]="formatRoles(user.roles)">
+              <span
+                class="users-role-chip"
+                *ngFor="let role of getRolePreview(user.roles)"
+              >
+                {{ role }}
+              </span>
+              <span
+                *ngIf="getRoleOverflowCount(user.roles) > 0"
+                class="users-role-chip users-role-chip--more"
+              >
+                +{{ getRoleOverflowCount(user.roles) }}
+              </span>
+              <span *ngIf="!user.roles?.length" class="users-role-empty"
+                >Chưa phân quyền</span
+              >
+            </div>
+          </td>
+
+          <td>
+            <div class="users-date-cell">
+              <strong>{{ user.createdAt | date: "dd/MM/yyyy" }}</strong>
+              <span>{{ user.createdAt | date: "HH:mm" }}</span>
+            </div>
+          </td>
+
+          <td class="users-actions-col">
             <p-button
               icon="pi pi-ellipsis-v"
               [text]="true"
@@ -96,146 +193,275 @@
           </td>
         </tr>
       </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5">
+            <div class="users-empty-state">
+              <i class="pi pi-users"></i>
+              <h5>Không tìm thấy người dùng</h5>
+              <p>
+                Hãy thử đổi từ khóa hoặc bỏ lọc để xem lại toàn bộ danh sách.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
     </p-table>
-  </div>
+  </section>
 
-  <!-- Reusable Menu for Table Rows -->
   <p-menu #menu [model]="userMenu" [popup]="true" appendTo="body"></p-menu>
+  <p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
 
-  <!-- Confirm Dialog Global -->
-  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
-
-  <!-- User Detail & Edit Dialog -->
   <p-dialog
     header="Chi tiết người dùng"
     [modal]="true"
     [(visible)]="detailDialogVisible"
-    [style]="{ width: '750px' }"
+    [style]="{ width: 'min(960px, 96vw)' }"
     [maximizable]="true"
+    [draggable]="false"
+    styleClass="users-dialog-shell"
   >
-    <div *ngIf="selectedUser">
-      <div class="flex align-items-center mb-3">
-        <div class="border-circle bg-primary-reverse text-primary flex align-items-center justify-content-center mr-3" style="width: 48px; height: 48px; font-size: 1.5rem; font-weight: bold;">
-          {{ selectedUser.email?.charAt(0) | uppercase }}
+    <div *ngIf="selectedUser" class="users-dialog">
+      <div class="users-dialog-hero">
+        <div class="users-dialog-profile">
+          <div
+            class="users-avatar users-avatar--lg"
+            [class.users-avatar--image]="!!selectedUser.avatarUrl"
+          >
+            <img
+              *ngIf="selectedUser.avatarUrl; else dialogInitials"
+              [src]="selectedUser.avatarUrl"
+              [alt]="
+                selectedUser.fullName || selectedUser.email || 'User avatar'
+              "
+            />
+            <ng-template #dialogInitials>{{
+              getUserInitials(selectedUser)
+            }}</ng-template>
+          </div>
+
+          <div class="users-dialog-copy">
+            <span class="users-panel-kicker">Hồ sơ quản trị</span>
+            <h2>{{ selectedUser.fullName || "Người dùng ẩn danh" }}</h2>
+            <p>{{ selectedUser.email }}</p>
+          </div>
         </div>
-        <div>
-          <h2 class="m-0 text-xl font-bold">{{ selectedUser.fullName || 'Người dùng ẩn danh' }}</h2>
-          <span class="text-secondary">{{ selectedUser.email }}</span>
-        </div>
-        <div class="ml-auto">
-        <div class="ml-auto">
-           <p-tag [severity]="selectedUser.status === 'active' ? 'success' : (selectedUser.status === 'locked' ? 'warn' : 'danger')" [value]="selectedUser.status || 'active'" size="large"></p-tag>
-        </div>
+
+        <div class="users-dialog-badges">
+          <p-tag
+            [severity]="getStatusSeverity(selectedUser.status)"
+            [value]="getStatusLabel(selectedUser.status)"
+            size="large"
+          ></p-tag>
+          <span class="users-dialog-meta">
+            <i class="pi pi-id-card"></i>
+            {{ selectedUser.id || "-" }}
+          </span>
+          <span class="users-dialog-meta">
+            <i class="pi pi-calendar"></i>
+            {{ selectedUser.createdAt | date: "dd/MM/yyyy HH:mm" }}</span
+          >
+          <span
+            *ngIf="hasLockedUntil(selectedUser)"
+            class="users-dialog-meta users-dialog-meta--danger"
+          >
+            <i class="pi pi-lock"></i>
+            Khóa đến {{ selectedUser.lockoutEnd | date: "dd/MM/yyyy HH:mm" }}
+          </span>
         </div>
       </div>
 
-      <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
-        <!-- TAB 1: OVERVIEW & ROLES -->
+      <p-tabView
+        [(activeIndex)]="activeTabIndex"
+        (onChange)="onTabChange($event)"
+      >
         <p-tabPanel header="Tổng quan & Quyền">
-          <div class="grid mt-2">
-             <div class="col-6">
-                <p class="text-secondary mb-1">ID</p>
-                <p class="font-medium m-0">{{ selectedUser.id }}</p>
-             </div>
-             <div class="col-6">
-                <p class="text-secondary mb-1">Ngày tham gia</p>
-                <p class="font-medium m-0">{{ selectedUser.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
-             </div>
+          <div class="users-overview-grid">
+            <div class="users-overview-card">
+              <span class="users-overview-label">ID</span>
+              <strong>{{ selectedUser.id || "-" }}</strong>
+            </div>
+            <div class="users-overview-card">
+              <span class="users-overview-label">Ngày tham gia</span>
+              <strong>{{
+                selectedUser.createdAt | date: "dd/MM/yyyy HH:mm"
+              }}</strong>
+            </div>
+            <div class="users-overview-card">
+              <span class="users-overview-label">Trạng thái</span>
+              <strong>{{ getStatusLabel(selectedUser.status) }}</strong>
+            </div>
+            <div class="users-overview-card">
+              <span class="users-overview-label">Vai trò</span>
+              <strong>{{ selectedUser.roles?.length || 0 }}</strong>
+            </div>
           </div>
-          
+
           <p-divider></p-divider>
 
-          <div class="field mt-4" style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label for="roles" class="font-bold text-lg">Phân quyền vhệ thống</label>
-            <p-multiSelect
-              id="roles"
-              [options]="availableRoles"
-              optionLabel="name"
-              optionValue="id"
-              [(ngModel)]="selectedRoles"
-              placeholder="Chọn vai trò"
-              [style]="{ width: '100%' }"
-              appendTo="body"
-            ></p-multiSelect>
-          </div>
-          
-          <div class="text-right mt-4">
-             <p-button label="Lưu phân quyền" icon="pi pi-check" (click)="saveRoles()" [loading]="savingRoles"></p-button>
-          </div>
-        </p-tabPanel>
-
-        <!-- TAB 2: SESSIONS -->
-        <p-tabPanel header="Phiên hoạt động">
-           <div class="flex justify-content-between align-items-center mb-3 mt-2">
-              <span class="font-bold">Thiết bị đang đăng nhập</span>
-              <p-button label="Đăng xuất tất cả" icon="pi pi-power-off" severity="danger" [outlined]="true" size="small" (click)="revokeAllSessions()" [disabled]="userSessions.length === 0"></p-button>
-           </div>
-           
-           <p-table [value]="userSessions" [loading]="loadingSessions" [rows]="5" [paginator]="true">
-              <ng-template pTemplate="header">
-                 <tr>
-                    <th>Trạng thái</th>
-                    <th>IP</th>
-                    <th>Trình duyệt / Thiết bị</th>
-                    <th>HĐ cuối</th>
-                    <th style="width: 80px"></th>
-                 </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-ss>
-                 <tr>
-                    <td>
-                       <p-tag *ngIf="ss.isActive" severity="success" value="Đang kết nối"></p-tag>
-                       <p-tag *ngIf="!ss.isActive" severity="secondary" value="Đã ngắt"></p-tag>
-                    </td>
-                    <td>{{ ss.ipAddress || 'Ẩn' }}</td>
-                    <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" [title]="ss.userAgent">{{ ss.userAgent || 'App' }}</td>
-                    <td>{{ ss.lastActivityAt | date:'dd/MM HH:mm' }}</td>
-                    <td>
-                       <p-button *ngIf="ss.isActive" icon="pi pi-times" severity="danger" [text]="true" size="small" [rounded]="true" pTooltip="Hủy phiên này" (click)="revokeSession(ss.id)"></p-button>
-                    </td>
-                 </tr>
-              </ng-template>
-              <ng-template pTemplate="emptymessage">
-                 <tr><td colspan="5" class="text-center p-4">Không có phiên đăng nhập nào (đã xóa hoặc chưa từng đăng nhập).</td></tr>
-              </ng-template>
-           </p-table>
-        </p-tabPanel>
-
-        <!-- TAB 3: AUDIT LOGS -->
-        <p-tabPanel header="Nhật ký truy cập">
-           <div class="mt-2">
-              <p-table 
-                [value]="auditLogs" 
-                [lazy]="true" 
-                (onLazyLoad)="loadUserAuditLogs($event)" 
-                [loading]="loadingAudit"
-                [paginator]="true"
-                [rows]="auditRows"
-                [first]="auditFirst"
-                [totalRecords]="auditTotalRecords"
-                styleClass="p-datatable-sm"
+          <div class="users-form-block">
+            <div>
+              <label for="roles" class="users-form-label"
+                >Phân quyền hệ thống</label
               >
-                 <ng-template pTemplate="header">
-                    <tr>
-                       <th style="width: 150px">Thời gian</th>
-                       <th>Hành động</th>
-                       <th>Mục tiêu</th>
-                       <th>IP</th>
-                    </tr>
-                 </ng-template>
-                 <ng-template pTemplate="body" let-log>
-                    <tr>
-                       <td>{{ log.createdAt | date:'dd/MM/yy HH:mm' }}</td>
-                       <td><span class="font-medium text-primary">{{ log.action }}</span></td>
-                       <td>{{ log.targetType }} {{ log.targetId ? '#' + log.targetId?.substring(0,6) : '' }}</td>
-                       <td><small class="text-secondary">{{ log.ipAddress }}</small></td>
-                    </tr>
-                 </ng-template>
-                 <ng-template pTemplate="emptymessage">
-                    <tr><td colspan="4" class="text-center p-4">Chưa có dữ liệu nhật ký.</td></tr>
-                 </ng-template>
-              </p-table>
-           </div>
+              <p-multiSelect
+                id="roles"
+                [options]="availableRoles"
+                optionLabel="name"
+                optionValue="id"
+                [(ngModel)]="selectedRoles"
+                placeholder="Chọn vai trò"
+                appendTo="body"
+                display="chip"
+                [style]="{ width: '100%' }"
+              ></p-multiSelect>
+            </div>
+
+            <div class="users-form-actions">
+              <p-button
+                label="Lưu phân quyền"
+                icon="pi pi-check"
+                (click)="saveRoles()"
+                [loading]="savingRoles"
+              ></p-button>
+            </div>
+          </div>
+        </p-tabPanel>
+
+        <p-tabPanel header="Phiên hoạt động">
+          <div class="users-tab-toolbar">
+            <div>
+              <span class="users-panel-kicker">Thiết bị đăng nhập</span>
+              <h5>Phiên đang hoạt động của user</h5>
+            </div>
+
+            <p-button
+              label="Đăng xuất tất cả"
+              icon="pi pi-power-off"
+              severity="danger"
+              [outlined]="true"
+              size="small"
+              (click)="revokeAllSessions()"
+              [disabled]="userSessions.length === 0"
+            ></p-button>
+          </div>
+
+          <p-table
+            [value]="userSessions"
+            [loading]="loadingSessions"
+            [rows]="5"
+            [paginator]="true"
+            styleClass="users-nested-table"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Trạng thái</th>
+                <th>IP</th>
+                <th>Thiết bị</th>
+                <th>HĐ cuối</th>
+                <th></th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-session>
+              <tr>
+                <td>
+                  <p-tag
+                    *ngIf="session.isActive"
+                    severity="success"
+                    value="Đang kết nối"
+                  ></p-tag>
+                  <p-tag
+                    *ngIf="!session.isActive"
+                    severity="secondary"
+                    value="Đã ngắt"
+                  ></p-tag>
+                </td>
+                <td>{{ session.ipAddress || "Ẩn" }}</td>
+                <td class="users-truncate" [title]="session.userAgent">
+                  {{ session.userAgent || "App" }}
+                </td>
+                <td>{{ session.lastActivityAt | date: "dd/MM HH:mm" }}</td>
+                <td>
+                  <p-button
+                    *ngIf="session.isActive"
+                    icon="pi pi-times"
+                    severity="danger"
+                    [text]="true"
+                    size="small"
+                    [rounded]="true"
+                    pTooltip="Hủy phiên này"
+                    (click)="revokeSession(session.id)"
+                  ></p-button>
+                </td>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5" class="users-empty-cell">
+                  Không có phiên đăng nhập nào.
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabPanel>
+
+        <p-tabPanel header="Nhật ký truy cập">
+          <div class="users-tab-toolbar">
+            <div>
+              <span class="users-panel-kicker">Audit trail</span>
+              <h5>Nhật ký hoạt động gần nhất</h5>
+            </div>
+          </div>
+
+          <p-table
+            [value]="auditLogs"
+            [lazy]="true"
+            (onLazyLoad)="loadUserAuditLogs($event)"
+            [loading]="loadingAudit"
+            [paginator]="true"
+            [rows]="auditRows"
+            [first]="auditFirst"
+            [totalRecords]="auditTotalRecords"
+            styleClass="users-nested-table"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Thời gian</th>
+                <th>Hành động</th>
+                <th>Mục tiêu</th>
+                <th>IP</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-log>
+              <tr>
+                <td>{{ log.createdAt | date: "dd/MM/yy HH:mm" }}</td>
+                <td>
+                  <span class="users-audit-action">{{ log.action }}</span>
+                </td>
+                <td>
+                  {{ log.targetType }}
+                  {{ log.targetId ? "#" + log.targetId?.substring(0, 6) : "" }}
+                </td>
+                <td>
+                  <span class="users-audit-ip">{{
+                    log.ipAddress || "Unknown"
+                  }}</span>
+                </td>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="4" class="users-empty-cell">
+                  Chưa có dữ liệu nhật ký.
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
         </p-tabPanel>
       </p-tabView>
     </div>

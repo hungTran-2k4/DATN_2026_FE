@@ -1,195 +1,199 @@
 @import 'primeicons/primeicons.css';
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-    --admin-bg-soft: #f3f6fc;
-    --admin-border: #dde5f2;
-    --admin-text-primary: #030229;
-    --admin-text-muted: #6a6f85;
-    --admin-surface: #ffffff;
-    --admin-surface-soft: #f9fbff;
+  --admin-bg-soft: #f3f6fc;
+  --admin-border: #dde5f2;
+  --admin-text-primary: #030229;
+  --admin-text-muted: #6a6f85;
+  --admin-surface: #ffffff;
+  --admin-surface-soft: #f9fbff;
 
-    --admin-primary: #3f7dff;
-    --admin-primary-strong: #2f66da;
-    --admin-primary-weak: rgba(63, 125, 255, 0.12);
+  --admin-primary: #3f7dff;
+  --admin-primary-strong: #2f66da;
+  --admin-primary-weak: rgba(63, 125, 255, 0.12);
 
-    --admin-warning: #f39a42;
-    --admin-success: #1e9f67;
-    --admin-danger: #dd4f5f;
-    --admin-info: #4d78ff;
+  --admin-warning: #f39a42;
+  --admin-success: #1e9f67;
+  --admin-danger: #dd4f5f;
+  --admin-info: #4d78ff;
 
-    --kpi-blue: rgba(91, 147, 255, 0.15);
-    --kpi-yellow: rgba(255, 214, 107, 0.25);
-    --kpi-orange: rgba(255, 143, 107, 0.2);
-    --kpi-violet: rgba(96, 91, 255, 0.18);
+  --kpi-blue: rgba(91, 147, 255, 0.15);
+  --kpi-yellow: rgba(255, 214, 107, 0.25);
+  --kpi-orange: rgba(255, 143, 107, 0.2);
+  --kpi-violet: rgba(96, 91, 255, 0.18);
 
-    --shadow-soft: 0 10px 30px rgba(14, 30, 62, 0.08);
+  --shadow-soft: 0 10px 30px rgba(14, 30, 62, 0.08);
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body {
-    margin: 0;
-    min-height: 100%;
-    font-size: 16px;
-    font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--admin-text-primary);
-    background: var(--admin-bg-soft);
+  margin: 0;
+  min-height: 100%;
+  font-size: 16px;
+  font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--admin-text-primary);
+  background: var(--admin-bg-soft);
 }
 
 body {
-    line-height: 1.45;
+  line-height: 1.45;
 }
 
 app-root {
-    display: block;
-    min-height: 100vh;
+  display: block;
+  min-height: 100vh;
 }
 
 .p-component {
-    font-family: inherit;
+  font-family: inherit;
 }
 
 .p-card {
-    border: 1px solid var(--admin-border);
-    border-radius: 14px;
-    box-shadow: var(--shadow-soft);
-    background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  background: var(--admin-surface);
 }
 
 .p-card .p-card-content {
-    padding-top: 0.4rem;
+  padding-top: 0.4rem;
 }
 
 .p-datatable .p-datatable-thead>tr>th {
-    color: var(--admin-text-primary);
-    font-weight: 700;
+  color: var(--admin-text-primary);
+  font-weight: 700;
 }
 
 .p-tag {
-    font-size: 0.78rem;
+  font-size: 0.78rem;
 }
 
 .p-button {
-    border-radius: 10px;
+  border-radius: 10px;
 }
 
 .p-button.p-button-sm {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.82rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
 }
 
 .p-button.p-button-outlined {
-    border-color: #cdd9f0;
+  border-color: #cdd9f0;
 }
 
 .p-inputtext {
-    border-radius: 10px;
+  border-radius: 10px;
 }
 
 .admin-panel {
-    background: var(--admin-surface);
-    border: 1px solid var(--admin-border);
-    border-radius: 14px;
-    box-shadow: var(--shadow-soft);
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
 }
 
 .admin-kpi-strip {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-    gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
 }
 
 .admin-kpi-card {
-    border: 1px solid var(--admin-border);
-    border-radius: 12px;
-    padding: 12px 14px;
-    background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #fff;
 
-    h4 {
-        margin: 0;
-        font-size: 0.84rem;
-        color: var(--admin-text-muted);
-        font-weight: 700;
-    }
+  h4 {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--admin-text-muted);
+    font-weight: 700;
+  }
 
-    p {
-        margin: 8px 0 0;
-        font-size: 1.34rem;
-        font-weight: 800;
-        color: var(--admin-text-primary);
-    }
+  p {
+    margin: 8px 0 0;
+    font-size: 1.34rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+  }
 
-    &.is-info {
-        background: linear-gradient(135deg, #eef3ff 0%, #ffffff 100%);
-        border-color: #d7e1ff;
-    }
+  &.is-info {
+    background: linear-gradient(135deg, #eef3ff 0%, #ffffff 100%);
+    border-color: #d7e1ff;
+  }
 
-    &.is-success {
-        background: linear-gradient(135deg, #ecfbf3 0%, #ffffff 100%);
-        border-color: #ccefdc;
-    }
+  &.is-success {
+    background: linear-gradient(135deg, #ecfbf3 0%, #ffffff 100%);
+    border-color: #ccefdc;
+  }
 
-    &.is-warn {
-        background: linear-gradient(135deg, #fff6e8 0%, #ffffff 100%);
-        border-color: #f4dfbc;
-    }
+  &.is-warn {
+    background: linear-gradient(135deg, #fff6e8 0%, #ffffff 100%);
+    border-color: #f4dfbc;
+  }
 }
 
 .admin-table-panel {
-    padding: 10px;
+  padding: 10px;
 }
 
 .admin-toolbar {
-    padding: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 
-    .p-inputtext {
-        min-width: 320px;
-    }
+  .p-inputtext {
+    min-width: 320px;
+  }
 }
 
 .admin-toolbar-actions {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 @media (max-width: 920px) {
-    .admin-toolbar {
-        flex-direction: column;
-        align-items: stretch;
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
 
-        .p-inputtext {
-            min-width: 0;
-            width: 100%;
-        }
+    .p-inputtext {
+      min-width: 0;
+      width: 100%;
     }
+  }
 
-    .admin-toolbar-actions {
-        justify-content: flex-end;
-    }
+  .admin-toolbar-actions {
+    justify-content: flex-end;
+  }
 
-    .admin-kpi-strip {
-        grid-template-columns: 1fr;
-    }
+  .admin-kpi-strip {
+    grid-template-columns: 1fr;
+  }
 }
 
 .page-heading {
-    h3 {
-        margin: 0;
-        color: var(--admin-text-primary);
-        font-size: 1.24rem;
-        font-weight: 800;
-    }
+  h3 {
+    margin: 0;
+    color: var(--admin-text-primary);
+    font-size: 1.24rem;
+    font-weight: 800;
+  }
 
-    p {
-        margin: 7px 0 0;
-        color: var(--admin-text-muted);
-        font-size: 0.93rem;
-    }
+  p {
+    margin: 7px 0 0;
+    color: var(--admin-text-muted);
+    font-size: 0.93rem;
+  }
 }

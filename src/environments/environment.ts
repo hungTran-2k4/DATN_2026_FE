@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://localhost:13021',
+  apiUrl:
+    'https://voraecommerce-fxdwhngqe7c8a0cv.southeastasia-01.azurewebsites.net',
 };
