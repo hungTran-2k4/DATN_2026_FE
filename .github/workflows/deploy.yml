@@ -3,7 +3,7 @@ name: Deploy Angular SSR to Azure
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-deploy:
