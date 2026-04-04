@@ -1,0 +1,27 @@
+name: Deploy Angular SSR to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - run: npm install
+
+      - run: npm run build:ssr
+
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: voraecommerce-app
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
