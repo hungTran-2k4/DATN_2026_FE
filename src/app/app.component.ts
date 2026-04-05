@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { Observable } from 'rxjs';
 import { LoadingOverlayService } from './core/services/loading-overlay.service';
 
 @Component({
@@ -11,5 +12,7 @@ import { LoadingOverlayService } from './core/services/loading-overlay.service';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  constructor(public readonly loadingOverlay: LoadingOverlayService) {}
+  private readonly loadingOverlay = inject(LoadingOverlayService);
+  readonly isGlobalLoading$: Observable<boolean> =
+    this.loadingOverlay.isLoading$;
 }
