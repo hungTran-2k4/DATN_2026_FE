@@ -2,7 +2,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { map, Observable } from 'rxjs';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -11,17 +11,12 @@ import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { MenuModule } from 'primeng/menu';
-import { TabViewModule } from 'primeng/tabview';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
 
 import {
-  AuditLogDto,
   RoleDto,
   UserDto,
-  UserSessionDto,
 } from '../../../../shared/api/generated/api-service-base.service';
 import { AdminExportService } from '../../../../core/services/admin-export.service';
 import { AdminUsersFacade } from '../../services/admin-users.facade';
@@ -41,10 +36,7 @@ import { AdminUsersFacade } from '../../services/admin-users.facade';
     TagModule,
     DialogModule,
     MultiSelectModule,
-    MenuModule,
-    TabViewModule,
     ConfirmDialogModule,
-    DividerModule,
     TooltipModule,
   ],
   providers: [ConfirmationService],
@@ -56,7 +48,6 @@ export class AdminUsersPageComponent {
 
   users: UserDto[] = [];
   totalRecords = 0;
-  loading = true;
 
   // Pagination config for users
   rows = 10;
@@ -71,28 +62,15 @@ export class AdminUsersPageComponent {
 
   // Menu for row actions
   rowUser: UserDto | null = null;
-  userMenu: MenuItem[] = [];
 
   // Dialog states
   detailDialogVisible = false;
+  rolesDialogVisible = false;
   selectedUser: UserDto | null = null;
-  activeTabIndex = 0;
 
-  // Tab 1: Roles
   selectedRoles: string[] = [];
   availableRoles: RoleDto[] = [];
   savingRoles = false;
-
-  // Tab 2: Sessions
-  userSessions: UserSessionDto[] = [];
-  loadingSessions = false;
-
-  // Tab 3: Audit Logs
-  auditLogs: AuditLogDto[] = [];
-  auditTotalRecords = 0;
-  loadingAudit = false;
-  auditRows = 10;
-  auditFirst = 0;
 
   constructor(
     private readonly usersFacade: AdminUsersFacade,
@@ -102,12 +80,10 @@ export class AdminUsersPageComponent {
   ) {
     this.rebindStats();
     this.loadRoles();
-    this.buildMenu();
     this.loadUsers();
   }
 
   loadUsers(event?: TableLazyLoadEvent): void {
-    this.loading = true;
     this.rows = event?.rows ?? this.rows;
     this.first = event?.first ?? this.first;
     const page = Math.floor(this.first / this.rows) + 1;
@@ -115,7 +91,6 @@ export class AdminUsersPageComponent {
     this.usersFacade
       .getUsers(this.keyword, page, this.rows)
       .subscribe((res) => {
-        this.loading = false;
         if (res) {
           this.users = res.data ?? [];
           this.totalRecords = res.totalRecords ?? 0;
@@ -188,77 +163,53 @@ export class AdminUsersPageComponent {
     this.loadUsers();
   }
 
-  /**
-   * Action Menu setup
-   */
-  setRowUser(user: UserDto): void {
-    this.rowUser = user;
-    this.buildMenu();
-  }
-
-  private buildMenu(): void {
-    const status = this.normalizeStatus(this.rowUser?.status);
-    const accountActions: MenuItem[] = [];
-
-    if (status === 'active') {
-      accountActions.push(
-        {
-          label: 'Khóa tài khoản',
-          icon: 'pi pi-fw pi-lock',
-          command: () => this.confirmLockUser(),
-        },
-        {
-          label: 'Vô hiệu hóa',
-          icon: 'pi pi-fw pi-ban',
-          command: () => this.confirmDeactivateUser(),
-        },
-      );
-    } else if (status === 'locked') {
-      accountActions.push(
-        {
-          label: 'Mở khóa',
-          icon: 'pi pi-fw pi-unlock',
-          command: () => this.confirmUnlockUser(),
-        },
-        {
-          label: 'Vô hiệu hóa',
-          icon: 'pi pi-fw pi-ban',
-          command: () => this.confirmDeactivateUser(),
-        },
-      );
-    } else if (status === 'deactivated') {
-      accountActions.push({
-        label: 'Kích hoạt lại',
-        icon: 'pi pi-fw pi-check-circle',
-        command: () => this.confirmActivateUser(),
-      });
-    }
-
-    this.userMenu = [
-      {
-        label: 'Thông tin bổ sung',
-        icon: 'pi pi-fw pi-info-circle',
-        command: () => {
-          if (this.rowUser) this.openDetailDialog(this.rowUser);
-        },
-      },
-      {
-        separator: true,
-      },
-      ...accountActions,
-      {
-        separator: true,
-      },
-      {
-        label: 'Reset Mật khẩu',
-        icon: 'pi pi-fw pi-key',
-        command: () => this.confirmResetPassword(),
-      },
-    ];
-  }
-
   private normalizeStatus(status?: string): string {
     return (status ?? '').trim().toLowerCase();
+  }
+
+  isActive(user: UserDto): boolean {
+    return this.normalizeStatus(user.status) === 'active';
+  }
+
+  isLocked(user: UserDto): boolean {
+    return this.normalizeStatus(user.status) === 'locked';
+  }
+
+  isDeactivated(user: UserDto): boolean {
+    return this.normalizeStatus(user.status) === 'deactivated';
+  }
+
+  openRolesDialog(user: UserDto): void {
+    this.selectedUser = user;
+    this.selectedRoles = this.availableRoles
+      .filter((r) => r.name && user.roles?.includes(r.name))
+      .map((r) => r.id!);
+    this.rolesDialogVisible = true;
+  }
+
+  lockUser(user: UserDto): void {
+    this.rowUser = user;
+    this.confirmLockUser();
+  }
+
+  unlockUser(user: UserDto): void {
+    this.rowUser = user;
+    this.confirmUnlockUser();
+  }
+
+  deactivateUser(user: UserDto): void {
+    this.rowUser = user;
+    this.confirmDeactivateUser();
+  }
+
+  activateUser(user: UserDto): void {
+    this.rowUser = user;
+    this.confirmActivateUser();
+  }
+
+  resetPassword(user: UserDto): void {
+    this.rowUser = user;
+    this.confirmResetPassword();
   }
 
   // --- ACTIONS ---
@@ -394,26 +345,7 @@ export class AdminUsersPageComponent {
 
   openDetailDialog(user: UserDto): void {
     this.selectedUser = user;
-    if (user.roles && user.roles.length > 0) {
-      this.selectedRoles = this.availableRoles
-        .filter((r) => r.name && user.roles!.includes(r.name))
-        .map((r) => r.id!);
-    } else {
-      this.selectedRoles = [];
-    }
-
-    this.activeTabIndex = 0;
     this.detailDialogVisible = true;
-  }
-
-  onTabChange(event: any): void {
-    this.activeTabIndex = event.index;
-    if (this.activeTabIndex === 1) {
-      this.loadUserSessions();
-    } else if (this.activeTabIndex === 2) {
-      this.auditFirst = 0;
-      this.loadUserAuditLogs();
-    }
   }
 
   saveRoles(): void {
@@ -430,7 +362,8 @@ export class AdminUsersPageComponent {
             summary: 'Thành công',
             detail: 'Cập nhật phân quyền thành công.',
           });
-          this.loadUsers(); // Refresh parent row data (roles list)
+          this.rolesDialogVisible = false;
+          this.loadUsers();
         },
         error: () => {
           this.savingRoles = false;
@@ -440,78 +373,6 @@ export class AdminUsersPageComponent {
             detail: 'Không cập nhật được quyền.',
           });
         },
-      });
-  }
-
-  // --- SESSIONS ---
-  loadUserSessions(): void {
-    if (!this.selectedUser?.id) return;
-    this.loadingSessions = true;
-    this.usersFacade
-      .getUserSessions(this.selectedUser.id)
-      .subscribe((sessions) => {
-        this.userSessions = sessions || [];
-        this.loadingSessions = false;
-      });
-  }
-
-  revokeAllSessions(): void {
-    if (!this.selectedUser?.id) return;
-    this.confirmationService.confirm({
-      message:
-        'Bạn muốn hủy tât cả các phiên đăng nhập của người dùng này? Họ sẽ bị văng ra khỏi hệ thống trên mọi thiết bị.',
-      header: 'Đăng xuất mọi nơi',
-      acceptLabel: 'Hủy hết',
-      rejectLabel: 'Hủy',
-      accept: () => {
-        this.usersFacade
-          .revokeAllSessions(this.selectedUser!.id!)
-          .subscribe(() => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Thành công',
-              detail: 'Đã xóa tất cả Session.',
-            });
-            this.loadUserSessions();
-          });
-      },
-    });
-  }
-
-  revokeSession(sessionId: string): void {
-    if (!this.selectedUser?.id) return;
-    this.usersFacade
-      .revokeSession(this.selectedUser.id, sessionId)
-      .subscribe(() => {
-        this.messageService.add({
-          severity: 'info',
-          summary: 'Đã ngắt',
-          detail: 'Xóa session chỉ định.',
-        });
-        this.loadUserSessions();
-      });
-  }
-
-  // --- AUDIT LOGS ---
-  loadUserAuditLogs(event?: TableLazyLoadEvent): void {
-    if (!this.selectedUser?.id) return;
-
-    this.loadingAudit = true;
-    this.auditRows = event?.rows ?? this.auditRows;
-    this.auditFirst = event?.first ?? this.auditFirst;
-    const page = Math.floor(this.auditFirst / this.auditRows) + 1;
-
-    this.usersFacade
-      .getUserAuditLogs(this.selectedUser.id, page, this.auditRows)
-      .subscribe((res) => {
-        this.loadingAudit = false;
-        if (res) {
-          this.auditLogs = res.data ?? [];
-          this.auditTotalRecords = res.totalRecords ?? 0;
-        } else {
-          this.auditLogs = [];
-          this.auditTotalRecords = 0;
-        }
       });
   }
 

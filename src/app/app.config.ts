@@ -1,4 +1,8 @@
-import { APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -13,7 +17,8 @@ import { environment } from '../environments/environment';
 import { API_BASE_URL } from './shared/api/generated/api-service-base.service';
 import { AuthFacade } from './pages/auth/services/auth.facade';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
- 
+import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+
 export function initializeAuth(authFacade: AuthFacade) {
   return () => authFacade.initializeAuth();
 }
@@ -37,7 +42,7 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,
       deps: [AuthFacade],
-      multi: true
+      multi: true,
     },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideHttpClient(
@@ -46,7 +51,7 @@ export const appConfig: ApplicationConfig = {
       //   cookieName: 'XSRF-TOKEN',
       //   headerName: 'X-XSRF-TOKEN',
       // }),
-      withInterceptors([authInterceptor])
+      withInterceptors([loadingInterceptor, authInterceptor]),
     ),
     provideRouter(routes),
     provideClientHydration(),

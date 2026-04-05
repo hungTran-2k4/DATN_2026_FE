@@ -32,20 +32,27 @@
   <main class="main-content">
     <header class="topbar">
       <div class="topbar-title">
-        <h2>Admin</h2>
-        <p>Quan ly he thong tu mot giao dien tap trung</p>
+        <h2>Quản trị hệ thống</h2>
       </div>
 
       <div class="topbar-actions">
-        <span class="status-dot">
-          <i class="pi pi-check-circle"></i>
-          He thong on dinh
-        </span>
-        <p-button
-          label="Bao cao nhanh"
-          icon="pi pi-file-export"
-          size="small"
-        ></p-button>
+        <div class="topbar-search">
+          <i class="pi pi-search"></i>
+          <input type="text" pInputText placeholder="Tim kiem nhanh..." />
+        </div>
+
+        <button type="button" class="topbar-notify" aria-label="Thong bao">
+          <i class="pi pi-bell"></i>
+        </button>
+
+        <button
+          type="button"
+          class="admin-user-trigger"
+          (click)="userMenu.toggle($event)"
+        >
+          <span>{{ adminName }}</span>
+          <i class="pi pi-angle-down"></i>
+        </button>
       </div>
     </header>
 
@@ -54,3 +61,71 @@
     </section>
   </main>
 </div>
+
+<p-menu
+  #userMenu
+  [model]="userMenuItems"
+  [popup]="true"
+  appendTo="body"
+></p-menu>
+
+<p-dialog
+  header="Quan ly thong tin admin"
+  [modal]="true"
+  [(visible)]="profileDialogVisible"
+  [draggable]="false"
+  [style]="{ width: 'min(520px, 96vw)' }"
+>
+  <div class="profile-form">
+    <div class="profile-preview">
+      <span
+        class="admin-user-avatar admin-user-avatar--lg"
+        [class.has-image]="!!profileForm.avatarUrl"
+      >
+        <img
+          *ngIf="profileForm.avatarUrl; else dialogInitials"
+          [src]="profileForm.avatarUrl"
+          [alt]="profileForm.fullName || adminName"
+        />
+        <ng-template #dialogInitials>{{ adminInitials }}</ng-template>
+      </span>
+      <div>
+        <strong>{{ profileForm.fullName || adminName }}</strong>
+        <p>{{ adminEmail || "admin@local" }}</p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <label for="admin-fullName">Ho ten</label>
+      <input
+        id="admin-fullName"
+        pInputText
+        [(ngModel)]="profileForm.fullName"
+        placeholder="Nhap ho ten"
+      />
+
+      <label for="admin-avatar">Avatar URL</label>
+      <input
+        id="admin-avatar"
+        pInputText
+        [(ngModel)]="profileForm.avatarUrl"
+        placeholder="https://..."
+      />
+    </div>
+
+    <div class="profile-actions">
+      <p-button
+        label="Huy"
+        severity="secondary"
+        [text]="true"
+        (click)="profileDialogVisible = false"
+      ></p-button>
+      <p-button
+        label="Luu thay doi"
+        icon="pi pi-check"
+        [loading]="savingProfile"
+        (click)="saveProfile()"
+      ></p-button>
+    </div>
+  </div>
+</p-dialog>

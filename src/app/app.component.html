@@ -1,1 +1,9 @@
 <router-outlet></router-outlet>
+
+<div class="app-global-loading" *ngIf="loadingOverlay.isLoading$ | async">
+  <div class="app-global-loading__backdrop"></div>
+  <div class="app-global-loading__content" role="status" aria-live="polite">
+    <span class="app-global-loading__spinner"></span>
+    <p>Đang tải dữ liệu...</p>
+  </div>
+</div>

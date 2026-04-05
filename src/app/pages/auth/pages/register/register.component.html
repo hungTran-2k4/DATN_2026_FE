@@ -1,3 +1,5 @@
+<p-toast position="top-right"></p-toast>
+
 <section class="shop-auth shop-auth--register">
   <form
     class="shop-auth-panel"
@@ -7,9 +9,9 @@
     <div class="shop-auth-head">
       <div class="shop-auth-logo">S</div>
       <p class="shop-auth-badge">Seller Onboarding</p>
-      <h1>Tao tai khoan ban hang</h1>
+      <h1>Tạo tài khoản bán hàng</h1>
       <p class="shop-auth-subtitle">
-        Bat dau kinh doanh tren san voi dashboard, voucher va kho van thong
+        Bắt đầu kinh doanh trên sàn với dashboard, voucher và kho vận thông
         minh.
       </p>
     </div>
@@ -35,7 +37,7 @@
       </button>
     </div>
 
-    <div class="shop-auth-divider"><span>Hoac dang ky bang email</span></div>
+    <div class="shop-auth-divider"><span>Hoặc đăng ký bằng email</span></div>
 
     <div class="shop-auth-field">
       <label for="register-fullname">Họ tên</label>
@@ -46,18 +48,18 @@
         formControlName="fullName"
         [ngClass]="{
           'ng-invalid ng-dirty':
-            registerForm.get('fullName')?.invalid &&
-            registerForm.get('fullName')?.touched,
+            getControl('fullName')?.invalid &&
+            (getControl('fullName')?.touched || submitted),
         }"
       />
       <small
         class="p-error"
         *ngIf="
-          registerForm.get('fullName')?.invalid &&
-          registerForm.get('fullName')?.touched
+          getControl('fullName')?.invalid &&
+          (getControl('fullName')?.touched || submitted)
         "
       >
-        Vui lòng nhập họ tên (tối thiểu 3 ký tự).
+        {{ getFullNameError() }}
       </small>
     </div>
 
@@ -70,18 +72,18 @@
         formControlName="email"
         [ngClass]="{
           'ng-invalid ng-dirty':
-            registerForm.get('email')?.invalid &&
-            registerForm.get('email')?.touched,
+            getControl('email')?.invalid &&
+            (getControl('email')?.touched || submitted),
         }"
       />
       <small
         class="p-error"
         *ngIf="
-          registerForm.get('email')?.invalid &&
-          registerForm.get('email')?.touched
+          getControl('email')?.invalid &&
+          (getControl('email')?.touched || submitted)
         "
       >
-        Email không hợp lệ.
+        {{ getEmailError() }}
       </small>
     </div>
 
@@ -94,18 +96,18 @@
         formControlName="password"
         [ngClass]="{
           'ng-invalid ng-dirty':
-            registerForm.get('password')?.invalid &&
-            registerForm.get('password')?.touched,
+            getControl('password')?.invalid &&
+            (getControl('password')?.touched || submitted),
         }"
       />
       <small
         class="p-error"
         *ngIf="
-          registerForm.get('password')?.invalid &&
-          registerForm.get('password')?.touched
+          getControl('password')?.invalid &&
+          (getControl('password')?.touched || submitted)
         "
       >
-        Mật khẩu phải dài ít nhất 6 ký tự.
+        {{ getPasswordError() }}
       </small>
     </div>
 
@@ -119,38 +121,34 @@
         for="register-terms"
         [ngClass]="{
           'p-error':
-            registerForm.get('acceptedTerms')?.invalid &&
-            registerForm.get('acceptedTerms')?.touched,
+            getControl('acceptedTerms')?.invalid &&
+            (getControl('acceptedTerms')?.touched || submitted),
         }"
       >
-        Toi dong y dieu khoan su dung va chinh sach bao mat cua san.
+        Tôi đồng ý điều khoản sử dụng và chính sách bảo mật của sàn.
       </label>
+      <small
+        class="p-error"
+        *ngIf="
+          getControl('acceptedTerms')?.invalid &&
+          (getControl('acceptedTerms')?.touched || submitted)
+        "
+      >
+        Bạn cần đồng ý điều khoản sử dụng để tiếp tục.
+      </small>
     </div>
 
     <button
       pButton
       type="submit"
       class="shop-auth-primary-btn"
-      [label]="isSubmitting ? 'Dang xu ly...' : 'Tao tai khoan'"
+      [label]="isSubmitting ? 'Đang xử lý...' : 'Tạo tài khoản'"
       [disabled]="isSubmitting"
     ></button>
 
-    <p
-      class="shop-auth-feedback shop-auth-feedback--error"
-      *ngIf="errorMessage"
-    >
-      {{ errorMessage }}
-    </p>
-    <p
-      class="shop-auth-feedback shop-auth-feedback--success"
-      *ngIf="successMessage"
-    >
-      {{ successMessage }}
-    </p>
-
     <p class="shop-auth-switch-text">
-      Da co tai khoan?
-      <a routerLink="/auth/login" class="shop-auth-link">Dang nhap ngay</a>
+      Đã có tài khoản?
+      <a routerLink="/auth/login" class="shop-auth-link">Đăng nhập ngay</a>
     </p>
   </form>
 
@@ -160,17 +158,17 @@
 
     <article class="hero-offer-card">
       <p class="offer-tag">Seller Growth</p>
-      <h3>Mo shop trong 2 phut</h3>
+      <h3>Mở shop trong 2 phút</h3>
       <p>
-        Tu dong de xuat danh muc, theo doi ton kho va goi y gia ban theo thi
-        truong.
+        Tự động đề xuất danh mục, theo dõi tồn kho và gợi ý giá bán theo thị
+        trường.
       </p>
       <div class="offer-progress">
         <span style="width: 58%"></span>
       </div>
       <div class="offer-stats">
         <strong>+320%</strong>
-        <span>toc do tao shop moi</span>
+        <span>tốc độ tạo shop mới</span>
       </div>
     </article>
 
@@ -178,7 +176,7 @@
       <div class="product-thumb"></div>
       <div>
         <h4>Starter Seller Kit</h4>
-        <p>Voucher + banner + analytics cho 30 ngay dau tien</p>
+        <p>Voucher + banner + analytics cho 30 ngày đầu tiên</p>
       </div>
       <strong>Free</strong>
     </article>

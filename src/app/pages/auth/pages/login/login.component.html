@@ -1,11 +1,13 @@
+<p-toast position="top-right"></p-toast>
+
 <section class="shop-auth shop-auth--login">
   <form class="shop-auth-panel" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <div class="shop-auth-head">
       <div class="shop-auth-logo">S</div>
       <p class="shop-auth-badge">Ecommerce Portal</p>
-      <h1>Chao mung quay tro lai</h1>
+      <h1>Chào mừng quay trở lại</h1>
       <p class="shop-auth-subtitle">
-        Dang nhap de quan ly don hang, doanh thu va chien dich khuyen mai.
+        Đăng nhập để quản lý đơn hàng, doanh thu và chiến dịch khuyến mãi.
       </p>
     </div>
 
@@ -30,10 +32,10 @@
       </button>
     </div>
 
-    <div class="shop-auth-divider"><span>Hoac dang nhap bang email</span></div>
+    <div class="shop-auth-divider"><span>Hoặc đăng nhập bằng email</span></div>
 
     <div class="shop-auth-field">
-      <label for="login-email">Email Address</label>
+      <label for="login-email">Email</label>
       <input
         id="login-email"
         pInputText
@@ -41,16 +43,18 @@
         formControlName="email"
         [ngClass]="{
           'ng-invalid ng-dirty':
-            loginForm.get('email')?.invalid && loginForm.get('email')?.touched,
+            getControl('email')?.invalid &&
+            (getControl('email')?.touched || submitted),
         }"
       />
       <small
         class="p-error"
         *ngIf="
-          loginForm.get('email')?.invalid && loginForm.get('email')?.touched
+          getControl('email')?.invalid &&
+          (getControl('email')?.touched || submitted)
         "
       >
-        Email không hợp lệ.
+        {{ getEmailError() }}
       </small>
     </div>
 
@@ -63,18 +67,18 @@
         formControlName="password"
         [ngClass]="{
           'ng-invalid ng-dirty':
-            loginForm.get('password')?.invalid &&
-            loginForm.get('password')?.touched,
+            getControl('password')?.invalid &&
+            (getControl('password')?.touched || submitted),
         }"
       />
       <small
         class="p-error"
         *ngIf="
-          loginForm.get('password')?.invalid &&
-          loginForm.get('password')?.touched
+          getControl('password')?.invalid &&
+          (getControl('password')?.touched || submitted)
         "
       >
-        Mật khẩu là bắt buộc.
+        {{ getPasswordError() }}
       </small>
     </div>
 
@@ -85,10 +89,13 @@
         inputId="remember-me"
       ></p-checkbox>
       <label for="remember-me" class="shop-auth-checkbox-label"
-        >Ghi nho tai khoan</label
+        >Ghi nhớ tài khoản</label
       >
-      <a routerLink="/auth/forgot-password" class="shop-auth-link-btn shop-auth-link--inline">
-        Quen mat khau?
+      <a
+        routerLink="/auth/forgot-password"
+        class="shop-auth-link-btn shop-auth-link--inline"
+      >
+        Quên mật khẩu?
       </a>
     </div>
 
@@ -96,27 +103,14 @@
       pButton
       type="submit"
       class="shop-auth-primary-btn"
-      [label]="isSubmitting ? 'Dang xu ly...' : 'Dang nhap'"
+      [label]="isSubmitting ? 'Đang xử lý...' : 'Đăng nhập'"
       [disabled]="isSubmitting"
     ></button>
 
-    <p
-      class="shop-auth-feedback shop-auth-feedback--error"
-      *ngIf="errorMessage"
-    >
-      {{ errorMessage }}
-    </p>
-    <p
-      class="shop-auth-feedback shop-auth-feedback--success"
-      *ngIf="successMessage"
-    >
-      {{ successMessage }}
-    </p>
-
     <p class="shop-auth-switch-text">
-      Chua co tai khoan?
+      Chưa có tài khoản?
       <a routerLink="/auth/register" class="shop-auth-link"
-        >Tao tai khoan moi</a
+        >Tạo tài khoản mới</a
       >
     </p>
   </form>
@@ -127,14 +121,14 @@
 
     <article class="hero-offer-card">
       <p class="offer-tag">Flash Sale</p>
-      <h3>Giam den 40% cho nha ban moi</h3>
-      <p>Tang toc chuyen doi voi bo cong cu marketing va voucher tu dong.</p>
+      <h3>Giảm đến 40% cho nhà bán mới</h3>
+      <p>Tăng tốc chuyển đổi với bộ công cụ marketing và voucher tự động.</p>
       <div class="offer-progress">
         <span style="width: 72%"></span>
       </div>
       <div class="offer-stats">
         <strong>12.4k</strong>
-        <span>don hang thang nay</span>
+        <span>đơn hàng tháng này</span>
       </div>
     </article>
 
@@ -142,7 +136,7 @@
       <div class="product-thumb"></div>
       <div>
         <h4>Summer Tote Bag</h4>
-        <p>Top san pham ban chay trong 7 ngay qua</p>
+        <p>Top sản phẩm bán chạy trong 7 ngày qua</p>
       </div>
       <strong>$128</strong>
     </article>

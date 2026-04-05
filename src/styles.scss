@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
 @import 'primeicons/primeicons.css';
 
 @tailwind base;
@@ -5,6 +6,7 @@
 @tailwind utilities;
 
 :root {
+  --app-font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --admin-bg-soft: #f3f6fc;
   --admin-border: #dde5f2;
   --admin-text-primary: #030229;
@@ -38,9 +40,16 @@ body {
   margin: 0;
   min-height: 100%;
   font-size: 16px;
-  font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--app-font-family);
   color: var(--admin-text-primary);
   background: var(--admin-bg-soft);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
 body {

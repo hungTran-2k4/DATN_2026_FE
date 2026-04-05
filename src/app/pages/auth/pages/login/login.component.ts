@@ -1,10 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
+import { ToastModule } from 'primeng/toast';
 import { finalize } from 'rxjs';
 import { AuthFacade } from '../../services/auth.facade';
 
@@ -18,38 +26,79 @@ import { AuthFacade } from '../../services/auth.facade';
     ButtonModule,
     CheckboxModule,
     InputTextModule,
+    ToastModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  submitted = false;
   isSubmitting = false;
-  errorMessage = '';
-  successMessage = '';
 
   constructor(
     private readonly authFacade: AuthFacade,
-    private readonly router: Router,
-    private fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly messageService: MessageService,
   ) {
     this.loginForm = this.fb.group({
-      email: ['example@gmail.com', [Validators.required, Validators.email]],
-      password: ['password', [Validators.required]],
-      rememberMe: [false]
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [false],
     });
   }
 
+  getControl(controlName: 'email' | 'password'): AbstractControl | null {
+    return this.loginForm.get(controlName);
+  }
+
+  getEmailError(): string {
+    const control = this.getControl('email');
+    if (!control?.errors) {
+      return '';
+    }
+
+    if (control.errors['required']) {
+      return 'Vui lòng nhập email.';
+    }
+
+    if (control.errors['email']) {
+      return 'Email không đúng định dạng.';
+    }
+
+    return 'Email không hợp lệ.';
+  }
+
+  getPasswordError(): string {
+    const control = this.getControl('password');
+    if (!control?.errors) {
+      return '';
+    }
+
+    if (control.errors['required']) {
+      return 'Vui lòng nhập mật khẩu.';
+    }
+
+    if (control.errors['minlength']) {
+      return 'Mật khẩu cần tối thiểu 6 ký tự.';
+    }
+
+    return 'Mật khẩu không hợp lệ.';
+  }
+
   onSubmit(): void {
+    this.submitted = true;
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
-      this.errorMessage = 'Vui long nhap day du email va mat khau hop le.';
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Thiếu thông tin',
+        detail: 'Vui lòng nhập đủ email và mật khẩu.',
+      });
       return;
     }
 
     this.isSubmitting = true;
-    this.errorMessage = '';
-    this.successMessage = '';
 
     const { email, password } = this.loginForm.value;
 
@@ -58,14 +107,19 @@ export class LoginComponent {
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: () => {
-          this.successMessage = 'Dang nhap thanh cong. Dang chuyen trang...';
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Thành công',
+            detail: 'Đăng nhập thành công. Chào mừng bạn!',
+          });
           this.authFacade.navigateAfterLogin();
         },
-        error: (error: unknown) => {
-          this.errorMessage =
-            error instanceof Error
-              ? error.message
-              : 'Dang nhap that bai, vui long thu lai.';
+        error: (error: any) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Đăng nhập thất bại',
+            detail: error.message,
+          });
         },
       });
   }

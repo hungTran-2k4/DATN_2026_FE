@@ -368,8 +368,16 @@
 }
 
 .users-actions-col {
-  width: 88px;
+  width: 248px;
   text-align: center;
+}
+
+.users-row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.15rem;
 }
 
 .users-empty-state {

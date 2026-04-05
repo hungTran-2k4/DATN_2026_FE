@@ -125,6 +125,11 @@
         font-size: 0.86rem;
         line-height: 1.4;
     }
+
+    small {
+        grid-column: 2;
+        margin-top: -2px;
+    }
 }
 
 .shop-auth-primary-btn {
