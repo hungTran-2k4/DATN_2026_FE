@@ -22,7 +22,8 @@ jobs:
       - name: Create environment file
         run: |
           mkdir -p src/environments
-          echo "export const environment = { apiUrl: '${{ secrets.API_URL }}' };" > src/environments/environment.ts
+          echo "export const environment = { production: true, apiUrl: '${{ secrets.API_URL }}' };" > src/environments/environment.ts
+          echo "export const environment = { production: true, apiUrl: '${{ secrets.API_URL }}' };" > src/environments/environment.production.ts
 
       - name: Build SSR
         run: npm run build:ssr
