@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "node dist/datn-2026/server/server.mjs",
     "build": "ng build",
-    "build:ssr": "ng build && ng run datn-2026:server",
+    "build:ssr": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:DATN_2026": "node dist/datn-2026/server/server.mjs"
