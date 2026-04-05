@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { AuthResponse } from '../../../shared/api/generated/api-service-base.service';
@@ -12,6 +13,7 @@ export class AuthFacade {
     private readonly authRepository: AuthRepository,
     private readonly sessionService: AuthSessionService,
     private readonly router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   get isLoggedIn$(): Observable<boolean> {
@@ -19,6 +21,10 @@ export class AuthFacade {
   }
 
   initializeAuth(): Observable<boolean> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of(false);
+    }
+
     const session = this.sessionService.getSession();
 
     // Always call getProfile to verify cookies and get latest user data
