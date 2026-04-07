@@ -13,7 +13,7 @@ import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
-import { finalize } from 'rxjs';
+import { finalize, switchMap, tap } from 'rxjs';
 import { AuthFacade } from '../../services/auth.facade';
 
 @Component({
@@ -112,7 +112,7 @@ export class RegisterComponent {
       this.registerForm.markAllAsTouched();
       this.messageService.add({
         severity: 'warn',
-        summary: 'Thiếu thông tin',
+        summary: 'Thiếu thông vịn',
         detail:
           'Vui lòng kiểm tra lại thông tin và đồng ý điều khoản trước khi đăng ký.',
       });
@@ -129,24 +129,26 @@ export class RegisterComponent {
         password: password,
         fullName: fullName.trim(),
       })
-      .pipe(finalize(() => (this.isSubmitting = false)))
-      .subscribe({
-        next: () => {
+      .pipe(
+        tap(() => {
           this.messageService.add({
             severity: 'success',
             summary: 'Đăng ký thành công',
-            detail: 'Đang chuyển vào hệ thống quản trị.',
+            detail: 'Đang tự động đăng nhập vào hệ thống...',
           });
+        }),
+        switchMap(() => this.authFacade.login(email.trim(), password)),
+        finalize(() => (this.isSubmitting = false))
+      )
+      .subscribe({
+        next: () => {
           this.authFacade.navigateAfterLogin();
         },
         error: (error: unknown) => {
           this.messageService.add({
             severity: 'error',
-            summary: 'Đăng ký thất bại',
-            detail:
-              error instanceof Error
-                ? error.message
-                : 'Đăng ký thất bại, vui lòng thử lại.',
+            summary: 'Đăng nhập tự động thất bại',
+            detail: 'Đăng ký thành công nhưng đăng nhập bị lỗi. Vui lòng đăng nhập lại.',
           });
         },
       });

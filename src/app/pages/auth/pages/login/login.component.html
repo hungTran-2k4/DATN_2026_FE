@@ -1,144 +1,83 @@
 <p-toast position="top-right"></p-toast>
 
-<section class="shop-auth shop-auth--login">
-  <form class="shop-auth-panel" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <div class="shop-auth-head">
-      <div class="shop-auth-logo">S</div>
-      <p class="shop-auth-badge">Ecommerce Portal</p>
-      <h1>Chào mừng quay trở lại</h1>
-      <p class="shop-auth-subtitle">
-        Đăng nhập để quản lý đơn hàng, doanh thu và chiến dịch khuyến mãi.
-      </p>
-    </div>
+<section class="shop-auth">
+  <div class="shop-auth-container">
+    <form class="shop-auth-panel" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="shop-auth-head">
+        <h1>Đăng nhập</h1>
+        <p class="shop-auth-subtitle">Chào mừng quay trở lại hệ thống.</p>
+      </div>
 
-    <div class="shop-auth-social-row">
+      <div class="shop-auth-field">
+        <label for="login-email">Email</label>
+        <input
+          id="login-email"
+          pInputText
+          type="email"
+          formControlName="email"
+          class="auth-input"
+          placeholder="Nhập email của bạn"
+          [ngClass]="{
+            'ng-invalid ng-dirty':
+              getControl('email')?.invalid &&
+              (getControl('email')?.touched || submitted)
+          }"
+        />
+        <small class="p-error" *ngIf="getControl('email')?.invalid && (getControl('email')?.touched || submitted)">
+          {{ getEmailError() }}
+        </small>
+      </div>
+
+      <div class="shop-auth-field">
+        <label for="login-password">Mật khẩu</label>
+        <input
+          id="login-password"
+          pInputText
+          type="password"
+          formControlName="password"
+          class="auth-input"
+          placeholder="Nhập mật khẩu"
+          [ngClass]="{
+            'ng-invalid ng-dirty':
+              getControl('password')?.invalid &&
+              (getControl('password')?.touched || submitted)
+          }"
+        />
+        <small class="p-error" *ngIf="getControl('password')?.invalid && (getControl('password')?.touched || submitted)">
+          {{ getPasswordError() }}
+        </small>
+        
+        <div class="shop-auth-row-between" style="margin-top: 6px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <p-checkbox formControlName="rememberMe" [binary]="true" inputId="remember-me"></p-checkbox>
+                <label for="remember-me" class="shop-auth-checkbox-label">Ghi nhớ</label>
+            </div>
+            <a routerLink="/auth/forgot-password" class="shop-auth-link">Quên mật khẩu?</a>
+        </div>
+      </div>
+
       <button
         pButton
-        type="button"
-        class="shop-auth-social-btn"
-        [outlined]="true"
-      >
-        <i class="pi pi-google"></i>
-        Google
-      </button>
-      <button
-        pButton
-        type="button"
-        class="shop-auth-social-btn"
-        [outlined]="true"
-      >
-        <i class="pi pi-facebook"></i>
-        Facebook
-      </button>
-    </div>
+        type="submit"
+        class="shop-auth-primary-btn"
+        [label]="isSubmitting ? 'Đang xử lý...' : 'Đăng nhập'"
+        [disabled]="isSubmitting"
+      ></button>
 
-    <div class="shop-auth-divider"><span>Hoặc đăng nhập bằng email</span></div>
-
-    <div class="shop-auth-field">
-      <label for="login-email">Email</label>
-      <input
-        id="login-email"
-        pInputText
-        type="email"
-        formControlName="email"
-        [ngClass]="{
-          'ng-invalid ng-dirty':
-            getControl('email')?.invalid &&
-            (getControl('email')?.touched || submitted),
-        }"
-      />
-      <small
-        class="p-error"
-        *ngIf="
-          getControl('email')?.invalid &&
-          (getControl('email')?.touched || submitted)
-        "
-      >
-        {{ getEmailError() }}
-      </small>
-    </div>
-
-    <div class="shop-auth-field">
-      <label for="login-password">Password</label>
-      <input
-        id="login-password"
-        pInputText
-        type="password"
-        formControlName="password"
-        [ngClass]="{
-          'ng-invalid ng-dirty':
-            getControl('password')?.invalid &&
-            (getControl('password')?.touched || submitted),
-        }"
-      />
-      <small
-        class="p-error"
-        *ngIf="
-          getControl('password')?.invalid &&
-          (getControl('password')?.touched || submitted)
-        "
-      >
-        {{ getPasswordError() }}
-      </small>
-    </div>
-
-    <div class="shop-auth-row-between">
-      <p-checkbox
-        formControlName="rememberMe"
-        [binary]="true"
-        inputId="remember-me"
-      ></p-checkbox>
-      <label for="remember-me" class="shop-auth-checkbox-label"
-        >Ghi nhớ tài khoản</label
-      >
-      <a
-        routerLink="/auth/forgot-password"
-        class="shop-auth-link-btn shop-auth-link--inline"
-      >
-        Quên mật khẩu?
-      </a>
-    </div>
-
-    <button
-      pButton
-      type="submit"
-      class="shop-auth-primary-btn"
-      [label]="isSubmitting ? 'Đang xử lý...' : 'Đăng nhập'"
-      [disabled]="isSubmitting"
-    ></button>
-
-    <p class="shop-auth-switch-text">
-      Chưa có tài khoản?
-      <a routerLink="/auth/register" class="shop-auth-link"
-        >Tạo tài khoản mới</a
-      >
-    </p>
-  </form>
-
-  <div class="shop-auth-hero">
-    <div class="hero-glow hero-glow--top"></div>
-    <div class="hero-glow hero-glow--bottom"></div>
-
-    <article class="hero-offer-card">
-      <p class="offer-tag">Flash Sale</p>
-      <h3>Giảm đến 40% cho nhà bán mới</h3>
-      <p>Tăng tốc chuyển đổi với bộ công cụ marketing và voucher tự động.</p>
-      <div class="offer-progress">
-        <span style="width: 72%"></span>
+      <div class="shop-auth-actions" style="display: flex; justify-content: center; margin-top: -2px;">
+        <span class="shop-auth-subtitle" style="font-size: 0.85rem">Chưa có tài khoản? <a routerLink="/auth/register" class="shop-auth-link">Đăng ký ngay</a></span>
       </div>
-      <div class="offer-stats">
-        <strong>12.4k</strong>
-        <span>đơn hàng tháng này</span>
-      </div>
-    </article>
 
-    <article class="hero-product-card">
-      <div class="product-thumb"></div>
-      <div>
-        <h4>Summer Tote Bag</h4>
-        <p>Top sản phẩm bán chạy trong 7 ngày qua</p>
+      <div class="shop-auth-divider"><span>Hoặc tiếp tục với</span></div>
+
+      <div class="shop-auth-social-row">
+        <button pButton type="button" class="shop-auth-social-btn" [outlined]="true">
+          <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" style="width: 18px; margin-right: 8px; object-fit: contain" alt="Google"> Google
+        </button>
+        <button pButton type="button" class="shop-auth-social-btn" [outlined]="true">
+          <i class="pi pi-facebook" style="color: #1877F2; font-size: 1.1rem; margin-right: 8px"></i> Facebook
+        </button>
       </div>
-      <strong>$128</strong>
-    </article>
+    </form>
   </div>
 </section>
