@@ -14,4 +14,20 @@ export class AdminShopsFacade {
   getShops(): Observable<ShopDto[]> {
     return this.shopRepository.getShops().pipe(catchError(() => of([])));
   }
+
+  getShopsPaging(search?: string, filter?: any, page: number = 1, pageSize: number = 10): Observable<any> {
+    return this.shopRepository.getShopsPaging(search, filter, page, pageSize).pipe(catchError(() => of(null)));
+  }
+
+  getShopById(id: string): Observable<ShopDto | undefined> {
+    return this.shopRepository.getShopById(id);
+  }
+
+  changeStatus(id: string, status: number): Observable<boolean> {
+    return this.shopRepository.changeStatus(id, status);
+  }
+
+  deleteShop(id: string): Observable<boolean | undefined> {
+    return this.shopRepository.deleteShop(id);
+  }
 }

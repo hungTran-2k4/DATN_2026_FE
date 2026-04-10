@@ -1,8 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import {
+  API_BASE_URL,
   ApiBaseService,
   FileParameter,
+  PagedRequest,
   ShopDto,
   UpdateShopCommand,
 } from '../../../shared/api/generated/api-service-base.service';
@@ -10,7 +13,29 @@ import { unwrapData } from './admin-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class ShopAdminRepository {
-  constructor(private readonly apiBase: ApiBaseService) {}
+  private readonly baseUrl: string;
+
+  constructor(
+    private readonly apiBase: ApiBaseService,
+    private readonly http: HttpClient,
+    @Optional() @Inject(API_BASE_URL) baseUrl?: string
+  ) {
+    this.baseUrl = baseUrl ?? '';
+  }
+
+  getShopsPaging(search?: string, filter?: any, page: number = 1, pageSize: number = 10): Observable<any> {
+    const body = new PagedRequest({ search, filter, page, pageSize });
+    return this.apiBase.paging2(body);
+  }
+
+  changeStatus(id: string, status: number): Observable<any> {
+    const url = `${this.baseUrl}/api/Shops/${id}/status`;
+    // Backend mong đợi body là enum ShopApprovalStatus (int)
+    return this.http.put(url, status, { 
+      withCredentials: true,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
   /**
    * Lay tat ca shop de hien thi bang quan tri tong quan.

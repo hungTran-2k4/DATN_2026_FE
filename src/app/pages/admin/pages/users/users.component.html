@@ -51,21 +51,34 @@
 
   <section class="users-toolbar users-surface">
     <div class="users-search-group">
-      <label for="user-search">Tìm kiếm</label>
-      <p-iconfield iconPosition="left" class="users-search-field">
-        <p-inputicon class="pi pi-search"></p-inputicon>
-        <input
-          id="user-search"
-          pInputText
-          type="text"
-          placeholder="Tìm theo email, tên, user id..."
-          [(ngModel)]="keyword"
-          (ngModelChange)="onKeywordChange()"
-        />
-      </p-iconfield>
+      <div class="users-search-inline">
+        <p-iconfield iconPosition="left" class="users-search-field">
+          <p-inputicon class="pi pi-search"></p-inputicon>
+          <input
+            id="user-search"
+            pInputText
+            type="text"
+            placeholder="Tìm theo email, tên, user id..."
+            [(ngModel)]="keyword"
+            (keydown.enter)="onKeywordChange()"
+          />
+        </p-iconfield>
+        <p-button
+          icon="pi pi-search"
+          label="Tìm kiếm"
+          [outlined]="true"
+          (click)="onKeywordChange()"
+        ></p-button>
+      </div>
     </div>
 
     <div class="users-toolbar-actions">
+      <p-button
+        icon="pi pi-plus"
+        label="Thêm tài khoản"
+        severity="primary"
+        (click)="openCreateDialog()"
+      ></p-button>
       <p-button
         icon="pi pi-refresh"
         label="Làm mới"
@@ -107,6 +120,9 @@
       [rows]="rows"
       [first]="first"
       [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [showCurrentPageReport]="true"
+      [currentPageReportTemplate]="reportTemplate"
     >
       <ng-template pTemplate="header">
         <tr>
@@ -394,5 +410,81 @@
         </div>
       </div>
     </div>
+  </p-dialog>
+
+  <!-- Create User Dialog -->
+  <p-dialog
+    header="Thêm tài khoản mới"
+    [(visible)]="createDialogVisible"
+    [modal]="true"
+    [style]="{ width: '450px' }"
+    styleClass="p-fluid users-dialog"
+  >
+    <div class="field">
+      <label for="new-fullname"
+        >Họ tên <span class="text-red-500">*</span></label
+      >
+      <input
+        type="text"
+        pInputText
+        id="new-fullname"
+        [(ngModel)]="newUser.fullName"
+        placeholder="Nguyễn Văn A"
+        required
+      />
+    </div>
+
+    <div class="field mt-3">
+      <label for="new-email">Email <span class="text-red-500">*</span></label>
+      <input
+        type="email"
+        pInputText
+        id="new-email"
+        [(ngModel)]="newUser.email"
+        placeholder="email@example.com"
+        required
+      />
+    </div>
+
+    <div class="field mt-3">
+      <label for="new-phone">Số điện thoại</label>
+      <input
+        type="text"
+        pInputText
+        id="new-phone"
+        [(ngModel)]="newUser.phoneNumber"
+        placeholder="09123..."
+      />
+    </div>
+
+    <div class="field mt-3">
+      <label>Phân quyền ban đầu</label>
+      <p-multiSelect
+        [options]="availableRoles"
+        optionLabel="name"
+        optionValue="id"
+        [(ngModel)]="newUser.roleIds"
+        placeholder="Chọn roles"
+        display="chip"
+        [showClear]="true"
+      ></p-multiSelect>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Hủy"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (click)="createDialogVisible = false"
+      ></p-button>
+      <p-button
+        label="Tạo tài khoản"
+        icon="pi pi-check"
+        (click)="saveNewUser()"
+        [loading]="creatingUser"
+        [disabled]="!newUser.email || !newUser.fullName"
+      ></p-button>
+    </ng-template>
   </p-dialog>
 </section>

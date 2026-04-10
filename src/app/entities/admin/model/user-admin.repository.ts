@@ -16,6 +16,12 @@ import {
 export class UserAdminRepository {
   constructor(private readonly apiBase: ApiBaseService) {}
 
+  createUser(payload: { email: string; fullName: string; phoneNumber?: string; roleIds?: string[] }): Observable<any> {
+    // Gọi method từ ApiBaseService sau khi gen NSwag (tạm gọi là createAdminUser)
+    // Cần kiểm tra lại chính xác tên method sau khi dev gen lại API
+    return (this.apiBase as any).create(payload);
+  }
+
   /**
    * Lay danh sach user phuc vu bo loc, phan quyen va theo doi tai khoan.
    */

@@ -1,58 +1,109 @@
 <p-toast position="top-right"></p-toast>
 
-<div class="admin-shell">
+<div class="admin-shell" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- ─── SIDEBAR ─── -->
   <aside class="sidebar">
-    <div class="brand-block">
-      <div class="brand-chip">ADMIN CORE</div>
-      <div class="brand">
-        <h1>Admin Console</h1>
-        <p>He thong quan tri san da nguoi ban</p>
+    <div class="sidebar-header">
+      <div class="brand" *ngIf="!sidebarCollapsed">
+        <i class="pi pi-shopping-cart brand-icon"></i>
+        <span class="brand-text">DATN Admin</span>
+      </div>
+      <div class="brand brand--mini" *ngIf="sidebarCollapsed">
+        <i class="pi pi-shopping-cart brand-icon"></i>
       </div>
     </div>
 
-    <nav class="menu">
+    <nav class="nav-menu">
       @for (item of navItems; track item.route) {
         <a
           [routerLink]="item.route"
           routerLinkActive="is-active"
-          class="menu-item"
+          class="nav-link"
+          [pTooltip]="sidebarCollapsed ? item.label : ''"
+          tooltipPosition="right"
         >
           <i [class]="item.icon"></i>
-          <span>{{ item.label }}</span>
+          <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+          <span
+            class="nav-badge"
+            *ngIf="item.badge && !sidebarCollapsed"
+          >{{ item.badge }}</span>
         </a>
       }
     </nav>
 
-    <div class="sidebar-footer">
-      <p>Dong bo gan nhat</p>
-      <strong>{{ lastSyncLabel }}</strong>
+    <div class="nav-section-label" *ngIf="!sidebarCollapsed">Cài đặt</div>
+    <nav class="nav-menu nav-menu--bottom">
+      @for (item of settingsItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+          class="nav-link"
+          [pTooltip]="sidebarCollapsed ? item.label : ''"
+          tooltipPosition="right"
+        >
+          <i [class]="item.icon"></i>
+          <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-user" *ngIf="!sidebarCollapsed">
+      <span
+        class="user-avatar"
+        [class.has-image]="!!adminAvatarUrl"
+      >
+        <img *ngIf="adminAvatarUrl" [src]="adminAvatarUrl" [alt]="adminName" />
+        <ng-container *ngIf="!adminAvatarUrl">{{ adminInitials }}</ng-container>
+      </span>
+      <div class="user-info">
+        <strong>{{ adminName }}</strong>
+        <small>{{ adminEmail || 'admin' }}</small>
+      </div>
+      <button
+        type="button"
+        class="user-menu-btn"
+        (click)="userMenu.toggle($event)"
+        aria-label="Menu"
+      >
+        <i class="pi pi-ellipsis-v"></i>
+      </button>
     </div>
   </aside>
 
-  <main class="main-content">
+  <!-- ─── MAIN ─── -->
+  <main class="main-area">
     <header class="topbar">
-      <div class="topbar-title">
-        <h2>Quản trị hệ thống</h2>
-      </div>
-
-      <div class="topbar-actions">
+      <div class="topbar-left">
+        <button type="button" class="sidebar-toggle" (click)="toggleSidebar()">
+          <i class="pi" [ngClass]="sidebarCollapsed ? 'pi-bars' : 'pi-times'"></i>
+        </button>
         <div class="topbar-search">
           <i class="pi pi-search"></i>
-          <input type="text" pInputText placeholder="Tim kiem nhanh..." />
+          <input type="text" placeholder="Tìm kiếm..." />
         </div>
+      </div>
 
-        <button type="button" class="topbar-notify" aria-label="Thong bao">
+      <div class="topbar-right">
+        <button type="button" class="topbar-icon-btn" aria-label="Thông báo">
           <i class="pi pi-bell"></i>
+          <span class="notify-dot"></span>
+        </button>
+        <button type="button" class="topbar-icon-btn" aria-label="Tin nhắn">
+          <i class="pi pi-envelope"></i>
         </button>
 
-        <button
-          type="button"
-          class="admin-user-trigger"
-          (click)="userMenu.toggle($event)"
-        >
-          <span>{{ adminName }}</span>
+        <div class="topbar-user" (click)="userMenu.toggle($event)">
+          <span class="user-avatar user-avatar--sm" [class.has-image]="!!adminAvatarUrl">
+            <img *ngIf="adminAvatarUrl" [src]="adminAvatarUrl" [alt]="adminName" />
+            <ng-container *ngIf="!adminAvatarUrl">{{ adminInitials }}</ng-container>
+          </span>
+          <div class="topbar-user-text">
+            <strong>{{ adminName }}</strong>
+            <small>Quản trị viên</small>
+          </div>
           <i class="pi pi-angle-down"></i>
-        </button>
+        </div>
       </div>
     </header>
 
@@ -70,16 +121,17 @@
 ></p-menu>
 
 <p-dialog
-  header="Quan ly thong tin admin"
+  header="Quản lý thông tin admin"
   [modal]="true"
   [(visible)]="profileDialogVisible"
   [draggable]="false"
-  [style]="{ width: 'min(520px, 96vw)' }"
+  [style]="dialogStyle"
+  styleClass="admin-profile-dialog"
 >
   <div class="profile-form">
     <div class="profile-preview">
       <span
-        class="admin-user-avatar admin-user-avatar--lg"
+        class="user-avatar user-avatar--lg"
         [class.has-image]="!!profileForm.avatarUrl"
       >
         <img
@@ -96,12 +148,12 @@
     </div>
 
     <div class="form-grid">
-      <label for="admin-fullName">Ho ten</label>
+      <label for="admin-fullName">Họ tên</label>
       <input
         id="admin-fullName"
         pInputText
         [(ngModel)]="profileForm.fullName"
-        placeholder="Nhap ho ten"
+        placeholder="Nhập họ tên"
       />
 
       <label for="admin-avatar">Avatar URL</label>
@@ -115,13 +167,13 @@
 
     <div class="profile-actions">
       <p-button
-        label="Huy"
+        label="Hủy"
         severity="secondary"
         [text]="true"
         (click)="profileDialogVisible = false"
       ></p-button>
       <p-button
-        label="Luu thay doi"
+        label="Lưu thay đổi"
         icon="pi pi-check"
         [loading]="savingProfile"
         (click)="saveProfile()"

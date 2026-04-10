@@ -15,6 +15,10 @@ export class AdminUsersFacade {
     return this.userRepository.getUsers(search, page, pageSize).pipe(catchError(() => of(null)));
   }
 
+  createUser(payload: { email: string; fullName: string; phoneNumber?: string; roleIds?: string[] }): Observable<any> {
+    return this.userRepository.createUser(payload);
+  }
+
   /**
    * Truy xuat toan bo cac roles co the the hien tren he thong.
    */

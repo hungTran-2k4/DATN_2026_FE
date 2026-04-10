@@ -52,6 +52,7 @@ export class AdminUsersPageComponent {
   // Pagination config for users
   rows = 10;
   first = 0;
+  reportTemplate = 'Hiển thị {first} - {last} / {totalRecords} bản ghi';
 
   // Overview Stats
   userStats$!: Observable<{
@@ -71,6 +72,16 @@ export class AdminUsersPageComponent {
   selectedRoles: string[] = [];
   availableRoles: RoleDto[] = [];
   savingRoles = false;
+
+  // Create User
+  createDialogVisible = false;
+  creatingUser = false;
+  newUser = {
+    email: '',
+    fullName: '',
+    phoneNumber: '',
+    roleIds: [] as string[],
+  };
 
   constructor(
     private readonly usersFacade: AdminUsersFacade,
@@ -374,6 +385,38 @@ export class AdminUsersPageComponent {
           });
         },
       });
+  }
+
+  // --- CREATE USER ---
+  openCreateDialog(): void {
+    this.newUser = { email: '', fullName: '', phoneNumber: '', roleIds: [] };
+    this.createDialogVisible = true;
+  }
+
+  saveNewUser(): void {
+    if (!this.newUser.email || !this.newUser.fullName) return;
+    this.creatingUser = true;
+
+    this.usersFacade.createUser(this.newUser).subscribe({
+      next: () => {
+        this.creatingUser = false;
+        this.createDialogVisible = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Thành công',
+          detail: 'Đã tạo tài khoản và gửi email thông báo.',
+        });
+        this.loadUsers();
+      },
+      error: () => {
+        this.creatingUser = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Không thể tạo tài khoản người dùng.',
+        });
+      },
+    });
   }
 
   // --- FORMATTERS ---

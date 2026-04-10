@@ -1,102 +1,341 @@
-<section class="admin-page">
-  <header class="page-heading">
-    <h3>Quan ly shop</h3>
-    <p>Theo doi va kiem soat hoat dong shop tren san.</p>
-  </header>
+<section class="admin-page shops-page">
+  <!-- <header class="shops-heading shops-surface">
+    <h3>Quản lý Shop</h3>
+    <p>Theo dõi và kiểm soát hoạt động của các Shop trên hệ thống.</p>
+  </header> -->
 
-  <div class="admin-kpi-strip" *ngIf="shopStats$ | async as stats">
-    <article class="admin-kpi-card is-info">
-      <h4>Tong shop</h4>
-      <p>{{ stats.total }}</p>
+  <div class="shops-stats" *ngIf="shopStats$ | async as stats">
+    <article class="shops-stat-card shops-stat-card--primary shops-surface">
+      <div>
+        <p>Tổng số Shop</p>
+        <h4>{{ stats.total }}</h4>
+      </div>
+      <span class="shops-stat-icon">
+        <i class="pi pi-briefcase"></i>
+      </span>
     </article>
-    <article class="admin-kpi-card is-success">
-      <h4>Shop dang hoat dong</h4>
-      <p>{{ stats.active }}</p>
+    <article class="shops-stat-card shops-stat-card--success shops-surface">
+      <div>
+        <p>Đang hoạt động</p>
+        <h4>{{ stats.active }}</h4>
+      </div>
+      <span class="shops-stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </span>
     </article>
-    <article class="admin-kpi-card is-warn">
-      <h4>Shop tam khoa</h4>
-      <p>{{ stats.inactive }}</p>
+    <article class="shops-stat-card shops-stat-card--warn shops-surface">
+      <div>
+        <p>Chờ duyệt</p>
+        <h4>{{ stats.pending }}</h4>
+      </div>
+      <span class="shops-stat-icon">
+        <i class="pi pi-clock"></i>
+      </span>
     </article>
   </div>
 
-  <div class="admin-toolbar admin-panel">
-    <p-iconfield iconPosition="left">
-      <p-inputicon class="pi pi-search"></p-inputicon>
-      <input
-        pInputText
-        type="text"
-        placeholder="Tim theo ten shop, slug, chu shop..."
-        [(ngModel)]="keyword"
-        (ngModelChange)="onKeywordChange()"
-      />
-    </p-iconfield>
+  <section class="shops-toolbar shops-surface mt-4">
+    <div class="shops-search-group">
+      <div class="shops-search-inline">
+        <p-iconfield iconPosition="left" class="shops-search-field">
+          <p-inputicon class="pi pi-search"></p-inputicon>
+          <input
+            id="shop-search"
+            pInputText
+            type="text"
+            placeholder="Tìm theo tên shop, slug..."
+            [(ngModel)]="keyword"
+            (keydown.enter)="onKeywordChange()"
+          />
+        </p-iconfield>
+        <p-button
+          icon="pi pi-search"
+          label="Tìm kiếm"
+          [outlined]="true"
+          (click)="onKeywordChange()"
+        ></p-button>
+      </div>
+    </div>
 
-    <div class="admin-toolbar-actions">
+    <div class="shops-toolbar-actions">
       <p-button
         icon="pi pi-refresh"
-        label="Lam moi"
+        label="Làm mới"
         [outlined]="true"
+        [loading]="isLoading"
         (click)="reloadShops()"
       ></p-button>
       <p-button
         icon="pi pi-filter-slash"
-        label="Bo loc"
+        label="Bỏ lọc"
         [outlined]="true"
         (click)="resetFilter()"
       ></p-button>
       <p-button
         icon="pi pi-file-export"
-        label="Xuat CSV"
+        label="Xuất CSV"
         severity="secondary"
         (click)="exportCurrentShops()"
       ></p-button>
     </div>
-  </div>
+  </section>
 
-  <div class="admin-panel admin-table-panel">
+  <section class="shops-table-panel shops-surface mt-4">
+    <div class="shops-table-header">
+      <div>
+        <span class="shops-panel-kicker">Danh sách</span>
+        <h4>Shop trong hệ thống</h4>
+      </div>
+      <span class="shops-table-hint">{{ totalRecords }} bản ghi</span>
+    </div>
+
     <p-table
-      [value]="(filteredShops$ | async) ?? []"
-      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="shops-datatable"
+      [value]="shops"
+      [lazy]="true"
+      (onLazyLoad)="loadShops($event)"
+      [tableStyle]="tableStyle"
       stripedRows
       [paginator]="true"
-      [rows]="8"
+      [rows]="rows"
+      [first]="first"
+      [totalRecords]="totalRecords"
+      [loading]="isLoading"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [currentPageReportTemplate]="reportTemplate"
+      [showCurrentPageReport]="true"
     >
       <ng-template pTemplate="header">
         <tr>
-          <th>Ten shop</th>
-          <th>Slug</th>
-          <th>Chu shop</th>
-          <th>Trang thai</th>
-          <th style="width: 130px">Thao tac</th>
+          <th>Tên Shop</th>
+          <th>Chủ sở hữu</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+          <th class="shops-actions-col">Thao tác</th>
         </tr>
       </ng-template>
+
       <ng-template pTemplate="body" let-shop>
         <tr>
-          <td>{{ shop.name || "-" }}</td>
-          <td>{{ shop.slug || "-" }}</td>
-          <td>{{ shop.ownerId || "-" }}</td>
+          <td>
+            <div class="shops-shop-cell flex align-items-center gap-3">
+              <div class="flex flex-column">
+                <span class="shop-name">{{ shop.name || "Chờ đặt tên" }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="shops-owner-meta flex flex-column">
+              <span class="owner-name">{{
+                shop.ownerName || "Người dùng ẩn danh"
+              }}</span>
+            </div>
+          </td>
           <td>
             <p-tag
-              [severity]="getStatusSeverity(shop.isActive)"
-              [value]="shop.isActive ? 'Dang hoat dong' : 'Tam khoa'"
+              [value]="getStatusLabel(shop.approvalStatus)"
+              [severity]="getStatusSeverity(shop.approvalStatus)"
+              [rounded]="true"
             ></p-tag>
           </td>
           <td>
-            <p-button
-              icon="pi pi-copy"
-              size="small"
-              [text]="true"
-              (click)="copyShopId(shop.id)"
-            ></p-button>
-            <p-button
-              icon="pi pi-pencil"
-              size="small"
-              [text]="true"
-              (click)="notifyFeaturePending('Cap nhat thong tin shop')"
-            ></p-button>
+            <div class="shops-date-cell">
+              <strong>{{ shop.createdAt | date: "dd/MM/yyyy" }}</strong>
+              <span>{{ shop.createdAt | date: "HH:mm" }}</span>
+            </div>
+          </td>
+          <td class="shops-actions-col">
+            <div class="shops-row-actions">
+              <p-button
+                icon="pi pi-eye"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                pTooltip="Xem chi tiết"
+                tooltipPosition="top"
+                (click)="openDetailDialog(shop)"
+              ></p-button>
+
+              <p-button
+                *ngIf="shop.approvalStatus === 1 || shop.approvalStatus === 4"
+                icon="pi pi-check"
+                severity="success"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Duyệt Shop"
+                tooltipPosition="top"
+                (click)="approveShop(shop)"
+              ></p-button>
+
+              <p-button
+                *ngIf="shop.approvalStatus === 1"
+                icon="pi pi-times"
+                severity="danger"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Từ chối"
+                tooltipPosition="top"
+                (click)="rejectShop(shop)"
+              ></p-button>
+
+              <p-button
+                *ngIf="shop.approvalStatus === 2"
+                icon="pi pi-lock"
+                severity="warn"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Khóa/Đình chỉ"
+                tooltipPosition="top"
+                (click)="suspendShop(shop)"
+              ></p-button>
+
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Xóa vĩnh viễn"
+                tooltipPosition="top"
+                (click)="deleteShop(shop)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5">
+            <div class="shops-empty-state">
+              <i class="pi pi-shop"></i>
+              <h5>Không tìm thấy shop</h5>
+              <p>
+                Hãy thử đổi từ khóa hoặc bỏ lọc để xem lại toàn bộ danh sách.
+              </p>
+            </div>
           </td>
         </tr>
       </ng-template>
     </p-table>
-  </div>
+  </section>
+
+  <p-confirmDialog
+    [style]="confirmStyle"
+    [breakpoints]="confirmBreakpoints"
+  ></p-confirmDialog>
+
+  <!-- Shop Detail Dialog -->
+  <p-dialog
+    [(visible)]="detailDialogVisible"
+    [modal]="true"
+    [breakpoints]="dialogBreakpoints"
+    [style]="dialogStyle"
+    [header]="'Thông tin Shop'"
+    styleClass="premium-dialog"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div *ngIf="selectedShop" class="shop-detail-container">
+      <div class="shop-cover-banner">
+        <img
+          *ngIf="selectedShop.coverUrl"
+          [src]="selectedShop.coverUrl"
+          alt="Cover"
+        />
+        <div *ngIf="!selectedShop.coverUrl" class="cover-placeholder"></div>
+        <div class="shop-logo-overlay">
+          <img
+            *ngIf="selectedShop.logoUrl"
+            [src]="selectedShop.logoUrl"
+            alt="Logo"
+          />
+          <div *ngIf="!selectedShop.logoUrl" class="logo-placeholder">
+            {{ selectedShop.name ? selectedShop.name[0] : "" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="shop-info-content mt-6 px-4 pb-4">
+        <div
+          class="detail-header flex justify-content-between align-items-center mb-4"
+        >
+          <div class="detail-title-wrap">
+            <h2 class="m-0">{{ selectedShop.name }}</h2>
+            <p class="m-0">&#64;{{ selectedShop.slug }}</p>
+          </div>
+          <p-tag
+            [value]="getStatusLabel(selectedShop.approvalStatus)"
+            [severity]="getStatusSeverity(selectedShop.approvalStatus)"
+          ></p-tag>
+        </div>
+
+        <div class="shop-description-card mb-4">
+          <p class="m-0">
+            {{
+              selectedShop.description || "Chưa cung cấp mô tả cho shop này."
+            }}
+          </p>
+        </div>
+
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <div class="detail-item flex align-items-center gap-2 mb-3">
+              <i class="pi pi-user"></i>
+              <div>
+                <span class="detail-label block">Chủ sở hữu</span>
+                <span class="detail-value">{{ selectedShop.ownerName }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item flex align-items-center gap-2 mb-3">
+              <i class="pi pi-envelope"></i>
+              <div>
+                <span class="detail-label block">Email liên hệ</span>
+                <span class="detail-value">{{ selectedShop.ownerEmail }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item flex align-items-center gap-2 mb-3">
+              <i class="pi pi-calendar"></i>
+              <div>
+                <span class="detail-label block">Ngày tham gia</span>
+                <span class="detail-value">{{
+                  selectedShop.createdAt | date: "longDate"
+                }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item flex align-items-center gap-2 mb-3">
+              <i class="pi pi-id-card"></i>
+              <div>
+                <span class="detail-label block">ID Hệ thống</span>
+                <span class="detail-id">{{ selectedShop.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="dialog-actions flex justify-content-end gap-2 p-4 border-top-1 surface-border"
+      >
+        <p-button
+          label="Đóng"
+          [outlined]="true"
+          (click)="detailDialogVisible = false"
+        ></p-button>
+
+        <p-button
+          *ngIf="selectedShop.approvalStatus === 1"
+          label="Duyệt kích hoạt"
+          severity="success"
+          (click)="approveShop(selectedShop); detailDialogVisible = false"
+        >
+        </p-button>
+      </div>
+    </div>
+  </p-dialog>
 </section>

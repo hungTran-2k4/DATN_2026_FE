@@ -173,28 +173,27 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  align-items: flex-end;
+  align-items: center;
   padding: 1.1rem 1.2rem;
 }
 
 .users-search-group {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.35rem;
   flex: 1;
   min-width: 280px;
+}
 
-  label {
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--admin-text-muted);
-  }
+.users-search-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
 }
 
 .users-search-field {
-  width: min(100%, 32rem);
+  flex: 1;
+  max-width: 32rem;
 
   ::ng-deep .p-inputtext {
     width: 100%;
@@ -210,6 +209,11 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: flex-end;
+  align-items: center;
+}
+
+:host ::ng-deep .users-toolbar .p-button {
+  min-height: 3.15rem;
 }
 
 .users-table-panel {
@@ -256,6 +260,63 @@
   color: var(--admin-text-muted);
   background: rgba(243, 246, 252, 0.9);
   border: 1px solid rgba(221, 229, 242, 0.9);
+}
+
+:host ::ng-deep .users-datatable.p-datatable .p-paginator {
+  border: 0;
+  padding-top: 0.95rem;
+  background: #fff;
+  gap: 0.35rem;
+
+  .p-paginator-pages .p-paginator-page,
+  .p-paginator-first,
+  .p-paginator-prev,
+  .p-paginator-next,
+  .p-paginator-last {
+    min-width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+  }
+
+  .p-paginator-rpp-options,
+  .p-dropdown,
+  .p-select {
+    border-radius: 0.68rem;
+  }
+
+  .p-paginator-first {
+    order: 1;
+  }
+
+  .p-paginator-prev {
+    order: 2;
+  }
+
+  .p-paginator-pages {
+    order: 3;
+  }
+
+  .p-paginator-next {
+    order: 4;
+  }
+
+  .p-paginator-last {
+    order: 5;
+  }
+
+  .p-paginator-rpp-options {
+    order: 6;
+    margin-left: auto;
+  }
+
+  .p-paginator-current {
+    order: 7;
+    margin-left: 0.6rem;
+    color: var(--admin-text-muted);
+    font-size: 0.84rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
 }
 
 .users-user-cell {
@@ -627,7 +688,34 @@
     min-width: 0;
   }
 
+  .users-search-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  :host ::ng-deep .users-search-inline .p-button {
+    width: 100%;
+  }
+
   .users-truncate {
     max-width: 14rem;
+  }
+
+  :host ::ng-deep .users-datatable.p-datatable .p-paginator {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+
+    .p-paginator-rpp-options {
+      margin-left: 0;
+      order: 6;
+    }
+
+    .p-paginator-current {
+      order: 7;
+      margin-left: 0;
+      width: 100%;
+      text-align: left;
+      padding-top: 0.35rem;
+    }
   }
 }

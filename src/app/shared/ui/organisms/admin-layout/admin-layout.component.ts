@@ -13,6 +13,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import {
   ApiBaseService,
   UpdateProfileRequest,
@@ -23,6 +24,7 @@ interface AdminNavItem {
   label: string;
   icon: string;
   route: string;
+  badge?: number;
 }
 
 interface AdminProfileForm {
@@ -44,19 +46,28 @@ interface AdminProfileForm {
     InputTextModule,
     MenuModule,
     ToastModule,
+    TooltipModule,
   ],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.scss',
 })
 export class AdminLayoutComponent implements OnInit {
-  readonly lastSyncLabel = new Date().toLocaleString('vi-VN');
+  sidebarCollapsed = false;
+
+  readonly dialogStyle = { width: 'min(520px, 96vw)' };
 
   readonly navItems: AdminNavItem[] = [
     { label: 'Dashboard', icon: 'pi pi-chart-line', route: '/admin/dashboard' },
-    { label: 'Nguoi dung', icon: 'pi pi-users', route: '/admin/users' },
+    { label: 'Đơn hàng', icon: 'pi pi-list-check', route: '/admin/orders' },
+    { label: 'Sản phẩm', icon: 'pi pi-box', route: '/admin/products' },
+    { label: 'Danh mục', icon: 'pi pi-tags', route: '/admin/catalog' },
+    { label: 'Người dùng', icon: 'pi pi-users', route: '/admin/users' },
     { label: 'Shop', icon: 'pi pi-shop', route: '/admin/shops' },
-    { label: 'San pham', icon: 'pi pi-box', route: '/admin/products' },
-    { label: 'Danh muc', icon: 'pi pi-tags', route: '/admin/catalog' },
+    { label: 'Báo cáo', icon: 'pi pi-chart-bar', route: '/admin/reports' },
+  ];
+
+  readonly settingsItems: AdminNavItem[] = [
+    { label: 'Cài đặt chung', icon: 'pi pi-cog', route: '/admin/settings' },
   ];
 
   adminName = 'Admin';
@@ -74,7 +85,7 @@ export class AdminLayoutComponent implements OnInit {
 
   readonly userMenuItems: MenuItem[] = [
     {
-      label: 'Quan ly thong tin',
+      label: 'Quản lý thông tin',
       icon: 'pi pi-user-edit',
       command: () => this.openProfileDialog(),
     },
@@ -82,7 +93,7 @@ export class AdminLayoutComponent implements OnInit {
       separator: true,
     },
     {
-      label: 'Dang xuat',
+      label: 'Đăng xuất',
       icon: 'pi pi-sign-out',
       command: () => this.logout(),
     },
@@ -111,6 +122,10 @@ export class AdminLayoutComponent implements OnInit {
       .slice(0, 2);
   }
 
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
   openProfileDialog(): void {
     this.profileForm.fullName = this.adminName;
     this.profileForm.avatarUrl = this.adminAvatarUrl;
@@ -126,8 +141,8 @@ export class AdminLayoutComponent implements OnInit {
     if (!fullName) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Thieu du lieu',
-        detail: 'Vui long nhap ho ten.',
+        summary: 'Thiếu dữ liệu',
+        detail: 'Vui lòng nhập họ tên.',
       });
       return;
     }
@@ -157,16 +172,16 @@ export class AdminLayoutComponent implements OnInit {
         this.profileDialogVisible = false;
         this.messageService.add({
           severity: 'success',
-          summary: 'Thanh cong',
-          detail: 'Da cap nhat thong tin admin.',
+          summary: 'Thành công',
+          detail: 'Đã cập nhật thông tin admin.',
         });
       },
       error: () => {
         this.savingProfile = false;
         this.messageService.add({
           severity: 'error',
-          summary: 'Loi',
-          detail: 'Khong cap nhat duoc thong tin. Thu lai sau.',
+          summary: 'Lỗi',
+          detail: 'Không cập nhật được thông tin. Thử lại sau.',
         });
       },
     });
@@ -189,8 +204,8 @@ export class AdminLayoutComponent implements OnInit {
     this.authSession.clearSession();
     this.messageService.add({
       severity: 'info',
-      summary: 'Da dang xuat',
-      detail: 'Phien lam viec da ket thuc.',
+      summary: 'Đã đăng xuất',
+      detail: 'Phiên làm việc đã kết thúc.',
     });
     void this.router.navigate(['/auth/login']);
   }

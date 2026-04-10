@@ -6830,6 +6830,98 @@ export class ApiBaseService {
   }
 
   /**
+   * @param body (optional)
+   * @return OK
+   */
+  paging2(
+    body: PagedRequest | undefined,
+  ): Observable<ShopDtoIEnumerablePagedResponse> {
+    let url_ = this.baseUrl + '/api/Shops/paging';
+    url_ = url_.replace(/[?&]$/, '');
+
+    const content_ = JSON.stringify(body);
+
+    let options_: any = {
+      body: content_,
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('post', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processPaging2(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processPaging2(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<ShopDtoIEnumerablePagedResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<ShopDtoIEnumerablePagedResponse>;
+        }),
+      );
+  }
+
+  protected processPaging2(
+    response: HttpResponseBase,
+  ): Observable<ShopDtoIEnumerablePagedResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = ShopDtoIEnumerablePagedResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
    * @return OK
    */
   my3(): Observable<ShopDtoIEnumerableApiResponse> {
@@ -7555,6 +7647,102 @@ export class ApiBaseService {
   }
 
   /**
+   * @param body (optional)
+   * @return OK
+   */
+  statusPUT(
+    id: string,
+    body: ShopApprovalStatus | undefined,
+  ): Observable<BooleanApiResponse> {
+    let url_ = this.baseUrl + '/api/Shops/{id}/status';
+    if (id === undefined || id === null)
+      throw new globalThis.Error("The parameter 'id' must be defined.");
+    url_ = url_.replace('{id}', encodeURIComponent('' + id));
+    url_ = url_.replace(/[?&]$/, '');
+
+    const content_ = JSON.stringify(body);
+
+    let options_: any = {
+      body: content_,
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('put', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processStatusPUT(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processStatusPUT(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<BooleanApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<BooleanApiResponse>;
+        }),
+      );
+  }
+
+  protected processStatusPUT(
+    response: HttpResponseBase,
+  ): Observable<BooleanApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = BooleanApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
    * @return OK
    */
   variant(variantId: string): Observable<StockDtoApiResponse> {
@@ -8122,7 +8310,7 @@ export class ApiBaseService {
    * @param body (optional)
    * @return OK
    */
-  paging2(
+  paging3(
     body: GetUsersQuery | undefined,
   ): Observable<UserDtoIEnumerablePagedResponse> {
     let url_ = this.baseUrl + '/api/Users/paging';
@@ -8145,14 +8333,14 @@ export class ApiBaseService {
       .request('post', url_, options_)
       .pipe(
         _observableMergeMap((response_: any) => {
-          return this.processPaging2(response_);
+          return this.processPaging3(response_);
         }),
       )
       .pipe(
         _observableCatch((response_: any) => {
           if (response_ instanceof HttpResponseBase) {
             try {
-              return this.processPaging2(response_ as any);
+              return this.processPaging3(response_ as any);
             } catch (e) {
               return _observableThrow(
                 e,
@@ -8166,7 +8354,7 @@ export class ApiBaseService {
       );
   }
 
-  protected processPaging2(
+  protected processPaging3(
     response: HttpResponseBase,
   ): Observable<UserDtoIEnumerablePagedResponse> {
     const status = response.status;
@@ -14083,6 +14271,56 @@ export interface IOrderSummaryDtoIEnumerablePagedResponse {
   totalRecords?: number;
 }
 
+export class PagedRequest implements IPagedRequest {
+  search?: string | undefined;
+  filter?: FilterDescriptor;
+  page?: number;
+  pageSize?: number;
+
+  constructor(data?: IPagedRequest) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.search = _data['search'];
+      this.filter = _data['filter']
+        ? FilterDescriptor.fromJS(_data['filter'])
+        : (undefined as any);
+      this.page = _data['page'];
+      this.pageSize = _data['pageSize'];
+    }
+  }
+
+  static fromJS(data: any): PagedRequest {
+    data = typeof data === 'object' ? data : {};
+    let result = new PagedRequest();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['search'] = this.search;
+    data['filter'] = this.filter ? this.filter.toJSON() : (undefined as any);
+    data['page'] = this.page;
+    data['pageSize'] = this.pageSize;
+    return data;
+  }
+}
+
+export interface IPagedRequest {
+  search?: string | undefined;
+  filter?: FilterDescriptor;
+  page?: number;
+  pageSize?: number;
+}
+
 export class ProblemDetails implements IProblemDetails {
   type?: string | undefined;
   title?: string | undefined;
@@ -15367,6 +15605,13 @@ export interface IRoleDto {
   name?: string | undefined;
 }
 
+export enum ShopApprovalStatus {
+  _1 = 1,
+  _2 = 2,
+  _3 = 3,
+  _4 = 4,
+}
+
 export class ShopDto implements IShopDto {
   id?: string;
   name?: string | undefined;
@@ -15375,6 +15620,8 @@ export class ShopDto implements IShopDto {
   logoUrl?: string | undefined;
   coverUrl?: string | undefined;
   ownerId?: string | undefined;
+  ownerName?: string | undefined;
+  ownerEmail?: string | undefined;
   provinceId?: number | undefined;
   districtId?: number | undefined;
   wardId?: number | undefined;
@@ -15382,6 +15629,7 @@ export class ShopDto implements IShopDto {
   rating?: number | undefined;
   isActive?: boolean | undefined;
   createdAt?: Date | undefined;
+  approvalStatus?: ShopApprovalStatus;
 
   constructor(data?: IShopDto) {
     if (data) {
@@ -15401,6 +15649,8 @@ export class ShopDto implements IShopDto {
       this.logoUrl = _data['logoUrl'];
       this.coverUrl = _data['coverUrl'];
       this.ownerId = _data['ownerId'];
+      this.ownerName = _data['ownerName'];
+      this.ownerEmail = _data['ownerEmail'];
       this.provinceId = _data['provinceId'];
       this.districtId = _data['districtId'];
       this.wardId = _data['wardId'];
@@ -15410,6 +15660,7 @@ export class ShopDto implements IShopDto {
       this.createdAt = _data['createdAt']
         ? new Date(_data['createdAt'].toString())
         : (undefined as any);
+      this.approvalStatus = _data['approvalStatus'];
     }
   }
 
@@ -15429,6 +15680,8 @@ export class ShopDto implements IShopDto {
     data['logoUrl'] = this.logoUrl;
     data['coverUrl'] = this.coverUrl;
     data['ownerId'] = this.ownerId;
+    data['ownerName'] = this.ownerName;
+    data['ownerEmail'] = this.ownerEmail;
     data['provinceId'] = this.provinceId;
     data['districtId'] = this.districtId;
     data['wardId'] = this.wardId;
@@ -15438,6 +15691,7 @@ export class ShopDto implements IShopDto {
     data['createdAt'] = this.createdAt
       ? this.createdAt.toISOString()
       : (undefined as any);
+    data['approvalStatus'] = this.approvalStatus;
     return data;
   }
 }
@@ -15450,6 +15704,8 @@ export interface IShopDto {
   logoUrl?: string | undefined;
   coverUrl?: string | undefined;
   ownerId?: string | undefined;
+  ownerName?: string | undefined;
+  ownerEmail?: string | undefined;
   provinceId?: number | undefined;
   districtId?: number | undefined;
   wardId?: number | undefined;
@@ -15457,6 +15713,7 @@ export interface IShopDto {
   rating?: number | undefined;
   isActive?: boolean | undefined;
   createdAt?: Date | undefined;
+  approvalStatus?: ShopApprovalStatus;
 }
 
 export class ShopDtoApiResponse implements IShopDtoApiResponse {
@@ -15610,6 +15867,101 @@ export interface IShopDtoIEnumerableApiResponse {
   errors?: { [key: string]: string[] } | undefined;
   traceId?: string | undefined;
   data?: ShopDto[] | undefined;
+}
+
+export class ShopDtoIEnumerablePagedResponse implements IShopDtoIEnumerablePagedResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: ShopDto[] | undefined;
+  pageNumber?: number;
+  pageSize?: number;
+  totalPages?: number;
+  totalRecords?: number;
+
+  constructor(data?: IShopDtoIEnumerablePagedResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      if (Array.isArray(_data['data'])) {
+        this.data = [] as any;
+        for (let item of _data['data']) this.data!.push(ShopDto.fromJS(item));
+      }
+      this.pageNumber = _data['pageNumber'];
+      this.pageSize = _data['pageSize'];
+      this.totalPages = _data['totalPages'];
+      this.totalRecords = _data['totalRecords'];
+    }
+  }
+
+  static fromJS(data: any): ShopDtoIEnumerablePagedResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new ShopDtoIEnumerablePagedResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    if (Array.isArray(this.data)) {
+      data['data'] = [];
+      for (let item of this.data)
+        data['data'].push(item ? item.toJSON() : (undefined as any));
+    }
+    data['pageNumber'] = this.pageNumber;
+    data['pageSize'] = this.pageSize;
+    data['totalPages'] = this.totalPages;
+    data['totalRecords'] = this.totalRecords;
+    return data;
+  }
+}
+
+export interface IShopDtoIEnumerablePagedResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: ShopDto[] | undefined;
+  pageNumber?: number;
+  pageSize?: number;
+  totalPages?: number;
+  totalRecords?: number;
 }
 
 export class StockDto implements IStockDto {
