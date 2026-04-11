@@ -1,11 +1,27 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'auth/login',
+    loadComponent: () => import('./shared/ui/organisms/user-layout/user-layout.component').then(m => m.UserLayoutComponent),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'home'
+      },
+      {
+        path: 'home',
+        loadComponent: () => import('./pages/user/pages/home/home.component').then(m => m.HomeComponent)
+      },
+      {
+        path: 'profile',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/user/pages/profile/profile.component').then(m => m.ProfileComponent)
+      }
+    ]
   },
   {
     path: 'auth',
@@ -93,10 +109,17 @@ export const routes: Routes = [
             (m) => m.AdminCatalogPageComponent,
           ),
       },
+      {
+        path: 'brands',
+        loadComponent: () =>
+          import('./pages/admin/pages/brands/brands.component').then(
+            (m) => m.AdminBrandsPageComponent,
+          ),
+      },
     ],
   },
   {
     path: '**',
-    redirectTo: 'auth/login',
+    redirectTo: 'home',
   },
 ];

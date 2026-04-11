@@ -1,0 +1,161 @@
+<p-toast position="top-right"></p-toast>
+
+<div class="bg-gray-50 min-h-screen py-10 font-inter">
+  <div class="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row gap-8">
+    
+    <!-- Sidebar Menu -->
+    <aside class="w-full md:w-1/4 shrink-0">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
+        
+        <!-- User summary -->
+        <div class="flex items-center gap-4 pb-6 border-b border-gray-100">
+          <div class="w-16 h-16 rounded-full bg-user-primary/10 flex items-center justify-center text-user-primary font-bold text-2xl shadow-sm overflow-hidden">
+            <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Avatar" class="w-full h-full object-cover">
+            <span *ngIf="!avatarUrl">{{ avatarInitials }}</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-gray-900 text-lg line-clamp-1">{{ userName }}</h3>
+            <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-md mt-1 inline-block">
+              {{ authSession.isAdmin() ? 'Quản trị viên' : 'Thành viên' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex flex-col gap-2">
+          <button 
+            (click)="activeMenu = 'profile'"
+            [class.bg-user-primary]="activeMenu === 'profile'"
+            [class.text-white]="activeMenu === 'profile'"
+            [class.hover:bg-gray-50]="activeMenu !== 'profile'"
+            [class.text-gray-700]="activeMenu !== 'profile'"
+            class="px-4 py-3 rounded-xl text-left font-semibold transition-colors flex items-center gap-3">
+            <i class="pi pi-user w-5"></i>
+            Hồ sơ cá nhân
+          </button>
+          
+          <button 
+            (click)="activeMenu = 'shop'"
+            [class.bg-user-primary]="activeMenu === 'shop'"
+            [class.text-white]="activeMenu === 'shop'"
+            [class.hover:bg-gray-50]="activeMenu !== 'shop'"
+            [class.text-gray-700]="activeMenu !== 'shop'"
+            class="px-4 py-3 rounded-xl text-left font-semibold transition-colors flex items-center gap-3">
+            <i class="pi pi-shop w-5"></i>
+            Đăng ký mở Shop
+          </button>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="w-full md:w-3/4">
+      
+      <!-- Profile Form -->
+      <div *ngIf="activeMenu === 'profile'" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 animate-fade-in">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Hồ sơ cá nhân</h2>
+        <p class="text-gray-500 text-sm mb-8">Quản lý thông tin bảo mật cho tài khoản này</p>
+
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="max-w-2xl">
+          <div class="flex flex-col gap-6">
+            
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-gray-700">Email thanh toán</label>
+              <input pInputText type="text" [value]="userEmail" disabled class="bg-gray-50 text-gray-500 opacity-80" />
+              <small class="text-gray-400">Email không thể thay đổi</small>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-gray-700">Tên hiển thị <span class="text-red-500">*</span></label>
+              <input pInputText type="text" formControlName="fullName" placeholder="Nhập tên của bạn" />
+              <small class="text-red-500" *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+                Tên hiển thị là bắt buộc
+              </small>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-gray-700">Đường dẫn ảnh đại diện (URL)</label>
+              <input pInputText type="text" formControlName="avatarUrl" placeholder="https://x.com/avatar.png" />
+            </div>
+
+            <div class="border-t border-gray-100 pt-6 mt-2">
+              <p-button 
+                type="submit" 
+                label="Lưu thông tin" 
+                icon="pi pi-save"
+                [loading]="isSavingProfile"
+                styleClass="bg-user-primary border-user-primary hover:bg-user-primary-hover px-8 py-3 rounded-xl font-bold">
+              </p-button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <!-- Shop Registration Form -->
+      <div *ngIf="activeMenu === 'shop'" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Bắt đầu bán hàng</h2>
+            <p class="text-gray-500 text-sm">Gia nhập hệ sinh thái kinh doanh cùng hàng triệu nhà bán hàng khác</p>
+          </div>
+          <div class="hidden sm:flex text-6xl text-user-primary/20">
+            <i class="pi pi-store"></i>
+          </div>
+        </div>
+
+        <form [formGroup]="shopForm" (ngSubmit)="registerShop()" class="max-w-2xl">
+          <div class="flex flex-col gap-6">
+            
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-gray-700">Tên Cửa Hàng (Shop Name) <span class="text-red-500">*</span></label>
+              <input pInputText type="text" formControlName="name" placeholder="Ví dụ: Cửa hàng điện máy xanh..." />
+              <small class="text-red-500" *ngIf="shopForm.get('name')?.invalid && shopForm.get('name')?.touched">
+                Tên cửa hàng không được để trống
+              </small>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-gray-700">Đường dẫn định danh (Slug) <span class="text-red-500">*</span></label>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon bg-gray-50">datn.com/shop/</span>
+                <input type="text" pInputText formControlName="slug" placeholder="cua-hang-dien-may" />
+              </div>
+              <small class="text-gray-400">Khách hàng sẽ sử dụng đường dẫn này để truy cập trực tiếp vào Shop của bạn.</small>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-gray-700">Mô tả cửa hàng</label>
+              <textarea 
+                pInputText 
+                rows="4" 
+                formControlName="description" 
+                placeholder="Giới thiệu nhanh về loại hình sản phẩm và dịch vụ của shop..." 
+                class="w-full border-gray-300 rounded-lg focus:ring-user-primary focus:border-user-primary p-3">
+              </textarea>
+            </div>
+
+            <div class="bg-blue-50 text-blue-800 p-4 rounded-xl flex gap-3 mt-2 border border-blue-100">
+              <i class="pi pi-info-circle text-xl shrink-0 mt-0.5"></i>
+              <div class="text-sm leading-relaxed">
+                Sau khi cửa hàng được tạo, tài khoản của bạn sẽ tự động được cấp quyền <strong>Seller</strong>. Các quy định về phí dịch vụ và địa chỉ lấy hàng sẽ được cập nhật sau trong trang Quản trị Cửa Hàng.
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-6 mt-2">
+              <p-button 
+                type="submit" 
+                label="Đăng ký Cửa Hàng ngay" 
+                icon="pi pi-check-circle"
+                [loading]="isSavingShop"
+                styleClass="bg-gray-900 border-gray-900 text-white hover:bg-gray-800 px-8 py-3 rounded-xl font-bold w-full sm:w-auto">
+              </p-button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+</div>

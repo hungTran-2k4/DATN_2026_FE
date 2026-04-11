@@ -4,6 +4,8 @@ import { catchError, map } from 'rxjs/operators';
 import {
   BrandDto,
   CategoryDto,
+  CreateCategoryCommand,
+  UpdateCategoryCommand,
 } from '../../../shared/api/generated/api-service-base.service';
 import { CatalogAdminRepository } from '../../../entities/admin/model/catalog-admin.repository';
 
@@ -27,6 +29,27 @@ export class AdminCatalogFacade {
     return this.catalogRepository.getBrands(undefined, 1, 20).pipe(
       map((result) => result.items),
       catchError(() => of([])),
+    );
+  }
+
+  createCategory(command: CreateCategoryCommand): Observable<boolean> {
+    return this.catalogRepository.createCategory(command).pipe(
+      map(res => !!res),
+      catchError(() => of(false))
+    );
+  }
+
+  updateCategory(id: string, command: UpdateCategoryCommand): Observable<boolean> {
+    return this.catalogRepository.updateCategory(id, command).pipe(
+      map(res => !!res),
+      catchError(() => of(false))
+    );
+  }
+
+  deactivateCategory(id: string): Observable<boolean> {
+    return this.catalogRepository.deleteCategory(id).pipe(
+      map(res => !!res),
+      catchError(() => of(false))
     );
   }
 }

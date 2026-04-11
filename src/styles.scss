@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import 'primeicons/primeicons.css';
 
 @tailwind base;
@@ -7,12 +8,21 @@
 
 :root {
   --app-font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --user-font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
   --admin-bg-soft: #f3f6fc;
   --admin-border: #dde5f2;
   --admin-text-primary: #030229;
   --admin-text-muted: #6a6f85;
   --admin-surface: #ffffff;
   --admin-surface-soft: #f9fbff;
+
+  --user-primary: #10B981;
+  --user-primary-hover: #059669;
+  --user-bg-soft: #F9FAFB;
+  --user-text-primary: #111827;
+  --user-text-muted: #6B7280;
+  --user-border: #E5E7EB;
 
   --admin-primary: #3f7dff;
   --admin-primary-strong: #2f66da;

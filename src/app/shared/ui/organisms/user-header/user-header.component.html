@@ -1,0 +1,193 @@
+<header class="font-inter border-b border-gray-200">
+  <!-- Topbar -->
+  <div class="bg-gray-100 text-gray-500 text-xs sm:text-sm py-2">
+    <div
+      class="container mx-auto px-4 max-w-7xl flex justify-between items-center"
+    >
+      <div class="flex gap-4">
+        <span><i class="pi pi-phone text-xs mr-1"></i> +84 123 456 789</span>
+        <span class="hidden sm:inline"
+          ><i class="pi pi-envelope text-xs mr-1"></i>
+          support&#64;datn2026.com</span
+        >
+      </div>
+      <div class="flex gap-4 font-medium">
+        <a href="#" class="hover:text-user-primary transition-colors"
+          >Store Location</a
+        >
+        <a href="#" class="hover:text-user-primary transition-colors"
+          >Order Tracking</a
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <div
+    class="container mx-auto px-4 max-w-7xl py-5 flex items-center justify-between gap-8"
+  >
+    <!-- Logo -->
+    <a
+      routerLink="/"
+      class="text-3xl font-black text-gray-900 tracking-tighter shrink-0"
+    >
+      DATN<span class="text-user-primary">.2026</span>
+    </a>
+
+    <!-- Search Bar -->
+    <div class="flex-1 max-w-2xl relative hidden lg:block">
+      <input
+        type="text"
+        placeholder="Tìm kiếm sản phẩm, danh mục..."
+        class="w-full bg-gray-50 border border-gray-300 rounded-full py-3 px-6 pr-14 focus:outline-none focus:border-user-primary focus:ring-1 focus:ring-user-primary transition-all shadow-sm"
+      />
+      <button
+        class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-user-primary rounded-full hover:bg-opacity-90 flex items-center justify-center text-white transition-colors"
+      >
+        <i class="pi pi-search text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-5 sm:gap-7 shrink-0">
+      <a
+        class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
+      >
+        <div
+          class="relative p-2 bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+        >
+          <i class="pi pi-heart text-xl"></i>
+          <span
+            class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4 border border-white"
+            >0</span
+          >
+        </div>
+        <span class="text-xs font-semibold mt-1 hidden sm:block"
+          >Yêu thích</span
+        >
+      </a>
+
+      <a
+        class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
+      >
+        <div
+          class="relative p-2 bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+        >
+          <i class="pi pi-shopping-bag text-xl"></i>
+          <span
+            class="absolute top-0 right-0 w-4 h-4 bg-user-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4 border border-white"
+            >3</span
+          >
+        </div>
+        <span class="text-xs font-semibold mt-1 hidden sm:block">Giỏ hàng</span>
+      </a>
+      <!-- Chưa đăng nhập -->
+      <a
+        *ngIf="!(authSession.currentUser$ | async)"
+        routerLink="/auth/login"
+        class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
+      >
+        <div
+          class="relative p-2 bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+        >
+          <i class="pi pi-user text-xl"></i>
+        </div>
+        <span class="text-xs font-semibold mt-1 hidden sm:block"
+          >Đăng nhập</span
+        >
+      </a>
+
+      <!-- Đã đăng nhập -->
+      <div
+        *ngIf="authSession.currentUser$ | async as user"
+        (click)="userMenu.toggle($event)"
+        class="flex items-center gap-2.5 pl-4 sm:pl-6 ml-1 sm:ml-3 border-l border-gray-200 cursor-pointer group"
+      >
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-user-primary/10 flex items-center justify-center text-user-primary font-bold text-base sm:text-lg group-hover:bg-user-primary group-hover:text-white transition-all shadow-sm">
+          {{ (user.userName || user.userEmail || 'U')[0].toUpperCase() }}
+        </div>
+        <div class="hidden md:flex flex-col justify-center">
+          <span class="text-sm font-bold text-gray-800 group-hover:text-user-primary transition-colors truncate max-w-[130px] leading-tight">
+            {{ user.userName || 'Người dùng' }}
+          </span>
+          <span class="text-[11px] text-gray-500 font-medium mt-0.5" *ngIf="authSession.isAdmin()">Quản trị viên</span>
+          <span class="text-[11px] text-gray-500 font-medium mt-0.5" *ngIf="!authSession.isAdmin()">Tài khoản của tôi</span>
+        </div>
+        <i class="pi pi-angle-down text-xs text-gray-400 group-hover:text-user-primary transition-transform group-hover:translate-y-0.5 hidden md:block ml-1"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Layer -->
+  <nav class="border-t border-gray-100 hidden md:block">
+    <div class="container mx-auto px-4 max-w-7xl flex items-center">
+      <!-- Mega menu button -->
+      <button
+        class="bg-user-primary text-white px-6 py-4 font-bold flex items-center gap-3 hover:bg-user-primary-hover transition-colors shrink-0"
+      >
+        <i class="pi pi-align-left text-lg"></i>
+        DANH MỤC SẢN PHẨM
+        <i class="pi pi-angle-down ml-4"></i>
+      </button>
+
+      <!-- Nav links -->
+      <ul
+        class="flex items-center gap-8 ml-8 font-semibold text-gray-700 w-full"
+      >
+        <li>
+          <a
+            routerLink="/"
+            class="hover:text-user-primary text-user-primary transition-colors py-4 inline-block"
+            >Trang chủ</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="hover:text-user-primary transition-colors py-4 inline-block flex items-center gap-1 group"
+            >Sản phẩm
+            <i
+              class="pi pi-angle-down text-xs group-hover:rotate-180 transition-transform"
+            ></i
+          ></a>
+        </li>
+        <li>
+          <a
+            href="#"
+            class="hover:text-user-primary transition-colors py-4 inline-block flex items-center gap-1"
+            >Khuyến mãi
+            <span
+              class="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-bold animate-pulse ml-0.5"
+              >Hot</span
+            ></a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="hover:text-user-primary transition-colors py-4 inline-block"
+            >Bài viết</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="hover:text-user-primary transition-colors py-4 inline-block"
+            >Liên hệ</a
+          >
+        </li>
+      </ul>
+
+      <div class="shrink-0 text-gray-500 font-medium flex items-center gap-2">
+        <i class="pi pi-bolt text-yellow-500"></i> Spend $50 get Free Shipping
+      </div>
+    </div>
+  </nav>
+</header>
+
+<p-menu
+  #userMenu
+  [model]="userMenuItems"
+  [popup]="true"
+  appendTo="body"
+></p-menu>

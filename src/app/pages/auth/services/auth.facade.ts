@@ -84,9 +84,11 @@ export class AuthFacade {
   }
 
   navigateAfterLogin(): void {
-    // Hiện tại app chỉ có layout admin, nên mặc định đều vào /admin/dashboard
-    // Khi có thêm layout khác (seller, customer), sẽ mở rộng logic ở đây
-    this.router.navigateByUrl('/admin/dashboard');
+    if (this.sessionService.isAdmin()) {
+      this.router.navigateByUrl('/admin/dashboard');
+    } else {
+      this.router.navigateByUrl('/home');
+    }
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {

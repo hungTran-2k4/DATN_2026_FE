@@ -26,484 +26,494 @@ $radius: 10px;
 $transition: .25s cubic-bezier(.4, 0, .2, 1);
 
 :host {
-  display: block;
-  width: 100%;
-  min-height: 100vh;
+    display: block;
+    width: 100%;
+    min-height: 100vh;
 }
 
 /* ── Shell Grid ── */
 .admin-shell {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: $sidebar-w 1fr;
-  transition: grid-template-columns $transition;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: $sidebar-w 1fr;
+    transition: grid-template-columns $transition;
 
-  &.sidebar-collapsed {
-    grid-template-columns: $sidebar-w-collapsed 1fr;
-  }
+    &.sidebar-collapsed {
+        grid-template-columns: $sidebar-w-collapsed 1fr;
+    }
 }
 
 /* ══════════════════════════════════════
    SIDEBAR
    ══════════════════════════════════════ */
 .sidebar {
-  background: $sidebar-bg;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: width $transition;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 100;
+    background: $sidebar-bg;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width $transition;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
 }
 
 .sidebar-header {
-  padding: 20px 18px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, .08);
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
 }
 
 .brand-icon {
-  font-size: 1.5rem;
-  color: #FBBF24;
+    font-size: 1.5rem;
+    color: #FBBF24;
 }
 
 .brand-text {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -.02em;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.02em;
 }
 
 .brand--mini {
-  justify-content: center;
+    justify-content: center;
 }
 
 /* ── Navigation ── */
 .nav-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px 10px;
-  flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 10px;
+    flex: 1;
 }
 
 .nav-menu--bottom {
-  flex: 0;
-  border-top: 1px solid rgba(255, 255, 255, .08);
-  padding-top: 8px;
+    flex: 0;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    padding-top: 8px;
 }
 
 .nav-section-label {
-  padding: 0 22px;
-  margin-top: 8px;
-  font-size: .68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: rgba(255, 255, 255, .35);
+    padding: 0 22px;
+    margin-top: 8px;
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: rgba(255, 255, 255, .35);
 }
 
 .nav-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  color: $sidebar-text;
-  text-decoration: none;
-  font-size: .875rem;
-  font-weight: 500;
-  transition: all .18s ease;
-  white-space: nowrap;
-  position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: $sidebar-text;
+    text-decoration: none;
+    font-size: .875rem;
+    font-weight: 500;
+    transition: all .18s ease;
+    white-space: nowrap;
+    position: relative;
 
-  i {
-    font-size: 1.1rem;
-    width: 20px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  &:hover {
-    color: $sidebar-text-active;
-    background: $sidebar-hover-bg;
-  }
-
-  &.is-active {
-    color: $sidebar-text-active;
-    background: $sidebar-active-bg;
-    font-weight: 600;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 6px;
-      bottom: 6px;
-      width: 3px;
-      border-radius: 0 3px 3px 0;
-      background: $sidebar-accent;
+    i {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
     }
-  }
+
+    &:hover {
+        color: $sidebar-text-active;
+        background: $sidebar-hover-bg;
+    }
+
+    &.is-active {
+        color: $sidebar-text-active;
+        background: $sidebar-active-bg;
+        font-weight: 600;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            bottom: 6px;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: $sidebar-accent;
+        }
+    }
 }
 
 .nav-badge {
-  margin-left: auto;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 10px;
-  background: #EF4444;
-  color: #fff;
-  font-size: .7rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: #EF4444;
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .sidebar-collapsed {
-  .nav-link {
-    justify-content: center;
-    padding: 10px;
-  }
+    .nav-link {
+        justify-content: center;
+        padding: 10px;
+    }
 }
 
 /* ── Sidebar User ── */
 .sidebar-user {
-  padding: 14px 14px 18px;
-  border-top: 1px solid rgba(255, 255, 255, .08);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    padding: 14px 14px 18px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .user-info {
-  flex: 1;
-  min-width: 0;
+    flex: 1;
+    min-width: 0;
 
-  strong {
-    display: block;
-    color: #fff;
-    font-size: .85rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    strong {
+        display: block;
+        color: #fff;
+        font-size: .85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-  small {
-    color: $sidebar-text;
-    font-size: .72rem;
-  }
+    small {
+        color: $sidebar-text;
+        font-size: .72rem;
+    }
 }
 
 .user-menu-btn {
-  border: 0;
-  background: transparent;
-  color: $sidebar-text;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: all .15s;
+    border: 0;
+    background: transparent;
+    color: $sidebar-text;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all .15s;
 
-  &:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, .1);
-  }
+    &:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, .1);
+    }
 }
 
 /* ══════════════════════════════════════
    MAIN AREA
    ══════════════════════════════════════ */
 .main-area {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background: $page-bg;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: $page-bg;
 }
 
 /* ── Topbar ── */
 .topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: $topbar-h;
-  padding: 0 24px;
-  background: $topbar-bg;
-  box-shadow: $topbar-shadow;
-  position: sticky;
-  top: 0;
-  z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: $topbar-h;
+    padding: 0 24px;
+    background: $topbar-bg;
+    box-shadow: $topbar-shadow;
+    position: sticky;
+    top: 0;
+    z-index: 90;
 }
 
 .topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .sidebar-toggle {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid $border-color;
-  background: #fff;
-  color: $text-secondary;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .15s;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid $border-color;
+    background: #fff;
+    color: $text-secondary;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
 
-  &:hover {
-    color: $text-primary;
-    border-color: $sidebar-accent;
-    background: rgba(59, 130, 246, .05);
-  }
+    &:hover {
+        color: $text-primary;
+        border-color: $sidebar-accent;
+        background: rgba(59, 130, 246, .05);
+    }
 
-  i { font-size: .95rem; }
+    i {
+        font-size: .95rem;
+    }
 }
 
 .topbar-search {
-  position: relative;
-  width: min(340px, 35vw);
+    position: relative;
+    width: min(340px, 35vw);
 
-  i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: $text-secondary;
-    font-size: .85rem;
-    pointer-events: none;
-  }
-
-  input {
-    width: 100%;
-    height: 38px;
-    border-radius: 8px;
-    border: 1px solid $border-color;
-    padding: 0 14px 0 36px;
-    font-size: .85rem;
-    color: $text-primary;
-    background: $page-bg;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-
-    &::placeholder { color: $text-secondary; }
-
-    &:focus {
-      border-color: $sidebar-accent;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
+    i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-secondary;
+        font-size: .85rem;
+        pointer-events: none;
     }
-  }
+
+    input {
+        width: 100%;
+        height: 38px;
+        border-radius: 8px;
+        border: 1px solid $border-color;
+        padding: 0 14px 0 36px;
+        font-size: .85rem;
+        color: $text-primary;
+        background: $page-bg;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+
+        &::placeholder {
+            color: $text-secondary;
+        }
+
+        &:focus {
+            border-color: $sidebar-accent;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
+        }
+    }
 }
 
 .topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .topbar-icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  border: 1px solid $border-color;
-  background: #fff;
-  color: $text-secondary;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  transition: all .15s;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid $border-color;
+    background: #fff;
+    color: $text-secondary;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all .15s;
 
-  &:hover {
-    color: $text-primary;
-    border-color: darken($border-color, 8%);
-  }
+    &:hover {
+        color: $text-primary;
+        border-color: darken($border-color, 8%);
+    }
 
-  i { font-size: 1rem; }
+    i {
+        font-size: 1rem;
+    }
 }
 
 .notify-dot {
-  position: absolute;
-  top: 7px;
-  right: 8px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #EF4444;
-  border: 2px solid #fff;
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EF4444;
+    border: 2px solid #fff;
 }
 
 .topbar-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: 8px;
-  padding: 6px 10px 6px 6px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background .15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 8px;
+    padding: 6px 10px 6px 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .15s;
 
-  &:hover {
-    background: rgba(0, 0, 0, .04);
-  }
+    &:hover {
+        background: rgba(0, 0, 0, .04);
+    }
 
-  .pi-angle-down {
-    color: $text-secondary;
-    font-size: .75rem;
-  }
+    .pi-angle-down {
+        color: $text-secondary;
+        font-size: .75rem;
+    }
 }
 
 .topbar-user-text {
-  strong {
-    display: block;
-    font-size: .85rem;
-    font-weight: 600;
-    color: $text-primary;
-    line-height: 1.2;
-  }
+    strong {
+        display: block;
+        font-size: .85rem;
+        font-weight: 600;
+        color: $text-primary;
+        line-height: 1.2;
+    }
 
-  small {
-    font-size: .72rem;
-    color: $text-secondary;
-  }
+    small {
+        font-size: .72rem;
+        color: $text-secondary;
+    }
 }
 
 /* ── User Avatar ── */
 .user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: linear-gradient(135deg, $sidebar-accent 0%, #2563EB 100%);
-  color: #fff;
-  font-size: .78rem;
-  font-weight: 700;
-  flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: linear-gradient(135deg, $sidebar-accent 0%, #2563EB 100%);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 700;
+    flex-shrink: 0;
 
-  &.has-image { background: transparent; }
+    &.has-image {
+        background: transparent;
+    }
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-  &--sm {
-    width: 34px;
-    height: 34px;
-    font-size: .72rem;
-  }
+    &--sm {
+        width: 34px;
+        height: 34px;
+        font-size: .72rem;
+    }
 
-  &--lg {
-    width: 52px;
-    height: 52px;
-    font-size: 1rem;
-  }
+    &--lg {
+        width: 52px;
+        height: 52px;
+        font-size: 1rem;
+    }
 }
 
 /* ── Page Body ── */
 .page-body {
-  padding: 24px;
-  flex: 1;
+    padding: 24px;
+    flex: 1;
 }
 
 /* ══════════════════════════════════════
    PROFILE DIALOG
    ══════════════════════════════════════ */
 .profile-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
 }
 
 .profile-preview {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid $border-color;
-  border-radius: $radius;
-  background: $page-bg;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid $border-color;
+    border-radius: $radius;
+    background: $page-bg;
 
-  strong {
-    color: $text-primary;
-    font-size: .95rem;
-  }
+    strong {
+        color: $text-primary;
+        font-size: .95rem;
+    }
 
-  p {
-    margin: 4px 0 0;
-    color: $text-secondary;
-    font-size: .82rem;
-  }
+    p {
+        margin: 4px 0 0;
+        color: $text-secondary;
+        font-size: .82rem;
+    }
 }
 
 .form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: .5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .5rem;
 
-  label {
-    color: $text-primary;
-    font-size: .78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    margin-top: .4rem;
-  }
+    label {
+        color: $text-primary;
+        font-size: .78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-top: .4rem;
+    }
 }
 
 .profile-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: .6rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: .6rem;
 }
 
 /* ══════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .admin-shell {
-    grid-template-columns: 1fr;
-  }
+    .admin-shell {
+        grid-template-columns: 1fr;
+    }
 
-  .sidebar {
-    position: fixed;
-    left: -$sidebar-w;
-    top: 0;
-    width: $sidebar-w;
-    transition: left $transition;
-    z-index: 200;
-  }
+    .sidebar {
+        position: fixed;
+        left: -$sidebar-w;
+        top: 0;
+        width: $sidebar-w;
+        transition: left $transition;
+        z-index: 200;
+    }
 
-  .admin-shell.sidebar-collapsed .sidebar {
-    left: -$sidebar-w;
-  }
+    .admin-shell.sidebar-collapsed .sidebar {
+        left: -$sidebar-w;
+    }
 
-  .admin-shell:not(.sidebar-collapsed) .sidebar {
-    left: 0;
-  }
+    .admin-shell:not(.sidebar-collapsed) .sidebar {
+        left: 0;
+    }
 
-  .topbar-search {
-    width: 100%;
-    max-width: 280px;
-  }
+    .topbar-search {
+        width: 100%;
+        max-width: 280px;
+    }
 
-  .topbar-user-text { display: none; }
+    .topbar-user-text {
+        display: none;
+    }
 }

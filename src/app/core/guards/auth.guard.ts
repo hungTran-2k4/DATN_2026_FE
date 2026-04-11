@@ -2,7 +2,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthSessionService } from '../services/auth-session.service';
 
-export const adminGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = () => {
   const sessionService = inject(AuthSessionService);
   const router = inject(Router);
 
@@ -12,10 +12,5 @@ export const adminGuard: CanActivateFn = () => {
     return false;
   }
 
-  if (sessionService.isAdmin()) {
-    return true;
-  }
-
-  router.navigateByUrl('/home');
-  return false;
+  return true;
 };

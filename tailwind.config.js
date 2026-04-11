@@ -22,7 +22,21 @@ module.exports = {
           danger: 'var(--admin-danger)',
           info: 'var(--admin-info)',
         },
+        user: {
+          theme: 'var(--user-primary)',
+          themeHover: 'var(--user-primary-hover)',
+          primary: 'var(--user-primary)',
+          'primary-hover': 'var(--user-primary-hover)',
+          text: 'var(--user-text-primary)',
+          textMuted: 'var(--user-text-muted)',
+          bg: 'var(--user-bg-soft)',
+          border: 'var(--user-border)'
+        }
       },
+      fontFamily: {
+        inter: ['var(--user-font-family)', 'sans-serif'],
+        nunito: ['var(--app-font-family)', 'sans-serif'],
+      }
     },
   },
   plugins: [],
