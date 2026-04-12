@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
 import {
   AbstractControl,
@@ -27,6 +27,7 @@ import { AuthFacade } from '../../services/auth.facade';
     CheckboxModule,
     InputTextModule,
     ToastModule,
+    NgOptimizedImage
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -47,6 +47,7 @@ interface AdminProfileForm {
     MenuModule,
     ToastModule,
     TooltipModule,
+    NgOptimizedImage,
   ],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.scss',

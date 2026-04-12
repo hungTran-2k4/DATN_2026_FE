@@ -144,7 +144,9 @@
               >
                 <img
                   *ngIf="user.avatarUrl; else initialsAvatar"
-                  [src]="user.avatarUrl"
+                  [ngSrc]="user.avatarUrl"
+                  width="32"
+                  height="32"
                   [alt]="user.fullName || user.email || 'User avatar'"
                 />
                 <ng-template #initialsAvatar>{{
@@ -309,7 +311,9 @@
           >
             <img
               *ngIf="selectedUser.avatarUrl; else dialogInitials"
-              [src]="selectedUser.avatarUrl"
+              [ngSrc]="selectedUser.avatarUrl"
+              width="100"
+              height="100"
               [alt]="
                 selectedUser.fullName || selectedUser.email || 'User avatar'
               "

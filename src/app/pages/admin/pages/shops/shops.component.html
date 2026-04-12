@@ -239,14 +239,19 @@
       <div class="shop-cover-banner">
         <img
           *ngIf="selectedShop.coverUrl"
-          [src]="selectedShop.coverUrl"
+          [ngSrc]="selectedShop.coverUrl"
+          width="700"
+          height="200"
+          style="width: 100%; height: 100%; object-fit: cover;"
           alt="Cover"
         />
         <div *ngIf="!selectedShop.coverUrl" class="cover-placeholder"></div>
         <div class="shop-logo-overlay">
           <img
             *ngIf="selectedShop.logoUrl"
-            [src]="selectedShop.logoUrl"
+            [ngSrc]="selectedShop.logoUrl"
+            width="100"
+            height="100"
             alt="Logo"
           />
           <div *ngIf="!selectedShop.logoUrl" class="logo-placeholder">

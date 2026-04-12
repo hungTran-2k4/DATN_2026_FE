@@ -1,0 +1,242 @@
+<div class="checkout-page bg-[#f5f5f5] min-h-screen font-inter pb-16">
+  <!-- Top Navigation (Simplified for checkout) -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="container mx-auto px-4 max-w-6xl h-20 flex items-center justify-between">
+       <div class="flex items-center gap-4">
+         <h1 class="text-2xl font-black text-user-primary">Thanh Toán</h1>
+       </div>
+       <a routerLink="/cart" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
+         <i class="pi pi-arrow-left text-xs"></i> Quay lại Giỏ hàng
+       </a>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4 max-w-6xl pt-8 pb-12">
+    <!-- Split Layout -->
+    <div class="flex flex-col lg:flex-row gap-8 items-start">
+       
+       <!-- LEFT COLUMN (60%) -->
+       <div class="w-full lg:w-[60%] flex flex-col gap-6">
+          
+          <!-- Block 1: Address Card -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+             <!-- Top red-blue dashed line like shopee -->
+             <div class="absolute top-0 left-0 right-0 h-1 bg-[repeating-linear-gradient(45deg,#ff6c6c_0,#ff6c6c_33px,transparent_0,transparent_41px,#5a8ee6_0,#5a8ee6_74px,transparent_0,transparent_82px)] opacity-60"></div>
+             
+             <div class="flex items-center justify-between mb-4 mt-2">
+                <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i class="pi pi-map-marker text-user-primary"></i> Địa Chỉ Ngưới Nhận</h2>
+                <button (click)="openAddressModal()" class="text-sm font-semibold text-user-primary hover:underline">Thay Đổi</button>
+             </div>
+             
+             <div *ngIf="getSelectedAddress() as addr" class="flex flex-col md:flex-row md:items-center p-4 border border-gray-100 rounded-xl bg-blue-50/30 gap-4 transition-colors hover:border-blue-200">
+                <div class="flex flex-col flex-1 pl-2">
+                   <div class="flex items-center gap-3 mb-1">
+                      <span class="font-bold text-gray-900">{{addr.name}}</span>
+                      <span class="text-gray-400">|</span>
+                      <span class="font-bold text-gray-600">{{addr.phone}}</span>
+                   </div>
+                   <p class="text-gray-500 text-sm leading-relaxed">{{addr.address}}</p>
+                </div>
+                <div *ngIf="addr.isDefault" class="shrink-0 border border-user-primary text-user-primary text-xs font-bold px-2 py-1 rounded max-w-max md:ml-auto">
+                   Mặc Định
+                </div>
+             </div>
+             
+             <div *ngIf="!getSelectedAddress()" class="p-6 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-3 text-center cursor-pointer hover:bg-gray-50" (click)="openAddressModal()">
+                <div class="w-12 h-12 rounded-full bg-blue-50 text-user-primary flex items-center justify-center text-xl"><i class="pi pi-plus"></i></div>
+                <div>
+                   <h3 class="font-bold text-gray-900">Chưa có địa chỉ</h3>
+                   <p class="text-sm text-gray-500">Thêm một địa chỉ để nhận hàng</p>
+                </div>
+             </div>
+          </div>
+
+          <!-- Block 2: Shipping Options -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-truck text-gray-500"></i> Phương Thức Vận Chuyển</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngFor="let opt of shippingOptions" 
+                     (click)="selectedShipping = opt.id; updateTotal()"
+                     class="border-2 rounded-xl p-4 cursor-pointer relative overflow-hidden transition-all"
+                     [ngClass]="selectedShipping === opt.id ? 'border-user-primary bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'">
+                   
+                   <div *ngIf="selectedShipping === opt.id" class="absolute top-0 right-0 w-0 h-0 border-[16px] border-transparent border-t-user-primary border-r-user-primary">
+                     <i class="pi pi-check text-white absolute -top-3.5 -right-3 text-[10px] font-bold"></i>
+                   </div>
+
+                   <div class="flex justify-between items-start mb-2">
+                      <span class="font-bold text-gray-900 text-sm">{{opt.name}}</span>
+                      <span class="font-bold text-user-primary text-sm">{{formatPrice(opt.price)}}</span>
+                   </div>
+                   <div class="text-xs text-gray-500">{{opt.duration}}</div>
+                </div>
+             </div>
+          </div>
+
+          <!-- Block 3: Payment Options -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-credit-card text-gray-500"></i> Phương Thức Thanh Toán</h2>
+             <div class="flex flex-col gap-3">
+                 <div *ngFor="let method of paymentMethods"
+                      (click)="selectedPayment = method.id"
+                      class="flex items-center gap-4 border border-gray-200 rounded-xl p-4 cursor-pointer transition-colors"
+                      [ngClass]="selectedPayment === method.id ? 'border-user-primary bg-blue-50/10' : 'hover:bg-gray-50'">
+                    
+                    <p-radioButton name="paymentGroup" [value]="method.id" [(ngModel)]="selectedPayment" inputId="pay_{{method.id}}"></p-radioButton>
+                    <i class="pi text-xl text-gray-500" [ngClass]="method.icon"></i>
+                    <span class="font-medium text-gray-800 flex-1">{{method.name}}</span>
+                 </div>
+             </div>
+          </div>
+
+          <!-- Block 4: Note -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-comments text-gray-500"></i> Lời Nhắn (Tùy chọn)</h2>
+             <textarea pInputTextarea [rows]="3" [(ngModel)]="orderNote" placeholder="Lưu ý cho người bán..." class="w-full bg-gray-50/50 border-gray-200 rounded-xl"></textarea>
+          </div>
+
+       </div>
+
+       <!-- RIGHT COLUMN (40%) -->
+       <div class="w-full lg:w-[40%]">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-6">
+             <h2 class="text-xl font-black text-gray-900 mb-6">Tóm Tắt Đơn Hàng</h2>
+
+             <!-- Items Summary -->
+             <div class="flex flex-col gap-4 mb-6 border-b border-gray-100 pb-6 max-h-[300px] overflow-y-auto no-scrollbar">
+                <div *ngFor="let item of cartItems" class="flex gap-4 items-center">
+                    <div class="relative w-16 h-16 rounded-lg border border-gray-200 shrink-0">
+                      <img [ngSrc]="item.image" width="64" height="64" class="w-full h-full object-cover rounded-lg">
+                      <span class="absolute -top-2 -right-2 bg-gray-600 text-white w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold z-10">{{item.quantity}}</span>
+                    </div>
+                   <div class="flex-1 flex flex-col justify-center min-w-0">
+                     <h4 class="text-sm font-semibold text-gray-800 line-clamp-1 mb-1">{{item.name}}</h4>
+                     <span class="text-xs text-gray-500 line-clamp-1">{{item.variant}}</span>
+                   </div>
+                   <div class="font-bold text-gray-900 text-sm whitespace-nowrap">
+                     {{formatPrice(item.price * item.quantity)}}
+                   </div>
+                </div>
+             </div>
+
+             <!-- Voucher -->
+             <div class="flex gap-2 mb-6 border-b border-gray-100 pb-6">
+                <input type="text" pInputText placeholder="Mã giảm giá" class="w-full border-gray-300 rounded-lg h-12 px-4 shadow-none">
+                <button pButton pRipple class="bg-gray-800 hover:bg-black border-none text-white px-6 font-bold rounded-lg whitespace-nowrap">ÁP DỤNG</button>
+             </div>
+
+             <!-- Calculation -->
+             <div class="flex flex-col gap-3 text-sm text-gray-600 mb-6">
+                <div class="flex justify-between">
+                   <span>Tổng tiền hàng</span>
+                   <span class="font-medium text-gray-900">{{formatPrice(merchandiseSubtotal)}}</span>
+                </div>
+                <div class="flex justify-between">
+                   <span>Phí vận chuyển</span>
+                   <span class="font-medium text-gray-900">{{formatPrice(shippingFee)}}</span>
+                </div>
+                <div class="flex justify-between text-green-600">
+                   <span>Giảm giá</span>
+                   <span class="font-medium">-{{formatPrice(discount)}}</span>
+                </div>
+             </div>
+
+             <!-- Total -->
+             <div class="flex justify-between items-center pt-6 border-t border-gray-100 mb-8">
+                <span class="text-lg font-bold text-gray-900">Tổng cộng</span>
+                <span class="text-2xl font-black text-user-primary">{{formatPrice(totalPayment)}}</span>
+             </div>
+
+             <!-- Action -->
+             <button (click)="placeOrder()" class="w-full h-14 bg-user-primary hover:bg-user-primary-hover text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all outline-none">
+               ĐẶT HÀNG NGAY
+             </button>
+
+             <!-- Terms -->
+             <p class="text-xs text-center text-gray-400 mt-4 leading-relaxed">
+               Bằng việc tiến hành Đặt Hàng, bạn đồng ý với<br><a href="#" class="text-user-primary hover:underline">Điều khoản dịch vụ</a>
+             </p>
+          </div>
+       </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     DIALOG: ADDRESS SELECTOR & NEW FORM
+     ============================================= -->
+<p-dialog [(visible)]="showAddressDialog" [modal]="true" [style]="{width: '560px'}" [draggable]="false" [resizable]="false" header="Địa Chỉ Nhận Hàng">
+    
+    <!-- State 1: Select Existing Address -->
+    <div *ngIf="!showNewAddressForm" class="flex flex-col">
+       <button (click)="triggerNewAddressForm()" class="w-full py-3 mb-6 bg-transparent border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:text-user-primary hover:border-user-primary hover:bg-blue-50/30 transition-colors flex items-center justify-center gap-2 font-bold">
+         <i class="pi pi-plus"></i> Thêm Địa Chỉ Mới
+       </button>
+
+       <div class="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+          <div *ngFor="let addr of savedAddresses"
+               (click)="selectedAddressId = addr.id"
+               class="border rounded-xl p-4 cursor-pointer relative transition-all"
+               [ngClass]="selectedAddressId === addr.id ? 'border-user-primary bg-blue-50/10 ring-1 ring-user-primary' : 'border-gray-200 hover:border-gray-300'">
+             
+             <div class="flex items-start gap-4">
+                <div class="pt-1">
+                   <p-radioButton name="addressGroup" [value]="addr.id" [(ngModel)]="selectedAddressId" inputId="addr_{{addr.id}}"></p-radioButton>
+                </div>
+                <div class="flex-1">
+                   <div class="flex items-center gap-2 mb-1">
+                      <span class="font-bold text-gray-900">{{addr.name}}</span>
+                      <span class="text-gray-400 text-sm">|</span>
+                      <span class="font-medium text-gray-600 text-sm">{{addr.phone}}</span>
+                      <span *ngIf="addr.isDefault" class="ml-auto border border-user-primary text-user-primary text-[10px] uppercase px-1.5 py-0.5 rounded font-bold">Mặc định</span>
+                   </div>
+                   <p class="text-sm text-gray-500 leading-relaxed">{{addr.address}}</p>
+                </div>
+             </div>
+          </div>
+       </div>
+
+       <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+          <button pButton class="p-button-text p-button-secondary font-bold" (click)="showAddressDialog=false">Huỷ</button>
+          <button pButton class="bg-user-primary hover:bg-user-primary-hover border-none font-bold text-white px-6" (click)="confirmSelectAddress()">Xác Nhận</button>
+       </div>
+    </div>
+
+    <!-- State 2: Add New Address Form -->
+    <div *ngIf="showNewAddressForm" class="flex flex-col animate-fade-in">
+       <button (click)="showNewAddressForm = false" class="text-user-primary font-bold text-sm mb-4 inline-flex items-center gap-2 w-max hover:underline"><i class="pi pi-arrow-left"></i> Trở lại danh sách</button>
+
+       <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-gray-700">Họ và tên</label>
+             <input type="text" pInputText placeholder="Họ và tên" [(ngModel)]="newAddress.name" class="w-full">
+          </div>
+          <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-gray-700">Số điện thoại</label>
+             <input type="text" pInputText placeholder="Số điện thoại" [(ngModel)]="newAddress.phone" class="w-full">
+          </div>
+       </div>
+
+       <!-- Vietnam Open API Pickers -->
+       <div class="flex flex-col gap-2 mb-4">
+          <label class="text-sm font-semibold text-gray-700">Tỉnh/Thành phố, Quận/Huyện, Phường/Xã</label>
+          <div class="flex gap-4">
+             <p-dropdown [options]="provinces" [(ngModel)]="newAddress.province" optionLabel="name" placeholder="Tỉnh / Thành phố" (onChange)="onProvinceChange()" styleClass="w-full" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
+          </div>
+       </div>
+       <div class="grid grid-cols-2 gap-4 mb-4">
+          <p-dropdown [options]="districts" [(ngModel)]="newAddress.district" optionLabel="name" placeholder="Quận / Huyện" [disabled]="!newAddress.province" (onChange)="onDistrictChange()" styleClass="w-full" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
+          <p-dropdown [options]="wards" [(ngModel)]="newAddress.ward" optionLabel="name" placeholder="Phường / Xã" [disabled]="!newAddress.district" styleClass="w-full" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
+       </div>
+
+       <div class="flex flex-col gap-2 mb-6">
+          <label class="text-sm font-semibold text-gray-700">Địa chỉ cụ thể</label>
+          <textarea pInputTextarea [rows]="2" [(ngModel)]="newAddress.street" placeholder="Số nhà, Tên đường..." class="w-full"></textarea>
+       </div>
+
+       <div class="flex justify-end pt-4 border-t border-gray-100">
+          <button pButton class="bg-user-primary hover:bg-user-primary-hover border-none font-bold text-white w-full flex justify-center py-3" (click)="saveNewAddress()">LƯU ĐỊA CHỈ</button>
+       </div>
+    </div>
+</p-dialog>

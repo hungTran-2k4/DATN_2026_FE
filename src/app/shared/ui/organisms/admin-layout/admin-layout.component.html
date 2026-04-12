@@ -5,11 +5,10 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="brand" *ngIf="!sidebarCollapsed">
-        <i class="pi pi-shopping-cart brand-icon"></i>
-        <span class="brand-text">DATN Admin</span>
+        <img ngSrc="/images/logo-brand.png" width="140" height="40" alt="Vora Logo" class="h-9 w-auto">
       </div>
       <div class="brand brand--mini" *ngIf="sidebarCollapsed">
-        <i class="pi pi-shopping-cart brand-icon"></i>
+        <img ngSrc="/images/logo-brand.png" width="32" height="32" alt="Vora" class="h-8 w-8 object-contain">
       </div>
     </div>
 
@@ -53,7 +52,13 @@
         class="user-avatar"
         [class.has-image]="!!adminAvatarUrl"
       >
-        <img *ngIf="adminAvatarUrl" [src]="adminAvatarUrl" [alt]="adminName" />
+        <img
+          *ngIf="adminAvatarUrl"
+          [ngSrc]="adminAvatarUrl"
+          [alt]="adminName"
+          width="40"
+          height="40"
+        />
         <ng-container *ngIf="!adminAvatarUrl">{{ adminInitials }}</ng-container>
       </span>
       <div class="user-info">
@@ -95,7 +100,13 @@
 
         <div class="topbar-user" (click)="userMenu.toggle($event)">
           <span class="user-avatar user-avatar--sm" [class.has-image]="!!adminAvatarUrl">
-            <img *ngIf="adminAvatarUrl" [src]="adminAvatarUrl" [alt]="adminName" />
+            <img
+              *ngIf="adminAvatarUrl"
+              [ngSrc]="adminAvatarUrl"
+              [alt]="adminName"
+              width="32"
+              height="32"
+            />
             <ng-container *ngIf="!adminAvatarUrl">{{ adminInitials }}</ng-container>
           </span>
           <div class="topbar-user-text">
@@ -136,8 +147,10 @@
       >
         <img
           *ngIf="profileForm.avatarUrl; else dialogInitials"
-          [src]="profileForm.avatarUrl"
+          [ngSrc]="profileForm.avatarUrl"
           [alt]="profileForm.fullName || adminName"
+          width="80"
+          height="80"
         />
         <ng-template #dialogInitials>{{ adminInitials }}</ng-template>
       </span>

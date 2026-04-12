@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
 import {
   AbstractControl,
@@ -27,6 +27,7 @@ import { AuthFacade } from '../../services/auth.facade';
     CheckboxModule,
     InputTextModule,
     ToastModule,
+    NgOptimizedImage
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -35,6 +36,7 @@ export class LoginComponent {
   loginForm: FormGroup;
   submitted = false;
   isSubmitting = false;
+  errorMessage: string | null = null;
 
   constructor(
     private readonly authFacade: AuthFacade,
@@ -88,6 +90,8 @@ export class LoginComponent {
 
   onSubmit(): void {
     this.submitted = true;
+    this.errorMessage = null;
+    
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       this.messageService.add({
@@ -115,11 +119,15 @@ export class LoginComponent {
           this.authFacade.navigateAfterLogin();
         },
         error: (error: any) => {
+          this.errorMessage = error.message;
           this.messageService.add({
             severity: 'error',
             summary: 'Đăng nhập thất bại',
             detail: error.message,
           });
+          // Better UX: Clear password and allow user to retype
+          this.loginForm.get('password')?.setValue('');
+          this.loginForm.get('password')?.markAsUntouched();
         },
       });
   }

@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule, NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { map, Observable } from 'rxjs';
@@ -38,6 +38,7 @@ import { AdminUsersFacade } from '../../services/admin-users.facade';
     MultiSelectModule,
     ConfirmDialogModule,
     TooltipModule,
+    NgOptimizedImage
   ],
   providers: [ConfirmationService],
   templateUrl: './users.component.html',

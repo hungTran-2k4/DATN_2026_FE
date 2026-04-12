@@ -20,6 +20,18 @@ export const routes: Routes = [
         path: 'profile',
         canActivate: [authGuard],
         loadComponent: () => import('./pages/user/pages/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'product/:id',
+        loadComponent: () => import('./pages/product/pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+      },
+      {
+        path: 'cart',
+        loadComponent: () => import('./pages/cart/pages/cart/cart.component').then(m => m.CartComponent)
+      },
+      {
+        path: 'checkout',
+        loadComponent: () => import('./pages/order/pages/checkout/checkout.component').then(m => m.CheckoutComponent)
       }
     ]
   },

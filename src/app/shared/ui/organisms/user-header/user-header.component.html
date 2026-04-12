@@ -27,11 +27,15 @@
     class="container mx-auto px-4 max-w-7xl py-5 flex items-center justify-between gap-8"
   >
     <!-- Logo -->
-    <a
-      routerLink="/"
-      class="text-3xl font-black text-gray-900 tracking-tighter shrink-0"
-    >
-      DATN<span class="text-user-primary">.2026</span>
+    <a routerLink="/" class="flex items-center shrink-0">
+      <img
+        ngSrc="/images/logo-brand.png"
+        alt="Vora Logo"
+        width="200"
+        height="150"
+        priority
+        class="h-16 sm:h-40 w-auto object-contain"
+      />
     </a>
 
     <!-- Search Bar -->
@@ -54,7 +58,7 @@
         class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
       >
         <div
-          class="relative p-2 bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+          class="relative w-10 h-10 aspect-square shrink-0 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
         >
           <i class="pi pi-heart text-xl"></i>
           <span
@@ -68,10 +72,11 @@
       </a>
 
       <a
+        routerLink="/cart"
         class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
       >
         <div
-          class="relative p-2 bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+          class="relative w-10 h-10 aspect-square shrink-0 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
         >
           <i class="pi pi-shopping-bag text-xl"></i>
           <span
@@ -81,47 +86,57 @@
         </div>
         <span class="text-xs font-semibold mt-1 hidden sm:block">Giỏ hàng</span>
       </a>
-      <!-- Chưa đăng nhập -->
-      <a
-        *ngIf="!(authSession.currentUser$ | async)"
-        routerLink="/auth/login"
-        class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
+
+      <!-- Auth Logic -->
+      <ng-container
+        *ngIf="authSession.currentUser$ | async as user; else loginBtn"
       >
         <div
-          class="relative p-2 bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+          (click)="userMenu.toggle($event)"
+          class="flex items-center gap-2.5 pl-4 sm:pl-6 ml-1 sm:ml-3 border-l border-gray-200 cursor-pointer group"
         >
-          <i class="pi pi-user text-xl"></i>
+          <div
+            class="w-10 h-10 aspect-square shrink-0 rounded-full bg-user-primary/10 flex items-center justify-center text-user-primary font-bold text-lg group-hover:bg-user-primary group-hover:text-white transition-all shadow-sm"
+          >
+            {{ (user.userName || user.userEmail || "U")[0].toUpperCase() }}
+          </div>
+          <div class="hidden md:flex flex-col justify-center">
+            <span
+              class="text-sm font-bold text-gray-800 group-hover:text-user-primary transition-colors truncate max-w-[130px] leading-tight"
+            >
+              {{ user.userName || "Người dùng" }}
+            </span>
+            <span class="text-[11px] text-gray-500 font-medium mt-0.5">{{
+              authSession.isAdmin() ? "Quản trị viên" : "Tài khoản của tôi"
+            }}</span>
+          </div>
+          <i
+            class="pi pi-angle-down text-xs text-gray-400 group-hover:text-user-primary transition-transform group-hover:translate-y-0.5 hidden md:block ml-1"
+          ></i>
         </div>
-        <span class="text-xs font-semibold mt-1 hidden sm:block"
-          >Đăng nhập</span
-        >
-      </a>
+      </ng-container>
 
-      <!-- Đã đăng nhập -->
-      <div
-        *ngIf="authSession.currentUser$ | async as user"
-        (click)="userMenu.toggle($event)"
-        class="flex items-center gap-2.5 pl-4 sm:pl-6 ml-1 sm:ml-3 border-l border-gray-200 cursor-pointer group"
-      >
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-user-primary/10 flex items-center justify-center text-user-primary font-bold text-base sm:text-lg group-hover:bg-user-primary group-hover:text-white transition-all shadow-sm">
-          {{ (user.userName || user.userEmail || 'U')[0].toUpperCase() }}
-        </div>
-        <div class="hidden md:flex flex-col justify-center">
-          <span class="text-sm font-bold text-gray-800 group-hover:text-user-primary transition-colors truncate max-w-[130px] leading-tight">
-            {{ user.userName || 'Người dùng' }}
-          </span>
-          <span class="text-[11px] text-gray-500 font-medium mt-0.5" *ngIf="authSession.isAdmin()">Quản trị viên</span>
-          <span class="text-[11px] text-gray-500 font-medium mt-0.5" *ngIf="!authSession.isAdmin()">Tài khoản của tôi</span>
-        </div>
-        <i class="pi pi-angle-down text-xs text-gray-400 group-hover:text-user-primary transition-transform group-hover:translate-y-0.5 hidden md:block ml-1"></i>
-      </div>
+      <ng-template #loginBtn>
+        <a
+          routerLink="/auth/login"
+          class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group pl-4 sm:pl-6 border-l border-gray-200"
+        >
+          <div
+            class="relative w-10 h-10 aspect-square shrink-0 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+          >
+            <i class="pi pi-user text-xl"></i>
+          </div>
+          <span class="text-xs font-semibold mt-1 hidden sm:block"
+            >Đăng nhập</span
+          >
+        </a>
+      </ng-template>
     </div>
   </div>
 
   <!-- Navigation Layer -->
-  <nav class="border-t border-gray-100 hidden md:block">
+  <!-- <nav class="border-t border-gray-100 hidden md:block">
     <div class="container mx-auto px-4 max-w-7xl flex items-center">
-      <!-- Mega menu button -->
       <button
         class="bg-user-primary text-white px-6 py-4 font-bold flex items-center gap-3 hover:bg-user-primary-hover transition-colors shrink-0"
       >
@@ -129,8 +144,6 @@
         DANH MỤC SẢN PHẨM
         <i class="pi pi-angle-down ml-4"></i>
       </button>
-
-      <!-- Nav links -->
       <ul
         class="flex items-center gap-8 ml-8 font-semibold text-gray-700 w-full"
       >
@@ -182,7 +195,7 @@
         <i class="pi pi-bolt text-yellow-500"></i> Spend $50 get Free Shipping
       </div>
     </div>
-  </nav>
+  </nav> -->
 </header>
 
 <p-menu

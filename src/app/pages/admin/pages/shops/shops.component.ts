@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule, NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { map, Observable } from 'rxjs';
@@ -32,6 +32,7 @@ import { AdminShopsFacade } from '../../services/admin-shops.facade';
     DialogModule,
     ConfirmDialogModule,
     TooltipModule,
+    NgOptimizedImage
   ],
   providers: [ConfirmationService],
   templateUrl: './shops.component.html',

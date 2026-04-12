@@ -29,15 +29,16 @@ export const authInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<any>> => {
   const router = inject(Router);
   const sessionService = inject(AuthSessionService);
-  const http = inject(HttpClient); // We can inject HttpClient for the refresh token call to avoid circular dep with DATNServiceBase
+  const http = inject(HttpClient);
+
+  // Skip URL check
+  const skipUrls = ['/api/Auth/refresh-token', '/api/Auth/login', '/api/Auth/register', '/api/Auth/forgot-password', '/api/Auth/reset-password'];
+  if (skipUrls.some(url => req.url.includes(url))) {
+    return next(req);
+  }
 
   return next(req).pipe(
     catchError((error) => {
-      // Don't intercept refresh-token call itself to prevent loops
-      if (req.url.includes('/api/Auth/refresh-token')) {
-        return throwError(() => error);
-      }
-
       if (error instanceof HttpErrorResponse && error.status === 401) {
         return handle401Error(req, next, http, router, sessionService);
       }
@@ -57,19 +58,19 @@ const handle401Error = (
     isRefreshing = true;
     refreshTokenSubject.next(null);
 
-    // Call the refresh token endpoint directly (withCredentials sends the refresh cookie)
     return http
       .post(`${environment.apiUrl}/api/Auth/refresh-token`, {}, { withCredentials: true })
       .pipe(
         switchMap((response: any) => {
           isRefreshing = false;
-          // Update the localized session data (roles, etc.)
+          
           if (response?.data) {
             sessionService.saveSession(response.data);
           }
+          
           refreshTokenSubject.next(response);
-
-          // Retry the original request
+          // Retry with the same request object. 
+          // Browser will automatically use the updated HttpOnly cookies.
           return next(request);
         }),
         catchError((err) => {
@@ -80,7 +81,7 @@ const handle401Error = (
         })
       );
   } else {
-    // Wait until refresh is done, then retry
+    // Other parallel requests wait here for the singleton refresh call to finish
     return refreshTokenSubject.pipe(
       filter((result) => result !== null),
       take(1),

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -9,7 +9,7 @@ import { ApiBaseService } from '../../../../shared/api/generated/api-service-bas
 @Component({
   selector: 'app-user-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, MenuModule],
+  imports: [CommonModule, RouterLink, MenuModule, NgOptimizedImage],
   templateUrl: './user-header.component.html',
   styleUrl: './user-header.component.scss',
 })

@@ -1,0 +1,20 @@
+/* Tweak primeNG checkboxes to match Shopee UI */
+::ng-deep .p-checkbox .p-checkbox-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 2px;
+    border-color: #d1d5db;
+}
+
+::ng-deep .p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box:hover {
+    border-color: #3b82f6; /* user-primary */
+}
+
+::ng-deep .p-checkbox .p-checkbox-box.p-highlight {
+    border-color: #3b82f6;
+    background: #3b82f6;
+}
+
+::ng-deep .p-checkbox .p-checkbox-box .p-checkbox-icon {
+    font-size: 12px;
+}

@@ -3,9 +3,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthResponse } from '../../shared/api/generated/api-service-base.service';
 
 interface StoredAuthSession {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: string;
   userId?: string;
   userEmail?: string;
   userName?: string;
@@ -20,14 +17,11 @@ export class AuthSessionService {
   public currentUser$ = this.userSubject.asObservable();
 
   saveSession(auth: AuthResponse): void {
-    if (typeof localStorage === 'undefined' || !auth.accessToken) {
+    if (typeof localStorage === 'undefined') {
       return;
     }
 
     const payload: StoredAuthSession = {
-      accessToken: auth.accessToken,
-      refreshToken: auth.refreshToken,
-      expiresAt: auth.expiresAt?.toISOString(),
       userId: auth.user?.id,
       userEmail: auth.user?.email,
       userName: auth.user?.fullName,
@@ -46,8 +40,8 @@ export class AuthSessionService {
   }
 
   getAccessToken(): string | null {
-    const session = this.getSession();
-    return session?.accessToken ?? null;
+    // Rely on HttpOnly cookies now
+    return null;
   }
 
   getRoles(): string[] {

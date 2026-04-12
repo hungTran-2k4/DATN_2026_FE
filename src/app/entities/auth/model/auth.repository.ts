@@ -108,7 +108,6 @@ export class AuthRepository {
           // Map to AuthResponse structure expected by sessionService.saveSession
           const profile = res.data;
           return {
-             accessToken: this.sessionService.getAccessToken() || '', 
              user: {
                  id: profile.userId || profile.id,
                  email: profile.email,
