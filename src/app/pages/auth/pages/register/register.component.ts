@@ -27,7 +27,7 @@ import { AuthFacade } from '../../services/auth.facade';
     CheckboxModule,
     InputTextModule,
     ToastModule,
-    NgOptimizedImage
+    NgOptimizedImage,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
@@ -43,7 +43,7 @@ export class RegisterComponent {
     private readonly messageService: MessageService,
   ) {
     this.registerForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(3)]],
+      username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       acceptedTerms: [false, [Validators.requiredTrue]],
@@ -51,26 +51,26 @@ export class RegisterComponent {
   }
 
   getControl(
-    controlName: 'fullName' | 'email' | 'password' | 'acceptedTerms',
+    controlName: 'username' | 'email' | 'password' | 'acceptedTerms',
   ): AbstractControl | null {
     return this.registerForm.get(controlName);
   }
 
-  getFullNameError(): string {
-    const control = this.getControl('fullName');
+  getUsernameError(): string {
+    const control = this.getControl('username');
     if (!control?.errors) {
       return '';
     }
 
     if (control.errors['required']) {
-      return 'Vui lòng nhập họ tên.';
+      return 'Vui lòng nhập tên đăng nhập.';
     }
 
     if (control.errors['minlength']) {
-      return 'Họ tên cần tối thiểu 3 ký tự.';
+      return 'Tên đăng nhập cần tối thiểu 3 ký tự.';
     }
 
-    return 'Họ tên không hợp lệ.';
+    return 'Tên đăng nhập không hợp lệ.';
   }
 
   getEmailError(): string {
@@ -122,13 +122,13 @@ export class RegisterComponent {
 
     this.isSubmitting = true;
 
-    const { email, password, fullName } = this.registerForm.value;
+    const { email, password, username } = this.registerForm.value;
 
     this.authFacade
       .register({
         email: email.trim(),
         password: password,
-        fullName: fullName.trim(),
+        username: username.trim(),
       })
       .pipe(
         tap(() => {
@@ -139,7 +139,7 @@ export class RegisterComponent {
           });
         }),
         switchMap(() => this.authFacade.login(email.trim(), password)),
-        finalize(() => (this.isSubmitting = false))
+        finalize(() => (this.isSubmitting = false)),
       )
       .subscribe({
         next: () => {
@@ -149,7 +149,8 @@ export class RegisterComponent {
           this.messageService.add({
             severity: 'error',
             summary: 'Đăng nhập tự động thất bại',
-            detail: 'Đăng ký thành công nhưng đăng nhập bị lỗi. Vui lòng đăng nhập lại.',
+            detail:
+              'Đăng ký thành công nhưng đăng nhập bị lỗi. Vui lòng đăng nhập lại.',
           });
         },
       });

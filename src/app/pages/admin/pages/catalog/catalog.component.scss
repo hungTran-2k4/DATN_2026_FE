@@ -2,6 +2,43 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    .category-thumb {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    }
+
+    .upload-preview {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        &:hover {
+            border-color: #3b82f6;
+            background-color: #f0f7ff;
+        }
+
+        &.group:hover .bg-black\/40 {
+            backdrop-filter: blur(2px);
+        }
+    }
+
+    // Custom styling for p-fileUpload basic mode
+    ::ng-deep {
+        .p-fileupload-basic {
+            .p-button {
+                width: 100%;
+                border-radius: 12px;
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+                transition: all 0.2s;
+                &:hover {
+                    background: #f8fafc;
+                    border-color: #cbd5e1;
+                }
+            }
+        }
+    }
 }
 
 .catalog-meta {

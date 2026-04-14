@@ -44,14 +44,23 @@
 
 /* PrimeNG Overrides */
 ::ng-deep {
+    .p-carousel-items-content,
     .p-carousel-items-container {
         display: flex !important;
         flex-wrap: nowrap !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        overflow: visible !important; /* Items-container should not hide content, items-content (viewport) will */
+    }
+    
+    .p-carousel-items-content {
+        overflow: hidden !important;
     }
 
     .p-carousel-item {
         padding: 0.75rem;
-        flex: 0 0 auto !important;
+        flex: 1 0 auto !important; /* Allow PrimeNG to calculate size, but don't wrap */
+        min-width: 0 !important;
     }
 
     .p-carousel-indicators {

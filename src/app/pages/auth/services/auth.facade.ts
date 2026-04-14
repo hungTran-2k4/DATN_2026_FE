@@ -1,7 +1,15 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
+import {
+  catchError,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { AuthResponse } from '../../../shared/api/generated/api-service-base.service';
 import { AuthRepository } from '../../../entities/auth/model/auth.repository';
 import { AuthSessionService } from '../../../core/services/auth-session.service';
@@ -13,7 +21,7 @@ export class AuthFacade {
     private readonly authRepository: AuthRepository,
     private readonly sessionService: AuthSessionService,
     private readonly router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
   get isLoggedIn$(): Observable<boolean> {
@@ -47,6 +55,12 @@ export class AuthFacade {
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.authRepository.login(email, password).pipe(
+      switchMap((result) =>
+        this.authRepository.getProfile().pipe(
+          map((profile) => profile ?? result),
+          catchError(() => of(result)),
+        ),
+      ),
       tap((result) => this.sessionService.saveSession(result)),
       catchError((error: unknown) =>
         throwError(
@@ -65,9 +79,15 @@ export class AuthFacade {
   register(input: {
     email: string;
     password: string;
-    fullName: string;
+    username: string;
   }): Observable<AuthResponse> {
     return this.authRepository.register(input).pipe(
+      switchMap((result) =>
+        this.authRepository.getProfile().pipe(
+          map((profile) => profile ?? result),
+          catchError(() => of(result)),
+        ),
+      ),
       tap((result) => this.sessionService.saveSession(result)),
       catchError((error: unknown) =>
         throwError(

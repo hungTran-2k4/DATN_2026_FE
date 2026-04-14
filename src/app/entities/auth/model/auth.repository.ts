@@ -35,13 +35,13 @@ export class AuthRepository {
   register(request: {
     email: string;
     password: string;
-    fullName: string;
+    username: string;
   }): Observable<AuthResponse> {
     const payload = new RegisterRequest({
       email: request.email,
       password: request.password,
       confirmPassword: request.password,
-      fullName: request.fullName,
+      userName: request.username,
     });
 
     return this.api.register(payload).pipe(
@@ -61,7 +61,11 @@ export class AuthRepository {
         success: boolean;
         data: string;
         message: string;
-      }>(`${environment.apiUrl}/api/Auth/forgot-password`, { email }, { withCredentials: true })
+      }>(
+        `${environment.apiUrl}/api/Auth/forgot-password`,
+        { email },
+        { withCredentials: true },
+      )
       .pipe(
         map((res) => ({
           message: res.data ?? res.message ?? 'Email đã được gửi.',
@@ -80,7 +84,11 @@ export class AuthRepository {
         data: string;
         message: string;
         errorCode?: string;
-      }>(`${environment.apiUrl}/api/Auth/reset-password`, { email, token, newPassword }, { withCredentials: true })
+      }>(
+        `${environment.apiUrl}/api/Auth/reset-password`,
+        { email, token, newPassword },
+        { withCredentials: true },
+      )
       .pipe(
         map((res) => {
           if (res.success === false) {
@@ -102,18 +110,20 @@ export class AuthRepository {
       .pipe(
         map((res) => {
           if (res.success === false || !res.data) {
-            throw new Error(res.message ?? 'Không thể lấy thông tin người dùng.');
+            throw new Error(
+              res.message ?? 'Không thể lấy thông tin người dùng.',
+            );
           }
-          
+
           // Map to AuthResponse structure expected by sessionService.saveSession
           const profile = res.data;
           return {
-             user: {
-                 id: profile.userId || profile.id,
-                 email: profile.email,
-                 fullName: profile.fullName,
-                 roles: profile.roles
-             }
+            user: {
+              id: profile.userId || profile.id,
+              email: profile.email,
+              fullName: profile.fullName,
+              roles: profile.roles,
+            },
           } as AuthResponse;
         }),
       );

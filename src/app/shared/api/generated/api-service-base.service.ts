@@ -188,24 +188,6 @@ export class ApiBaseService {
           return _observableOf(result200);
         }),
       );
-    } else if (status === 401) {
-      return blobToText(responseBlob).pipe(
-        _observableMergeMap((_responseText: string) => {
-          let result401: any = null;
-          let resultData401 =
-            _responseText === ''
-              ? null
-              : JSON.parse(_responseText, this.jsonParseReviver);
-          result401 = AuthResponseApiResponse.fromJS(resultData401);
-          return throwException(
-            'Unauthorized',
-            status,
-            _responseText,
-            _headers,
-            result401,
-          );
-        }),
-      );
     } else if (status !== 200 && status !== 204) {
       return blobToText(responseBlob).pipe(
         _observableMergeMap((_responseText: string) => {
@@ -296,24 +278,6 @@ export class ApiBaseService {
               : JSON.parse(_responseText, this.jsonParseReviver);
           result200 = AuthResponseApiResponse.fromJS(resultData200);
           return _observableOf(result200);
-        }),
-      );
-    } else if (status === 401) {
-      return blobToText(responseBlob).pipe(
-        _observableMergeMap((_responseText: string) => {
-          let result401: any = null;
-          let resultData401 =
-            _responseText === ''
-              ? null
-              : JSON.parse(_responseText, this.jsonParseReviver);
-          result401 = AuthResponseApiResponse.fromJS(resultData401);
-          return throwException(
-            'Unauthorized',
-            status,
-            _responseText,
-            _headers,
-            result401,
-          );
         }),
       );
     } else if (status !== 200 && status !== 204) {
@@ -2836,9 +2800,9 @@ export class ApiBaseService {
       throw new globalThis.Error("The parameter 'file' cannot be null.");
     else
       content_.append(
-        'file',
+        'File',
         file.data,
-        file.fileName ? file.fileName : 'file',
+        file.fileName ? file.fileName : 'File',
       );
 
     let options_: any = {
@@ -3285,9 +3249,9 @@ export class ApiBaseService {
       throw new globalThis.Error("The parameter 'file' cannot be null.");
     else
       content_.append(
-        'file',
+        'File',
         file.data,
-        file.fileName ? file.fileName : 'file',
+        file.fileName ? file.fileName : 'File',
       );
 
     let options_: any = {
@@ -7423,9 +7387,9 @@ export class ApiBaseService {
       throw new globalThis.Error("The parameter 'file' cannot be null.");
     else
       content_.append(
-        'file',
+        'File',
         file.data,
-        file.fileName ? file.fileName : 'file',
+        file.fileName ? file.fileName : 'File',
       );
 
     let options_: any = {
@@ -7544,9 +7508,9 @@ export class ApiBaseService {
       throw new globalThis.Error("The parameter 'file' cannot be null.");
     else
       content_.append(
-        'file',
+        'File',
         file.data,
-        file.fileName ? file.fileName : 'file',
+        file.fileName ? file.fileName : 'File',
       );
 
     let options_: any = {
@@ -15134,7 +15098,7 @@ export class RegisterRequest implements IRegisterRequest {
   email!: string;
   password!: string;
   confirmPassword!: string;
-  fullName?: string | undefined;
+  userName?: string | undefined;
 
   constructor(data?: IRegisterRequest) {
     if (data) {
@@ -15150,7 +15114,7 @@ export class RegisterRequest implements IRegisterRequest {
       this.email = _data['email'];
       this.password = _data['password'];
       this.confirmPassword = _data['confirmPassword'];
-      this.fullName = _data['fullName'];
+      this.userName = _data['userName'];
     }
   }
 
@@ -15166,7 +15130,7 @@ export class RegisterRequest implements IRegisterRequest {
     data['email'] = this.email;
     data['password'] = this.password;
     data['confirmPassword'] = this.confirmPassword;
-    data['fullName'] = this.fullName;
+    data['userName'] = this.userName;
     return data;
   }
 }
@@ -15175,7 +15139,7 @@ export interface IRegisterRequest {
   email: string;
   password: string;
   confirmPassword: string;
-  fullName?: string | undefined;
+  userName?: string | undefined;
 }
 
 export class RegisterWithFirebaseRequest implements IRegisterWithFirebaseRequest {
@@ -17825,6 +17789,7 @@ export class UserProfileDto implements IUserProfileDto {
   avatarUrl?: string | undefined;
   status?: string | undefined;
   createdAt?: Date;
+  roles?: string[] | undefined;
 
   constructor(data?: IUserProfileDto) {
     if (data) {
@@ -17846,6 +17811,10 @@ export class UserProfileDto implements IUserProfileDto {
       this.createdAt = _data['createdAt']
         ? new Date(_data['createdAt'].toString())
         : (undefined as any);
+      if (Array.isArray(_data['roles'])) {
+        this.roles = [] as any;
+        for (let item of _data['roles']) this.roles!.push(item);
+      }
     }
   }
 
@@ -17867,6 +17836,10 @@ export class UserProfileDto implements IUserProfileDto {
     data['createdAt'] = this.createdAt
       ? this.createdAt.toISOString()
       : (undefined as any);
+    if (Array.isArray(this.roles)) {
+      data['roles'] = [];
+      for (let item of this.roles) data['roles'].push(item);
+    }
     return data;
   }
 }
@@ -17879,6 +17852,7 @@ export interface IUserProfileDto {
   avatarUrl?: string | undefined;
   status?: string | undefined;
   createdAt?: Date;
+  roles?: string[] | undefined;
 }
 
 export class UserProfileDtoApiResponse implements IUserProfileDtoApiResponse {

@@ -87,6 +87,11 @@ export class AdminLayoutComponent implements OnInit {
 
   readonly userMenuItems: MenuItem[] = [
     {
+      label: 'Về trang chủ',
+      icon: 'pi pi-home',
+      command: () => this.router.navigate(['/home']),
+    },
+    {
       label: 'Quản lý thông tin',
       icon: 'pi pi-user-edit',
       command: () => this.openProfileDialog(),

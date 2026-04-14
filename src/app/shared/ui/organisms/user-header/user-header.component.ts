@@ -34,7 +34,7 @@ export class UserHeaderComponent implements OnInit {
           label: 'Trang quản trị',
           icon: 'pi pi-cog',
           visible: this.authSession.isAdmin(),
-          command: () => this.router.navigate(['/admin']),
+          command: () => this.router.navigate(['/admin/dashboard']),
         },
         { separator: true },
         {

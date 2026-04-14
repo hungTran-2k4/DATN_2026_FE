@@ -111,6 +111,7 @@ export class ProfileComponent implements OnInit {
             this.userEmail ||
             'U')[0].toUpperCase();
           this.avatarUrl = res.data.avatarUrl || '';
+          this.authSession.updateUserSession(res.data);
 
           this.profileForm.patchValue({
             fullName: res.data.fullName,
@@ -154,9 +155,8 @@ export class ProfileComponent implements OnInit {
           summary: 'Thành công',
           detail: 'Đã cập nhật thông tin cá nhân.',
         });
-        const session = this.authSession.getSession();
-        if (session && res.data) {
-          session.userName = res.data.fullName;
+        if (res.data) {
+          this.authSession.updateUserSession(res.data);
           this.sessionUserName = res.data.fullName;
         }
         this.loadProfile();

@@ -3,7 +3,7 @@
   <div class="container mx-auto px-4 max-w-7xl">
     <div class="flex items-end justify-between mb-8">
       <div>
-        <h2 class="text-3xl font-black text-gray-900 tracking-tight">
+        <h2 class="text-2xl font-black text-gray-900 tracking-tight">
           Danh Mục Sản Phẩm
         </h2>
         <!-- <p class="text-gray-500 text-sm mt-1">
@@ -282,7 +282,8 @@
           </div>
           <a [routerLink]="['/product', 1]" class="block">
             <h4
-              class="font-extrabold text-gray-900 mb-3 line-clamp-2 leading-tight cursor-pointer hover:text-emerald-500 transition-colors"
+              class="font-extrabold text-gray-900 mb-3 leading-tight cursor-pointer hover:text-emerald-500 transition-colors truncate"
+              [title]="product.name"
             >
               {{ product.name }}
             </h4>

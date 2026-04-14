@@ -12,8 +12,10 @@ interface StoredAuthSession {
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {
   private readonly sessionKey = 'datn_auth_session';
-  
-  private userSubject = new BehaviorSubject<StoredAuthSession | null>(this.getSession());
+
+  private userSubject = new BehaviorSubject<StoredAuthSession | null>(
+    this.getSession(),
+  );
   public currentUser$ = this.userSubject.asObservable();
 
   saveSession(auth: AuthResponse): void {
@@ -21,11 +23,33 @@ export class AuthSessionService {
       return;
     }
 
+    const current = this.getSession();
+    const normalizedRoles = this.extractRoles(auth, current);
+
     const payload: StoredAuthSession = {
-      userId: auth.user?.id,
-      userEmail: auth.user?.email,
-      userName: auth.user?.fullName,
-      roles: auth.user?.roles,
+      userId: auth.user?.id ?? current?.userId,
+      userEmail: auth.user?.email ?? current?.userEmail,
+      userName: auth.user?.fullName ?? current?.userName,
+      roles: normalizedRoles,
+    };
+
+    localStorage.setItem(this.sessionKey, JSON.stringify(payload));
+    this.userSubject.next(payload);
+  }
+
+  updateUserSession(userData: any): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    const current = this.getSession();
+    if (!current) return;
+
+    const payload: StoredAuthSession = {
+      ...current,
+      userEmail: userData.email ?? current.userEmail,
+      userName: userData.fullName ?? userData.username ?? current.userName,
+      roles: Array.isArray(userData.roles) ? userData.roles : current.roles,
     };
 
     localStorage.setItem(this.sessionKey, JSON.stringify(payload));
@@ -67,7 +91,7 @@ export class AuthSessionService {
     if (typeof localStorage === 'undefined') {
       return null;
     }
-    
+
     const raw = localStorage.getItem(this.sessionKey);
     if (!raw) {
       return null;
@@ -79,5 +103,31 @@ export class AuthSessionService {
       this.clearSession();
       return null;
     }
+  }
+
+  private extractRoles(
+    auth: AuthResponse,
+    current: StoredAuthSession | null,
+  ): string[] {
+    const rawRoles = (auth.user as any)?.roles;
+
+    if (Array.isArray(rawRoles) && rawRoles.length > 0) {
+      return rawRoles
+        .map((role) => {
+          if (typeof role === 'string') {
+            return role.trim();
+          }
+          if (role && typeof role === 'object') {
+            const roleName =
+              (role as { name?: unknown; roleName?: unknown }).name ??
+              (role as { name?: unknown; roleName?: unknown }).roleName;
+            return typeof roleName === 'string' ? roleName.trim() : '';
+          }
+          return '';
+        })
+        .filter((role) => !!role);
+    }
+
+    return current?.roles ?? [];
   }
 }

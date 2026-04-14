@@ -3,14 +3,26 @@
 <div class="admin-shell" [class.sidebar-collapsed]="sidebarCollapsed">
   <!-- ─── SIDEBAR ─── -->
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand" *ngIf="!sidebarCollapsed">
-        <img ngSrc="/images/logo-brand.png" width="140" height="40" alt="Vora Logo" class="h-9 w-auto">
-      </div>
-      <div class="brand brand--mini" *ngIf="sidebarCollapsed">
-        <img ngSrc="/images/logo-brand.png" width="32" height="32" alt="Vora" class="h-8 w-8 object-contain">
-      </div>
-    </div>
+    <!-- <div class="sidebar-header">
+      <a routerLink="/home" class="brand" *ngIf="!sidebarCollapsed">
+        <img
+          ngSrc="/images/logo-brand-2.0.png"
+          width="200"
+          height="64"
+          alt="Vora Logo"
+          class="brand-logo"
+        />
+      </a>
+      <a routerLink="/home" class="brand brand--mini" *ngIf="sidebarCollapsed">
+        <img
+          ngSrc="/images/logo-brand-2.0.png"
+          width="48"
+          height="48"
+          alt="Vora"
+          class="brand-logo-mini"
+        />
+      </a>
+    </div> -->
 
     <nav class="nav-menu">
       @for (item of navItems; track item.route) {
@@ -22,11 +34,12 @@
           tooltipPosition="right"
         >
           <i [class]="item.icon"></i>
-          <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
-          <span
-            class="nav-badge"
-            *ngIf="item.badge && !sidebarCollapsed"
-          >{{ item.badge }}</span>
+          <span class="nav-label" *ngIf="!sidebarCollapsed">{{
+            item.label
+          }}</span>
+          <span class="nav-badge" *ngIf="item.badge && !sidebarCollapsed">{{
+            item.badge
+          }}</span>
         </a>
       }
     </nav>
@@ -42,16 +55,15 @@
           tooltipPosition="right"
         >
           <i [class]="item.icon"></i>
-          <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+          <span class="nav-label" *ngIf="!sidebarCollapsed">{{
+            item.label
+          }}</span>
         </a>
       }
     </nav>
 
     <div class="sidebar-user" *ngIf="!sidebarCollapsed">
-      <span
-        class="user-avatar"
-        [class.has-image]="!!adminAvatarUrl"
-      >
+      <span class="user-avatar" [class.has-image]="!!adminAvatarUrl">
         <img
           *ngIf="adminAvatarUrl"
           [ngSrc]="adminAvatarUrl"
@@ -63,7 +75,7 @@
       </span>
       <div class="user-info">
         <strong>{{ adminName }}</strong>
-        <small>{{ adminEmail || 'admin' }}</small>
+        <small>{{ adminEmail || "admin" }}</small>
       </div>
       <button
         type="button"
@@ -81,7 +93,10 @@
     <header class="topbar">
       <div class="topbar-left">
         <button type="button" class="sidebar-toggle" (click)="toggleSidebar()">
-          <i class="pi" [ngClass]="sidebarCollapsed ? 'pi-bars' : 'pi-times'"></i>
+          <i
+            class="pi"
+            [ngClass]="sidebarCollapsed ? 'pi-bars' : 'pi-times'"
+          ></i>
         </button>
         <div class="topbar-search">
           <i class="pi pi-search"></i>
@@ -99,7 +114,10 @@
         </button>
 
         <div class="topbar-user" (click)="userMenu.toggle($event)">
-          <span class="user-avatar user-avatar--sm" [class.has-image]="!!adminAvatarUrl">
+          <span
+            class="user-avatar user-avatar--sm"
+            [class.has-image]="!!adminAvatarUrl"
+          >
             <img
               *ngIf="adminAvatarUrl"
               [ngSrc]="adminAvatarUrl"
@@ -107,7 +125,9 @@
               width="32"
               height="32"
             />
-            <ng-container *ngIf="!adminAvatarUrl">{{ adminInitials }}</ng-container>
+            <ng-container *ngIf="!adminAvatarUrl">{{
+              adminInitials
+            }}</ng-container>
           </span>
           <div class="topbar-user-text">
             <strong>{{ adminName }}</strong>
