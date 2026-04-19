@@ -74,11 +74,19 @@
         </button>
 
         <button 
-          (click)="setMenu('others', 'shop')"
-          [ngClass]="activeMenu === 'shop' ? 'text-user-primary font-medium' : 'text-gray-700 hover:text-user-primary'"
-          class="flex items-center gap-2 py-2 text-left transition-colors mt-4 pt-4 border-t border-gray-200">
+          (click)="goToSellerCenter()"
+          *ngIf="!authSession.isAdmin()"
+          class="flex items-center gap-2 py-2 text-left transition-colors mt-4 pt-4 border-t border-gray-200 w-full group"
+          [ngClass]="authSession.isSeller() ? 'text-user-primary font-medium' : 'text-gray-700 hover:text-user-primary'"
+        >
           <div class="w-5 flex justify-center"><i class="pi pi-shop text-green-500"></i></div>
-          Kênh người bán
+          <span>Kênh người bán</span>
+          <!-- Badge trạng thái -->
+          <ng-container *ngIf="sellerState$ | async as state">
+            <span *ngIf="state === 'pending'" class="ml-auto text-[10px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded-full">Chờ duyệt</span>
+            <span *ngIf="state === 'approved'" class="ml-auto text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">Đã duyệt</span>
+          </ng-container>
+          <i class="pi pi-external-link text-[10px] ml-auto text-gray-400 group-hover:text-user-primary" *ngIf="(sellerState$ | async) !== 'pending' && (sellerState$ | async) !== 'approved'"></i>
         </button>
 
       </nav>
@@ -201,73 +209,9 @@
         </div>
       </div>
 
-      <!-- Shop Registration Form (unchanged layout, just minor padding touchup to match) -->
-      <div *ngIf="activeMenu === 'shop'" class="bg-white rounded-sm shadow-sm border border-gray-100 p-8 animate-fade-in min-h-[500px]">
-        <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-8">
-          <div>
-            <h2 class="text-xl font-medium text-gray-900 capitalize mb-1">Bắt đầu bán hàng</h2>
-            <p class="text-gray-500 text-sm">Gia nhập hệ sinh thái kinh doanh cùng hàng triệu nhà bán hàng khác</p>
-          </div>
-          <div class="hidden md:flex text-5xl text-user-primary/20">
-            <i class="pi pi-store"></i>
-          </div>
-        </div>
-
-        <form [formGroup]="shopForm" (ngSubmit)="registerShop()" class="max-w-2xl px-4 md:px-8">
-          <div class="flex flex-col gap-6">
-            
-            <div class="flex flex-col gap-2">
-              <label class="font-semibold text-gray-700 text-sm">Tên Cửa Hàng (Shop Name) <span class="text-red-500">*</span></label>
-              <input pInputText type="text" formControlName="name" placeholder="Ví dụ: Cửa hàng điện máy xanh..." class="px-3 py-2 border border-gray-300 rounded focus:border-user-primary focus:ring-0 text-sm" />
-              <small class="text-red-500" *ngIf="shopForm.get('name')?.invalid && shopForm.get('name')?.touched">
-                Tên cửa hàng không được để trống
-              </small>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="font-semibold text-gray-700 text-sm">Đường dẫn định danh (Slug) <span class="text-red-500">*</span></label>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon bg-gray-50 text-sm border-gray-300">datn.com/shop/</span>
-                <input type="text" pInputText formControlName="slug" placeholder="cua-hang-dien-may" class="px-3 py-2 border-y border-r border-gray-300 rounded-r focus:border-user-primary focus:ring-0 text-sm" />
-              </div>
-              <small class="text-gray-400 text-xs">Khách hàng sẽ sử dụng đường dẫn này để truy cập trực tiếp vào Shop của bạn.</small>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="font-semibold text-gray-700 text-sm">Mô tả cửa hàng</label>
-              <textarea 
-                pInputText 
-                rows="4" 
-                formControlName="description" 
-                placeholder="Giới thiệu nhanh về loại hình sản phẩm và dịch vụ của shop..." 
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:border-user-primary focus:ring-0 text-sm">
-              </textarea>
-            </div>
-
-            <div class="bg-blue-50 text-blue-800 p-4 rounded-sm flex gap-3 mt-2 border border-blue-100">
-              <i class="pi pi-info-circle text-xl shrink-0 mt-0.5"></i>
-              <div class="text-[13px] leading-relaxed">
-                Sau khi cửa hàng được tạo, tài khoản của bạn sẽ tự động được cấp quyền <strong>Seller</strong>. Các quy định về phí dịch vụ và địa chỉ lấy hàng sẽ được cập nhật sau trong trang Quản trị Cửa Hàng.
-              </div>
-            </div>
-
-            <div class="border-t border-gray-100 pt-6 mt-2">
-              <p-button 
-                type="submit" 
-                label="Đăng ký Cửa Hàng ngay" 
-                icon="pi pi-check-circle"
-                [loading]="isSavingShop"
-                styleClass="bg-gray-900 border-gray-900 text-white hover:bg-gray-800 px-8 py-2.5 rounded-sm font-medium text-sm w-full sm:w-auto shadow-sm">
-              </p-button>
-            </div>
-
-          </div>
-        </form>
-      </div>
-      
       <!-- Placeholder for other menus -->
-      <div *ngIf="!['profile', 'shop'].includes(activeMenu)" class="bg-white rounded-sm shadow-sm border border-gray-100 p-8 animate-fade-in flex flex-col items-center justify-center min-h-[500px]">
-          <i class="pi pi-cog text-5xl text-gray-300 mb-4 animate-spin-slow"></i>
+      <div *ngIf="activeMenu !== 'profile'" class="bg-white rounded-sm shadow-sm border border-gray-100 p-8 animate-fade-in flex flex-col items-center justify-center min-h-[500px]">
+          <i class="pi pi-cog text-5xl text-gray-300 mb-4"></i>
           <h3 class="text-xl text-gray-800 font-medium capitalize">Chức năng {{ activeMenu }}</h3>
           <p class="text-sm text-gray-500 mt-2">Tính năng đang trong quá trình nâng cấp và sẽ sớm ra mắt.</p>
       </div>

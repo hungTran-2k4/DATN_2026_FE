@@ -1,0 +1,185 @@
+<p-toast position="top-right"></p-toast>
+
+<div class="seller-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Quản lý đơn hàng</h1>
+      <p class="page-subtitle">{{ result.totalRecords | number }} đơn hàng</p>
+    </div>
+    <button class="btn-outline" (click)="loadOrders()">
+      <i class="pi pi-refresh"></i> Làm mới
+    </button>
+  </div>
+
+  <!-- Status tabs -->
+  <div class="status-tabs">
+    <button
+      *ngFor="let tab of statusTabs"
+      (click)="onTabChange(tab.value)"
+      class="tab-btn"
+      [class.active]="selectedStatus === tab.value"
+    >{{ tab.label }}</button>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="orders-list" *ngIf="isLoading">
+    <div class="order-card" *ngFor="let s of skeletons">
+      <p-skeleton height="80px" borderRadius="12px"></p-skeleton>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!isLoading && result.items.length === 0">
+    <div class="empty-icon"><i class="pi pi-inbox"></i></div>
+    <h3>Không có đơn hàng nào</h3>
+    <p>{{ selectedStatus ? 'Không có đơn hàng với trạng thái này' : 'Chưa có đơn hàng nào' }}</p>
+  </div>
+
+  <!-- Orders list -->
+  <div class="orders-list" *ngIf="!isLoading && result.items.length > 0">
+    <div class="order-card" *ngFor="let order of result.items">
+      <div class="order-main">
+        <div class="order-left">
+          <div class="order-code">{{ order.orderCode }}</div>
+          <div class="order-product">{{ order.firstItemName }}</div>
+          <div class="order-meta">
+            <span><i class="pi pi-shopping-bag text-xs"></i> {{ order.totalItems }} sản phẩm</span>
+            <span><i class="pi pi-calendar text-xs"></i> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+        <div class="order-right">
+          <div class="order-amount">{{ formatPrice(order.totalAmount) }}</div>
+          <span class="badge" [ngClass]="getStatusClass(order.orderStatus)">
+            {{ getStatusLabel(order.orderStatus) }}
+          </span>
+          <div class="order-actions">
+            <button (click)="openDetail(order)" class="action-btn-sm action-view">
+              <i class="pi pi-eye"></i> Chi tiết
+            </button>
+            <button
+              *ngIf="canUpdateStatus(order.orderStatus)"
+              (click)="openStatusUpdate(order)"
+              class="action-btn-sm action-update"
+            >
+              <i class="pi pi-check-circle"></i> Cập nhật
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-wrap" *ngIf="!isLoading && result.totalRecords > pageSize">
+    <p-paginator
+      [rows]="pageSize"
+      [totalRecords]="result.totalRecords"
+      [first]="(currentPage - 1) * pageSize"
+      [rowsPerPageOptions]="[20, 50]"
+      (onPageChange)="onPageChange($event)"
+      styleClass="seller-paginator"
+    ></p-paginator>
+  </div>
+
+</div>
+
+<!-- ── Order Detail Dialog ── -->
+<p-dialog
+  header="Chi tiết đơn hàng"
+  [(visible)]="showDetail"
+  [modal]="true"
+  [style]="{width: 'min(600px, 96vw)'}"
+  [draggable]="false"
+>
+  <div *ngIf="isLoadingDetail" class="p-6">
+    <p-skeleton height="200px" borderRadius="12px"></p-skeleton>
+  </div>
+
+  <div *ngIf="!isLoadingDetail && selectedOrder" class="order-detail">
+    <div class="detail-header">
+      <div>
+        <p class="detail-code">{{ selectedOrder.orderCode }}</p>
+        <span class="badge" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
+          {{ getStatusLabel(selectedOrder.orderStatus) }}
+        </span>
+      </div>
+      <div class="detail-amount">{{ formatPrice(selectedOrder.totalAmount) }}</div>
+    </div>
+
+    <div class="detail-section">
+      <h4>Địa chỉ giao hàng</h4>
+      <p>{{ selectedOrder.shippingAddress }}</p>
+    </div>
+
+    <div class="detail-section">
+      <h4>Sản phẩm</h4>
+      <div class="detail-items">
+        <div class="detail-item" *ngFor="let item of selectedOrder.items">
+          <div class="item-name">{{ item.productNameSnapshot }}</div>
+          <div class="item-qty">x{{ item.quantity }}</div>
+          <div class="item-price">{{ formatPrice(item.unitPrice) }}</div>
+          <div class="item-subtotal">{{ formatPrice(item.subTotal) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-totals">
+      <div class="total-row">
+        <span>Phí vận chuyển</span>
+        <span>{{ formatPrice(selectedOrder.shippingFee) }}</span>
+      </div>
+      <div class="total-row total-final">
+        <span>Tổng cộng</span>
+        <span>{{ formatPrice(selectedOrder.totalAmount) }}</span>
+      </div>
+    </div>
+
+    <div class="detail-note" *ngIf="selectedOrder.customerNote">
+      <i class="pi pi-comment text-gray-400"></i>
+      <p>{{ selectedOrder.customerNote }}</p>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ── Update Status Dialog ── -->
+<p-dialog
+  header="Cập nhật trạng thái đơn hàng"
+  [(visible)]="showStatusDialog"
+  [modal]="true"
+  [style]="{width: 'min(440px, 96vw)'}"
+  [draggable]="false"
+>
+  <div class="status-form">
+    <div class="field">
+      <label class="field-label">Trạng thái mới <span class="text-red-500">*</span></label>
+      <div class="status-options">
+        <button
+          *ngFor="let opt of getNextStatusOptions(getOrderCurrentStatus(updatingOrderId))"
+          (click)="newStatus = opt.value"
+          class="status-option"
+          [class.selected]="newStatus === opt.value"
+        >{{ opt.label }}</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Ghi chú (tùy chọn)</label>
+      <textarea
+        pTextarea
+        [(ngModel)]="statusNote"
+        rows="3"
+        placeholder="Ghi chú cho người mua..."
+        class="w-full"
+      ></textarea>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-outline" (click)="showStatusDialog = false">Hủy</button>
+      <button class="btn-primary" [disabled]="!newStatus || isUpdating" (click)="updateStatus()">
+        <i class="pi pi-spin pi-spinner" *ngIf="isUpdating"></i>
+        <i class="pi pi-check" *ngIf="!isUpdating"></i>
+        Xác nhận
+      </button>
+    </div>
+  </div>
+</p-dialog>

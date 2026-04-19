@@ -1,0 +1,86 @@
+<p-toast position="top-right"></p-toast>
+
+<div class="seller-page">
+  <div class="page-header">
+    <h1 class="page-title">Cài đặt cửa hàng</h1>
+    <p class="page-subtitle">Quản lý thông tin và cấu hình cửa hàng của bạn</p>
+  </div>
+
+  <div class="settings-grid">
+    <!-- Shop info card -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon card-icon-emerald"><i class="pi pi-shop"></i></div>
+        <div>
+          <h3 class="card-title">Thông tin cửa hàng</h3>
+          <p class="card-subtitle">Tên, mô tả và địa chỉ lấy hàng</p>
+        </div>
+      </div>
+
+      <ng-container *ngIf="isLoading">
+        <div class="space-y-4">
+          <p-skeleton height="40px" borderRadius="10px"></p-skeleton>
+          <p-skeleton height="80px" borderRadius="10px"></p-skeleton>
+          <p-skeleton height="40px" borderRadius="10px"></p-skeleton>
+        </div>
+      </ng-container>
+
+      <form [formGroup]="form" (ngSubmit)="save()" *ngIf="!isLoading" class="settings-form">
+        <div class="field">
+          <label class="field-label">Tên cửa hàng <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="name" placeholder="Tên cửa hàng..." class="w-full" />
+          <p class="field-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">Tên cửa hàng không được để trống.</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Mô tả</label>
+          <textarea pTextarea formControlName="description" rows="4" placeholder="Giới thiệu về cửa hàng..." class="w-full resize-none"></textarea>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Địa chỉ lấy hàng</label>
+          <input pInputText formControlName="pickupAddress" placeholder="Số nhà, đường, phường, quận..." class="w-full" />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || isSaving">
+            <i class="pi pi-spin pi-spinner" *ngIf="isSaving"></i>
+            <i class="pi pi-check" *ngIf="!isSaving"></i>
+            Lưu thay đổi
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Shop status card -->
+    <div class="settings-card" *ngIf="shopInfo">
+      <div class="card-header">
+        <div class="card-icon card-icon-blue"><i class="pi pi-info-circle"></i></div>
+        <div>
+          <h3 class="card-title">Trạng thái cửa hàng</h3>
+          <p class="card-subtitle">Thông tin hiện tại của shop</p>
+        </div>
+      </div>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="info-label">Slug</span>
+          <span class="info-value font-mono text-emerald-600">{{ shopInfo.slug }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Trạng thái</span>
+          <span class="badge badge-success" *ngIf="shopInfo.approvalStatus === 2">Đã duyệt</span>
+          <span class="badge badge-warning" *ngIf="shopInfo.approvalStatus === 1">Chờ duyệt</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Ngày tạo</span>
+          <span class="info-value">{{ shopInfo.createdAt | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Hoạt động</span>
+          <span class="badge badge-success" *ngIf="shopInfo.isActive">Đang hoạt động</span>
+          <span class="badge badge-danger" *ngIf="!shopInfo.isActive">Tạm dừng</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

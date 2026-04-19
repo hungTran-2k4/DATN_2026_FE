@@ -1,0 +1,255 @@
+<p-toast position="top-right"></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="seller-page">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Quản lý sản phẩm</h1>
+      <p class="page-subtitle">{{ result.totalRecords | number }} sản phẩm trong cửa hàng</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateDialog()">
+      <i class="pi pi-plus"></i> Thêm sản phẩm
+    </button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="pi pi-search search-icon"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchKeyword"
+        (ngModelChange)="onSearch()"
+        placeholder="Tìm kiếm sản phẩm..."
+        class="search-input"
+      />
+    </div>
+    <button class="btn-outline" (click)="loadProducts()">
+      <i class="pi pi-refresh"></i> Làm mới
+    </button>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="products-grid" *ngIf="isLoading">
+    <div class="product-card" *ngFor="let s of skeletons">
+      <p-skeleton height="160px" borderRadius="12px 12px 0 0"></p-skeleton>
+      <div class="p-4 space-y-2">
+        <p-skeleton height="14px" width="60%"></p-skeleton>
+        <p-skeleton height="16px"></p-skeleton>
+        <p-skeleton height="14px" width="40%"></p-skeleton>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!isLoading && result.items.length === 0">
+    <div class="empty-icon"><i class="pi pi-box"></i></div>
+    <h3>Chưa có sản phẩm nào</h3>
+    <p>Bắt đầu bằng cách thêm sản phẩm đầu tiên của bạn</p>
+    <button class="btn-primary mt-4" (click)="openCreateDialog()">
+      <i class="pi pi-plus"></i> Thêm sản phẩm
+    </button>
+  </div>
+
+  <!-- Products grid -->
+  <div class="products-grid" *ngIf="!isLoading && result.items.length > 0">
+    <div class="product-card" *ngFor="let product of result.items">
+      <div class="product-image">
+        <img *ngIf="getMainImage(product)" [src]="getMainImage(product)" [alt]="product.name" loading="lazy" onerror="this.style.display='none'" />
+        <div class="product-image-placeholder" *ngIf="!getMainImage(product)">
+          <i class="pi pi-image text-3xl text-gray-300"></i>
+        </div>
+        <span class="product-status-badge" [ngClass]="'status-' + (product.status?.toLowerCase() ?? 'draft')">
+          {{ getStatusLabel(product.status) }}
+        </span>
+      </div>
+      <div class="product-info">
+        <p class="product-sku">{{ product.sku }}</p>
+        <h3 class="product-name" [title]="product.name">{{ product.name }}</h3>
+        <p class="product-meta"><i class="pi pi-eye text-xs"></i> {{ product.viewCount ?? 0 }} lượt xem</p>
+      </div>
+      <div class="product-actions">
+        <button (click)="openEditDialog(product)" class="action-btn action-edit" pTooltip="Chỉnh sửa" tooltipPosition="top">
+          <i class="pi pi-pencil"></i>
+        </button>
+        <a [routerLink]="['/product', product.id]" target="_blank" class="action-btn action-view" pTooltip="Xem trang" tooltipPosition="top">
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button (click)="confirmDelete(product)" class="action-btn action-delete" pTooltip="Xóa" tooltipPosition="top">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-wrap" *ngIf="!isLoading && result.totalRecords > pageSize">
+    <p-paginator
+      [rows]="pageSize"
+      [totalRecords]="result.totalRecords"
+      [first]="(currentPage - 1) * pageSize"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      (onPageChange)="onPageChange($event)"
+      styleClass="seller-paginator"
+    ></p-paginator>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     DIALOG: Tạo / Chỉnh sửa sản phẩm
+     ══════════════════════════════════════ -->
+<p-dialog
+  [header]="isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: 'min(720px, 96vw)'}"
+  (onHide)="closeDialog()"
+>
+  <form [formGroup]="form" (ngSubmit)="saveProduct()" class="product-form" novalidate>
+
+    <div class="form-grid">
+
+      <!-- Tên sản phẩm -->
+      <div class="field field-full">
+        <label class="field-label">Tên sản phẩm <span class="required">*</span></label>
+        <input
+          pInputText
+          formControlName="name"
+          placeholder="Nhập tên sản phẩm..."
+          class="w-full"
+          [class.p-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+        />
+        <p class="field-error" *ngIf="form.get('name')?.errors?.['required'] && form.get('name')?.touched">
+          Tên sản phẩm không được để trống.
+        </p>
+        <p class="field-error" *ngIf="form.get('name')?.errors?.['maxlength'] && form.get('name')?.touched">
+          Tên không được vượt quá 255 ký tự.
+        </p>
+      </div>
+
+      <!-- SKU -->
+      <div class="field">
+        <label class="field-label">SKU</label>
+        <input pInputText formControlName="sku" placeholder="VD: SP-001" class="w-full" />
+        <p class="field-hint">Mã định danh sản phẩm (tùy chọn)</p>
+      </div>
+
+      <!-- Slug -->
+      <div class="field">
+        <label class="field-label">Slug (URL)</label>
+        <div class="slug-input">
+          <span class="slug-prefix">sp/</span>
+          <input
+            type="text"
+            formControlName="slug"
+            placeholder="ten-san-pham"
+            class="slug-field"
+          />
+        </div>
+        <p class="field-hint">Tự động tạo từ tên sản phẩm</p>
+      </div>
+
+      <!-- Danh mục -->
+      <div class="field">
+        <label class="field-label">Danh mục</label>
+        <p-dropdown
+          [options]="categories"
+          formControlName="categoryId"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Chọn danh mục..."
+          [filter]="true"
+          filterPlaceholder="Tìm danh mục..."
+          [showClear]="true"
+          styleClass="w-full"
+          [loading]="isLoadingMeta"
+        ></p-dropdown>
+      </div>
+
+      <!-- Thương hiệu -->
+      <div class="field">
+        <label class="field-label">Thương hiệu</label>
+        <p-dropdown
+          [options]="brands"
+          formControlName="brandId"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Chọn thương hiệu..."
+          [filter]="true"
+          filterPlaceholder="Tìm thương hiệu..."
+          [showClear]="true"
+          styleClass="w-full"
+          [loading]="isLoadingMeta"
+        ></p-dropdown>
+      </div>
+
+      <!-- Trạng thái -->
+      <div class="field">
+        <label class="field-label">Trạng thái</label>
+        <p-dropdown
+          [options]="statusOptions"
+          formControlName="status"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        ></p-dropdown>
+      </div>
+
+      <!-- Mô tả ngắn -->
+      <div class="field field-full">
+        <label class="field-label">Mô tả ngắn</label>
+        <textarea
+          pTextarea
+          formControlName="summary"
+          rows="2"
+          placeholder="Mô tả ngắn hiển thị trong danh sách sản phẩm..."
+          class="w-full resize-none"
+          maxlength="500"
+        ></textarea>
+        <p class="field-hint text-right">{{ form.get('summary')?.value?.length ?? 0 }}/500</p>
+      </div>
+
+      <!-- Mô tả chi tiết -->
+      <div class="field field-full">
+        <label class="field-label">Mô tả chi tiết</label>
+        <textarea
+          pTextarea
+          formControlName="description"
+          rows="5"
+          placeholder="Mô tả đầy đủ về sản phẩm, tính năng, thông số kỹ thuật..."
+          class="w-full resize-none"
+        ></textarea>
+      </div>
+
+    </div>
+
+    <!-- Note về variants -->
+    <div class="form-note" *ngIf="!isEditMode">
+      <i class="pi pi-info-circle text-blue-500 shrink-0"></i>
+      <p>Sau khi tạo sản phẩm, bạn có thể thêm <strong>biến thể</strong> (màu sắc, kích thước) và <strong>ảnh sản phẩm</strong> trong trang chỉnh sửa.</p>
+    </div>
+
+  </form>
+
+  <!-- Dialog footer -->
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button type="button" class="btn-cancel" (click)="closeDialog()">Hủy</button>
+      <button
+        type="button"
+        class="btn-save"
+        [disabled]="form.invalid || isSaving"
+        (click)="saveProduct()"
+      >
+        <i class="pi pi-spin pi-spinner" *ngIf="isSaving"></i>
+        <i class="pi pi-check" *ngIf="!isSaving"></i>
+        {{ isEditMode ? 'Lưu thay đổi' : 'Tạo sản phẩm' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

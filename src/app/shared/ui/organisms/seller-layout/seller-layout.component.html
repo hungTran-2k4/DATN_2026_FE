@@ -1,0 +1,109 @@
+<p-toast position="top-right"></p-toast>
+
+<div class="seller-shell" [class.sidebar-collapsed]="sidebarCollapsed">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-header">
+      <div class="brand" *ngIf="!sidebarCollapsed">
+        <div class="brand-icon">
+          <i class="pi pi-shop"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Seller Center</span>
+          <span class="brand-sub">{{ shopName || sellerName }}</span>
+        </div>
+      </div>
+      <div class="brand brand--mini" *ngIf="sidebarCollapsed">
+        <div class="brand-icon brand-icon--mini">
+          <i class="pi pi-shop"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="nav-menu">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.route"
+        routerLinkActive="is-active"
+        class="nav-link"
+        [pTooltip]="sidebarCollapsed ? item.label : ''"
+        tooltipPosition="right"
+      >
+        <i [class]="item.icon"></i>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+        <span class="nav-badge" *ngIf="item.badge && !sidebarCollapsed">{{ item.badge }}</span>
+      </a>
+    </nav>
+
+    <div class="nav-section-label" *ngIf="!sidebarCollapsed">Cài đặt</div>
+    <nav class="nav-menu nav-menu--bottom">
+      <a
+        *ngFor="let item of bottomItems"
+        [routerLink]="item.route"
+        routerLinkActive="is-active"
+        class="nav-link"
+        [pTooltip]="sidebarCollapsed ? item.label : ''"
+        tooltipPosition="right"
+      >
+        <i [class]="item.icon"></i>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- User info -->
+    <div class="sidebar-user" *ngIf="!sidebarCollapsed">
+      <span class="user-avatar">{{ sellerInitials }}</span>
+      <div class="user-info">
+        <strong>{{ sellerName }}</strong>
+        <small>Người bán</small>
+      </div>
+      <button type="button" class="user-menu-btn" (click)="userMenu.toggle($event)">
+        <i class="pi pi-ellipsis-v"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main-area">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="sidebar-toggle" (click)="toggleSidebar()">
+          <i class="pi" [ngClass]="sidebarCollapsed ? 'pi-bars' : 'pi-times'"></i>
+        </button>
+        <div class="topbar-breadcrumb">
+          <i class="pi pi-shop text-seller-primary mr-2"></i>
+          <span class="font-semibold text-gray-700">Seller Center</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <button type="button" class="topbar-icon-btn" aria-label="Thông báo">
+          <i class="pi pi-bell"></i>
+          <span class="notify-dot"></span>
+        </button>
+        <a routerLink="/home" class="topbar-icon-btn" pTooltip="Về trang mua sắm" tooltipPosition="bottom">
+          <i class="pi pi-home"></i>
+        </a>
+        <div class="topbar-user" (click)="userMenu.toggle($event)">
+          <span class="user-avatar user-avatar--sm">{{ sellerInitials }}</span>
+          <div class="topbar-user-text">
+            <strong>{{ sellerName }}</strong>
+            <small>Người bán</small>
+          </div>
+          <i class="pi pi-angle-down"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <section class="page-body">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
+
+<p-menu #userMenu [model]="userMenuItems" [popup]="true" appendTo="body"></p-menu>

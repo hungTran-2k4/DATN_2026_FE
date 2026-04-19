@@ -1,0 +1,324 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6" novalidate>
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 pb-4 border-b border-gray-100">
+    <div class="w-10 h-10 rounded-xl bg-user-primary/10 flex items-center justify-center">
+      <i class="pi pi-shop text-user-primary text-lg"></i>
+    </div>
+    <div>
+      <h3 class="font-black text-gray-900 text-base">Thông tin cửa hàng</h3>
+      <p class="text-xs text-gray-500 mt-0.5">Điền đầy đủ thông tin để đăng ký làm người bán</p>
+    </div>
+  </div>
+
+  <!-- Tên shop -->
+  <div class="field">
+    <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+      Tên cửa hàng <span class="text-red-500">*</span>
+    </label>
+    <div class="relative">
+      <input
+        pInputText
+        formControlName="name"
+        (input)="onNameInput()"
+        placeholder="Ví dụ: Cửa Hàng Thời Trang ABC"
+        class="w-full"
+        [class.p-invalid]="nameControl?.invalid && nameControl?.touched"
+        maxlength="100"
+      />
+      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+        {{ nameControl?.value?.length ?? 0 }}/100
+      </span>
+    </div>
+    <div *ngIf="nameControl?.invalid && nameControl?.touched" class="mt-1.5 space-y-0.5">
+      <p *ngIf="nameControl?.errors?.['required']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> Tên cửa hàng không được để trống.
+      </p>
+      <p *ngIf="nameControl?.errors?.['whitespace']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> Tên cửa hàng không được chỉ chứa khoảng trắng.
+      </p>
+      <p *ngIf="nameControl?.errors?.['maxlength']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> Tên cửa hàng không được vượt quá 100 ký tự.
+      </p>
+    </div>
+  </div>
+
+  <!-- Slug -->
+  <div class="field">
+    <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+      Slug (URL định danh) <span class="text-red-500">*</span>
+      <i
+        class="pi pi-info-circle text-gray-400 ml-1 cursor-help"
+        pTooltip="Slug là định danh duy nhất của shop trên URL. Chỉ dùng chữ thường, số và dấu gạch ngang."
+        tooltipPosition="top"
+      ></i>
+    </label>
+    <div class="relative">
+      <div class="flex items-center border rounded-xl overflow-hidden transition-all"
+        [ngClass]="{
+          'border-red-400 ring-1 ring-red-400': slugControl?.invalid && slugControl?.touched,
+          'border-user-primary ring-1 ring-user-primary': slugControl?.valid && slugControl?.dirty,
+          'border-gray-300': !(slugControl?.invalid && slugControl?.touched) && !(slugControl?.valid && slugControl?.dirty)
+        }"
+      >
+        <span class="px-3 py-2.5 bg-gray-50 text-gray-400 text-sm border-r border-gray-200 shrink-0 select-none">
+          shop/
+        </span>
+        <input
+          type="text"
+          formControlName="slug"
+          (input)="onSlugInput()"
+          placeholder="ten-cua-hang-cua-ban"
+          class="flex-1 px-3 py-2.5 text-sm outline-none bg-white font-mono"
+          maxlength="50"
+        />
+        <!-- Async validation indicator -->
+        <div class="px-3 shrink-0">
+          <ng-container *ngIf="slugControl?.pending">
+            <i class="pi pi-spin pi-spinner text-gray-400 text-sm"></i>
+          </ng-container>
+          <ng-container *ngIf="!slugControl?.pending && slugControl?.valid && slugControl?.dirty">
+            <i class="pi pi-check-circle text-user-primary text-sm"></i>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="slugControl?.invalid && slugControl?.touched" class="mt-1.5 space-y-0.5">
+      <p *ngIf="slugControl?.errors?.['required']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> Slug không được để trống.
+      </p>
+      <p *ngIf="slugControl?.errors?.['slugPattern']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> Slug chỉ được chứa chữ thường, số và dấu gạch ngang.
+      </p>
+      <p *ngIf="slugControl?.errors?.['maxlength']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> Slug không được vượt quá 50 ký tự.
+      </p>
+      <p *ngIf="slugControl?.errors?.['slugTaken']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> Slug này đã được sử dụng, vui lòng chọn slug khác.
+      </p>
+      <p *ngIf="slugControl?.errors?.['serverError']" class="text-xs text-red-500 flex items-center gap-1">
+        <i class="pi pi-exclamation-circle text-xs"></i> {{ slugControl?.errors?.['serverError'] }}
+      </p>
+    </div>
+    <p class="text-xs text-gray-400 mt-1.5">
+      Gợi ý: chỉ dùng chữ thường, số và dấu <code class="bg-gray-100 px-1 rounded">-</code>. Ví dụ: <code class="bg-gray-100 px-1 rounded">cua-hang-abc-2026</code>
+    </p>
+  </div>
+
+  <!-- Mô tả -->
+  <div class="field">
+    <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+      Mô tả cửa hàng
+      <span class="text-gray-400 font-normal text-xs ml-1">(tùy chọn)</span>
+    </label>
+    <textarea
+      pTextarea
+      formControlName="description"
+      rows="3"
+      placeholder="Giới thiệu ngắn về cửa hàng của bạn..."
+      class="w-full resize-none"
+      [class.p-invalid]="descriptionControl?.invalid && descriptionControl?.touched"
+      maxlength="500"
+    ></textarea>
+    <div class="flex justify-between mt-1">
+      <p *ngIf="descriptionControl?.errors?.['maxlength']" class="text-xs text-red-500">
+        Mô tả không được vượt quá 500 ký tự.
+      </p>
+      <span class="text-xs text-gray-400 ml-auto">{{ descriptionControl?.value?.length ?? 0 }}/500</span>
+    </div>
+  </div>
+
+  <!-- ── SECTION: Địa chỉ Shop (hiển thị) ── -->
+  <div class="field">
+    <div class="flex items-center gap-2 mb-3">
+      <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+        <i class="pi pi-building text-blue-500 text-xs"></i>
+      </div>
+      <label class="text-sm font-bold text-gray-800">
+        Địa chỉ cửa hàng
+        <span class="text-gray-400 font-normal text-xs ml-1">(hiển thị với khách hàng)</span>
+      </label>
+    </div>
+
+    <div class="space-y-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <p-dropdown
+          [options]="provinces"
+          formControlName="shopProvince"
+          optionLabel="name"
+          placeholder="Tỉnh / Thành phố"
+          [filter]="true"
+          filterPlaceholder="Tìm tỉnh thành..."
+          [showClear]="true"
+          (onChange)="onShopProvinceChange()"
+          styleClass="w-full"
+          [loading]="isLoadingProvinces"
+        ></p-dropdown>
+        <p-dropdown
+          [options]="shopDistricts"
+          formControlName="shopDistrict"
+          optionLabel="name"
+          placeholder="Quận / Huyện"
+          [filter]="true"
+          filterPlaceholder="Tìm quận huyện..."
+          [showClear]="true"
+          (onChange)="onShopDistrictChange()"
+          styleClass="w-full"
+          [loading]="isLoadingShopDistricts"
+        ></p-dropdown>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <p-dropdown
+          [options]="shopWards"
+          formControlName="shopWard"
+          optionLabel="name"
+          placeholder="Phường / Xã"
+          [filter]="true"
+          filterPlaceholder="Tìm phường xã..."
+          [showClear]="true"
+          styleClass="w-full"
+          [loading]="isLoadingShopWards"
+        ></p-dropdown>
+        <input
+          pInputText
+          formControlName="shopStreet"
+          placeholder="Số nhà, tên đường..."
+          class="w-full"
+        />
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div
+      *ngIf="shopStreetControl?.value || shopWardControl?.value || shopDistrictControl?.value || shopProvinceControl?.value"
+      class="mt-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 flex items-start gap-2"
+    >
+      <i class="pi pi-map-marker text-blue-500 text-sm mt-0.5 shrink-0"></i>
+      <p class="text-sm text-gray-700 leading-relaxed">
+        <ng-container *ngIf="shopStreetControl?.value">{{ shopStreetControl?.value }}, </ng-container>
+        <ng-container *ngIf="shopWardControl?.value">{{ shopWardControl?.value?.name }}, </ng-container>
+        <ng-container *ngIf="shopDistrictControl?.value">{{ shopDistrictControl?.value?.name }}, </ng-container>
+        <ng-container *ngIf="shopProvinceControl?.value">{{ shopProvinceControl?.value?.name }}</ng-container>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── SECTION: Địa chỉ lấy hàng (logistics) ── -->
+  <div class="field">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+          <i class="pi pi-truck text-user-primary text-xs"></i>
+        </div>
+        <label class="text-sm font-bold text-gray-800">
+          Địa chỉ lấy hàng
+          <span class="text-gray-400 font-normal text-xs ml-1">(shipper đến lấy)</span>
+        </label>
+      </div>
+      <!-- Checkbox dùng chung -->
+      <label class="flex items-center gap-2 cursor-pointer select-none group">
+        <div
+          (click)="toggleSameAddress()"
+          class="w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0"
+          [ngClass]="sameAsShopAddress ? 'bg-user-primary border-user-primary' : 'border-gray-300 group-hover:border-user-primary'"
+        >
+          <i *ngIf="sameAsShopAddress" class="pi pi-check text-white" style="font-size: 9px"></i>
+        </div>
+        <span class="text-xs text-gray-600 group-hover:text-gray-900 transition-colors">Giống địa chỉ cửa hàng</span>
+      </label>
+    </div>
+
+    <!-- Tooltip giải thích -->
+    <div class="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 flex gap-2 mb-3">
+      <i class="pi pi-info-circle text-amber-500 text-sm mt-0.5 shrink-0"></i>
+      <p class="text-xs text-amber-700 leading-relaxed">
+        Đây là địa chỉ <strong>kho hàng</strong> — nơi shipper đến lấy hàng sau khi có đơn. Dùng để tính phí vận chuyển và điều phối shipper gần nhất.
+      </p>
+    </div>
+
+    <div [class.opacity-50]="sameAsShopAddress" [class.pointer-events-none]="sameAsShopAddress" class="space-y-3 transition-opacity">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <p-dropdown
+          [options]="provinces"
+          formControlName="province"
+          optionLabel="name"
+          placeholder="Tỉnh / Thành phố"
+          [filter]="true"
+          filterPlaceholder="Tìm tỉnh thành..."
+          [showClear]="true"
+          (onChange)="onProvinceChange()"
+          styleClass="w-full"
+          [loading]="isLoadingProvinces"
+        ></p-dropdown>
+        <p-dropdown
+          [options]="districts"
+          formControlName="district"
+          optionLabel="name"
+          placeholder="Quận / Huyện"
+          [filter]="true"
+          filterPlaceholder="Tìm quận huyện..."
+          [showClear]="true"
+          (onChange)="onDistrictChange()"
+          styleClass="w-full"
+          [loading]="isLoadingDistricts"
+        ></p-dropdown>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <p-dropdown
+          [options]="wards"
+          formControlName="ward"
+          optionLabel="name"
+          placeholder="Phường / Xã"
+          [filter]="true"
+          filterPlaceholder="Tìm phường xã..."
+          [showClear]="true"
+          styleClass="w-full"
+          [loading]="isLoadingWards"
+        ></p-dropdown>
+        <input
+          pInputText
+          formControlName="street"
+          placeholder="Số nhà, tên đường..."
+          class="w-full"
+          [class.p-invalid]="streetControl?.invalid && streetControl?.touched"
+        />
+      </div>
+    </div>
+
+    <!-- Preview pickup address -->
+    <div
+      *ngIf="streetControl?.value || wardControl?.value || districtControl?.value || provinceControl?.value"
+      class="mt-2 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5 flex items-start gap-2"
+    >
+      <i class="pi pi-map-marker text-user-primary text-sm mt-0.5 shrink-0"></i>
+      <p class="text-sm text-gray-700 leading-relaxed">
+        <ng-container *ngIf="streetControl?.value">{{ streetControl?.value }}, </ng-container>
+        <ng-container *ngIf="wardControl?.value">{{ wardControl?.value?.name }}, </ng-container>
+        <ng-container *ngIf="districtControl?.value">{{ districtControl?.value?.name }}, </ng-container>
+        <ng-container *ngIf="provinceControl?.value">{{ provinceControl?.value?.name }}</ng-container>
+      </p>
+    </div>
+  </div>
+
+  <!-- Điều khoản -->
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
+    <i class="pi pi-info-circle text-amber-500 mt-0.5 shrink-0"></i>
+    <p class="text-xs text-amber-700 leading-relaxed">
+      Sau khi đăng ký, đơn của bạn sẽ được <strong>Admin xem xét và duyệt</strong> trong vòng 1-3 ngày làm việc.
+      Bạn sẽ nhận được thông báo khi có kết quả.
+    </p>
+  </div>
+
+  <!-- Submit button -->
+  <div class="flex justify-end pt-2">
+    <p-button
+      type="submit"
+      label="Gửi đơn đăng ký"
+      icon="pi pi-send"
+      [loading]="isLoading"
+      [disabled]="isLoading"
+      styleClass="bg-user-primary border-user-primary hover:bg-user-primary-hover px-6 py-2.5 font-bold rounded-xl"
+    ></p-button>
+  </div>
+
+</form>

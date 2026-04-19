@@ -1,0 +1,449 @@
+<div class="min-h-screen bg-user-bg font-inter">
+
+  <!-- ── Page Header ── -->
+  <div class="bg-white border-b border-user-border">
+    <div class="container mx-auto px-4 max-w-7xl py-5">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+        <a routerLink="/home" class="hover:text-user-primary transition-colors">Trang chủ</a>
+        <i class="pi pi-angle-right text-xs"></i>
+        <span class="text-gray-800 font-semibold">Sản phẩm</span>
+        <ng-container *ngIf="searchKeyword">
+          <i class="pi pi-angle-right text-xs"></i>
+          <span class="text-user-primary font-semibold">"{{ searchKeyword }}"</span>
+        </ng-container>
+      </nav>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-black text-gray-900">
+            {{ searchKeyword ? 'Kết quả tìm kiếm' : 'Tất cả sản phẩm' }}
+          </h1>
+          <p class="text-sm text-gray-500 mt-0.5" *ngIf="!isLoading">
+            {{ result.totalRecords | number }} sản phẩm
+          </p>
+        </div>
+
+        <!-- Search bar -->
+        <div class="relative w-full sm:w-80">
+          <input
+            type="text"
+            [(ngModel)]="searchKeyword"
+            (ngModelChange)="onSearchInput()"
+            (keyup.enter)="onSearchSubmit()"
+            placeholder="Tìm kiếm sản phẩm..."
+            class="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-5 pr-12 text-sm focus:outline-none focus:border-user-primary focus:ring-1 focus:ring-user-primary transition-all"
+          />
+          <button
+            (click)="onSearchSubmit()"
+            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 bg-user-primary rounded-full flex items-center justify-center text-white hover:bg-user-primary-hover transition-colors"
+          >
+            <i class="pi pi-search text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main Layout ── -->
+  <div class="container mx-auto px-4 max-w-7xl py-8">
+    <div class="flex gap-8">
+
+      <!-- ── Sidebar Filter (Desktop) ── -->
+      <aside class="hidden lg:block w-64 shrink-0">
+        <div class="bg-white rounded-2xl border border-user-border p-6 sticky top-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-black text-gray-900 text-base">Bộ lọc</h3>
+            <button
+              *ngIf="hasActiveFilters()"
+              (click)="clearFilters()"
+              class="text-xs text-user-primary font-semibold hover:underline"
+            >
+              Xóa tất cả
+            </button>
+          </div>
+
+          <!-- Categories -->
+          <div class="mb-6" *ngIf="categories.length > 0">
+            <h4 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Danh mục</h4>
+            <div class="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scroll">
+              <label
+                *ngFor="let cat of categories"
+                class="flex items-center gap-3 cursor-pointer group py-1"
+              >
+                <div
+                  (click)="toggleCategory(cat.id!)"
+                  class="w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0"
+                  [ngClass]="isCategorySelected(cat.id!) ? 'bg-user-primary border-user-primary' : 'border-gray-300 group-hover:border-user-primary'"
+                >
+                  <i *ngIf="isCategorySelected(cat.id!)" class="pi pi-check text-white" style="font-size: 9px"></i>
+                </div>
+                <span
+                  (click)="toggleCategory(cat.id!)"
+                  class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors"
+                  [ngClass]="{'font-semibold text-gray-900': isCategorySelected(cat.id!)}"
+                >{{ cat.name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Brands -->
+          <div class="mb-6" *ngIf="brands.length > 0">
+            <h4 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Thương hiệu</h4>
+            <div class="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scroll">
+              <label
+                *ngFor="let brand of brands"
+                class="flex items-center gap-3 cursor-pointer group py-1"
+              >
+                <div
+                  (click)="toggleBrand(brand.id!)"
+                  class="w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0"
+                  [ngClass]="isBrandSelected(brand.id!) ? 'bg-user-primary border-user-primary' : 'border-gray-300 group-hover:border-user-primary'"
+                >
+                  <i *ngIf="isBrandSelected(brand.id!)" class="pi pi-check text-white" style="font-size: 9px"></i>
+                </div>
+                <span
+                  (click)="toggleBrand(brand.id!)"
+                  class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors"
+                  [ngClass]="{'font-semibold text-gray-900': isBrandSelected(brand.id!)}"
+                >{{ brand.name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Active filter chips -->
+          <div *ngIf="hasActiveFilters()" class="pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-500 mb-2">Đang lọc:</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span
+                *ngFor="let id of selectedCategoryIds"
+                class="inline-flex items-center gap-1 bg-user-primary/10 text-user-primary text-xs font-semibold px-2.5 py-1 rounded-full"
+              >
+                {{ getCategoryName(id) }}
+                <button (click)="toggleCategory(id)" class="hover:text-red-500 transition-colors ml-0.5">
+                  <i class="pi pi-times" style="font-size: 9px"></i>
+                </button>
+              </span>
+              <span
+                *ngFor="let id of selectedBrandIds"
+                class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-xs font-semibold px-2.5 py-1 rounded-full"
+              >
+                {{ getBrandName(id) }}
+                <button (click)="toggleBrand(id)" class="hover:text-red-500 transition-colors ml-0.5">
+                  <i class="pi pi-times" style="font-size: 9px"></i>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ── Product Area ── -->
+      <div class="flex-1 min-w-0">
+
+        <!-- Toolbar -->
+        <div class="flex items-center justify-between mb-6 bg-white rounded-2xl border border-user-border px-5 py-3">
+          <div class="flex items-center gap-3">
+            <!-- Mobile filter toggle -->
+            <button
+              (click)="isSidebarOpen = true"
+              class="lg:hidden flex items-center gap-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl px-3 py-2 hover:border-user-primary hover:text-user-primary transition-all"
+            >
+              <i class="pi pi-sliders-h"></i>
+              Lọc
+              <span *ngIf="totalActiveFilters > 0" class="w-5 h-5 bg-user-primary text-white text-xs rounded-full flex items-center justify-center">
+                {{ totalActiveFilters }}
+              </span>
+            </button>
+
+            <span class="text-sm text-gray-500 hidden sm:block">
+              <span class="font-bold text-gray-900">{{ result.totalRecords | number }}</span> sản phẩm
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Sort -->
+            <p-dropdown
+              [options]="sortOptions"
+              [(ngModel)]="selectedSort"
+              optionLabel="label"
+              (onChange)="onSortChange()"
+              styleClass="text-sm border-gray-200 rounded-xl"
+              [style]="{'min-width': '160px'}"
+            ></p-dropdown>
+
+            <!-- View toggle -->
+            <div class="hidden sm:flex items-center border border-gray-200 rounded-xl overflow-hidden">
+              <button
+                (click)="viewMode = 'grid'"
+                class="w-9 h-9 flex items-center justify-center transition-colors"
+                [ngClass]="viewMode === 'grid' ? 'bg-user-primary text-white' : 'text-gray-400 hover:text-gray-700'"
+              >
+                <i class="pi pi-th-large text-sm"></i>
+              </button>
+              <button
+                (click)="viewMode = 'list'"
+                class="w-9 h-9 flex items-center justify-center transition-colors"
+                [ngClass]="viewMode === 'list' ? 'bg-user-primary text-white' : 'text-gray-400 hover:text-gray-700'"
+              >
+                <i class="pi pi-list text-sm"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Skeleton Loading ── -->
+        <ng-container *ngIf="isLoading">
+          <div [ngClass]="viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-5' : 'flex flex-col gap-4'">
+            <div *ngFor="let s of skeletonItems" class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <p-skeleton height="200px" styleClass="rounded-none"></p-skeleton>
+              <div class="p-4 space-y-2">
+                <p-skeleton height="14px" width="60%"></p-skeleton>
+                <p-skeleton height="16px"></p-skeleton>
+                <p-skeleton height="16px" width="80%"></p-skeleton>
+                <p-skeleton height="20px" width="40%"></p-skeleton>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ── Empty State ── -->
+        <ng-container *ngIf="!isLoading && result.items.length === 0">
+          <div class="flex flex-col items-center justify-center py-24 text-center">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <i class="pi pi-search text-4xl text-gray-300"></i>
+            </div>
+            <h3 class="text-xl font-black text-gray-800 mb-2">Không tìm thấy sản phẩm</h3>
+            <p class="text-gray-500 text-sm mb-6 max-w-xs">
+              Thử thay đổi từ khóa hoặc xóa bộ lọc để xem thêm kết quả.
+            </p>
+            <button
+              (click)="clearFilters()"
+              class="px-6 py-2.5 bg-user-primary text-white rounded-xl font-semibold hover:bg-user-primary-hover transition-colors"
+            >
+              Xóa bộ lọc
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- ── Grid View ── -->
+        <ng-container *ngIf="!isLoading && result.items.length > 0 && viewMode === 'grid'">
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-5">
+            <a
+              *ngFor="let product of result.items"
+              [routerLink]="['/product', product.id]"
+              class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+            >
+              <!-- Image -->
+              <div class="relative aspect-square bg-gray-50 overflow-hidden">
+                <img
+                  [src]="getMainImage(product)"
+                  [alt]="product.name"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  onerror="this.src='https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image'"
+                />
+                <!-- Status badge -->
+                <div *ngIf="product.status" class="absolute top-3 left-3">
+                  <span
+                    class="text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider"
+                    [ngClass]="{
+                      'bg-emerald-500 text-white': product.status === 'Active' || product.status === 'active',
+                      'bg-yellow-400 text-gray-900': product.status === 'Draft' || product.status === 'draft',
+                      'bg-gray-200 text-gray-600': product.status !== 'Active' && product.status !== 'active' && product.status !== 'Draft' && product.status !== 'draft'
+                    }"
+                  >{{ product.status }}</span>
+                </div>
+                <!-- Hover overlay -->
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div class="flex gap-2">
+                    <button
+                      (click)="$event.preventDefault()"
+                      class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-red-500 hover:scale-110 transition-all"
+                      pTooltip="Yêu thích" tooltipPosition="top"
+                    >
+                      <i class="pi pi-heart text-sm"></i>
+                    </button>
+                    <button
+                      (click)="$event.preventDefault()"
+                      class="w-10 h-10 bg-user-primary rounded-full shadow-lg flex items-center justify-center text-white hover:bg-user-primary-hover hover:scale-110 transition-all"
+                      pTooltip="Thêm vào giỏ" tooltipPosition="top"
+                    >
+                      <i class="pi pi-shopping-cart text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Info -->
+              <div class="p-4 flex flex-col flex-1">
+                <p class="text-[11px] text-user-primary font-bold uppercase tracking-wider mb-1.5">
+                  {{ product.sku ?? 'SKU' }}
+                </p>
+                <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-3 flex-1">
+                  {{ product.name }}
+                </h3>
+                <div class="flex items-center justify-between mt-auto">
+                  <div class="flex items-center gap-1 text-yellow-400 text-xs">
+                    <i class="pi pi-star-fill"></i>
+                    <i class="pi pi-star-fill"></i>
+                    <i class="pi pi-star-fill"></i>
+                    <i class="pi pi-star-fill"></i>
+                    <i class="pi pi-star-half-fill"></i>
+                    <span class="text-gray-400 ml-1 font-medium">({{ product.viewCount ?? 0 }})</span>
+                  </div>
+                  <button
+                    (click)="$event.preventDefault()"
+                    class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-user-primary hover:text-white transition-all"
+                  >
+                    <i class="pi pi-plus text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </a>
+          </div>
+        </ng-container>
+
+        <!-- ── List View ── -->
+        <ng-container *ngIf="!isLoading && result.items.length > 0 && viewMode === 'list'">
+          <div class="flex flex-col gap-4">
+            <a
+              *ngFor="let product of result.items"
+              [routerLink]="['/product', product.id]"
+              class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex gap-0"
+            >
+              <!-- Image -->
+              <div class="w-40 sm:w-52 shrink-0 bg-gray-50 overflow-hidden">
+                <img
+                  [src]="getMainImage(product)"
+                  [alt]="product.name"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  onerror="this.src='https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image'"
+                />
+              </div>
+              <!-- Info -->
+              <div class="flex-1 p-5 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-start justify-between gap-4 mb-2">
+                    <div>
+                      <p class="text-[11px] text-user-primary font-bold uppercase tracking-wider mb-1">{{ product.sku }}</p>
+                      <h3 class="text-base font-bold text-gray-900 group-hover:text-user-primary transition-colors leading-snug">
+                        {{ product.name }}
+                      </h3>
+                    </div>
+                    <span
+                      *ngIf="product.status"
+                      class="shrink-0 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider"
+                      [ngClass]="{
+                        'bg-emerald-100 text-emerald-700': product.status === 'Active' || product.status === 'active',
+                        'bg-yellow-100 text-yellow-700': product.status === 'Draft' || product.status === 'draft'
+                      }"
+                    >{{ product.status }}</span>
+                  </div>
+                  <p class="text-sm text-gray-500 line-clamp-2 mt-2">{{ product.summary }}</p>
+                </div>
+                <div class="flex items-center justify-between mt-4">
+                  <div class="flex items-center gap-1 text-yellow-400 text-xs">
+                    <i class="pi pi-star-fill"></i><i class="pi pi-star-fill"></i>
+                    <i class="pi pi-star-fill"></i><i class="pi pi-star-fill"></i>
+                    <i class="pi pi-star-half-fill"></i>
+                    <span class="text-gray-400 ml-1">({{ product.viewCount ?? 0 }})</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="$event.preventDefault()"
+                      class="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-red-300 hover:text-red-500 transition-all"
+                    >
+                      <i class="pi pi-heart text-xs"></i>
+                      <span class="hidden sm:inline">Yêu thích</span>
+                    </button>
+                    <button
+                      (click)="$event.preventDefault()"
+                      class="flex items-center gap-1.5 px-4 py-2 bg-user-primary text-white rounded-xl text-sm font-semibold hover:bg-user-primary-hover transition-colors"
+                    >
+                      <i class="pi pi-shopping-cart text-xs"></i>
+                      <span class="hidden sm:inline">Thêm vào giỏ</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </ng-container>
+
+        <!-- ── Pagination ── -->
+        <div *ngIf="!isLoading && result.totalRecords > pageSize" class="mt-8 flex justify-center">
+          <p-paginator
+            [rows]="pageSize"
+            [totalRecords]="result.totalRecords"
+            [first]="(currentPage - 1) * pageSize"
+            [rowsPerPageOptions]="[12, 24, 48]"
+            (onPageChange)="onPageChange($event)"
+            styleClass="border-0 bg-transparent"
+          ></p-paginator>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Mobile Sidebar Overlay ── -->
+<div
+  *ngIf="isSidebarOpen"
+  class="fixed inset-0 z-50 lg:hidden"
+>
+  <div class="absolute inset-0 bg-black/50" (click)="isSidebarOpen = false"></div>
+  <div class="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="font-black text-gray-900 text-lg">Bộ lọc</h3>
+      <button (click)="isSidebarOpen = false" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+        <i class="pi pi-times text-gray-500"></i>
+      </button>
+    </div>
+
+    <!-- Categories -->
+    <div class="mb-6" *ngIf="categories.length > 0">
+      <h4 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Danh mục</h4>
+      <div class="space-y-2">
+        <label *ngFor="let cat of categories" class="flex items-center gap-3 cursor-pointer group py-1">
+          <div
+            (click)="toggleCategory(cat.id!)"
+            class="w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0"
+            [ngClass]="isCategorySelected(cat.id!) ? 'bg-user-primary border-user-primary' : 'border-gray-300'"
+          >
+            <i *ngIf="isCategorySelected(cat.id!)" class="pi pi-check text-white" style="font-size: 9px"></i>
+          </div>
+          <span (click)="toggleCategory(cat.id!)" class="text-sm text-gray-600">{{ cat.name }}</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Brands -->
+    <div class="mb-6" *ngIf="brands.length > 0">
+      <h4 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Thương hiệu</h4>
+      <div class="space-y-2">
+        <label *ngFor="let brand of brands" class="flex items-center gap-3 cursor-pointer group py-1">
+          <div
+            (click)="toggleBrand(brand.id!)"
+            class="w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0"
+            [ngClass]="isBrandSelected(brand.id!) ? 'bg-user-primary border-user-primary' : 'border-gray-300'"
+          >
+            <i *ngIf="isBrandSelected(brand.id!)" class="pi pi-check text-white" style="font-size: 9px"></i>
+          </div>
+          <span (click)="toggleBrand(brand.id!)" class="text-sm text-gray-600">{{ brand.name }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="flex gap-3 pt-4 border-t border-gray-100">
+      <button (click)="clearFilters(); isSidebarOpen = false" class="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-gray-300 transition-colors">
+        Xóa lọc
+      </button>
+      <button (click)="isSidebarOpen = false" class="flex-1 py-3 bg-user-primary text-white rounded-xl text-sm font-semibold hover:bg-user-primary-hover transition-colors">
+        Áp dụng
+      </button>
+    </div>
+  </div>
+</div>

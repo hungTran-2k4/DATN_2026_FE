@@ -1,0 +1,61 @@
+:host {
+    display: block;
+}
+
+:host ::ng-deep {
+    .p-inputtext {
+        border-radius: 12px;
+        border-color: #e5e7eb;
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &:focus {
+            border-color: var(--user-primary);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+        }
+
+        &.p-invalid {
+            border-color: #f87171;
+        }
+    }
+
+    .p-inputtextarea {
+        border-radius: 12px;
+        border-color: #e5e7eb;
+
+        &:focus {
+            border-color: var(--user-primary);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+        }
+    }
+
+    .p-dropdown {
+        border-radius: 12px;
+        border-color: #e5e7eb;
+        width: 100%;
+
+        &:not(.p-disabled):hover {
+            border-color: var(--user-primary);
+        }
+
+        &.p-focus {
+            border-color: var(--user-primary);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+        }
+    }
+
+    .p-button {
+        border-radius: 12px;
+        background-color: var(--user-primary);
+        border-color: var(--user-primary);
+        font-weight: 700;
+
+        &:hover:not(:disabled) {
+            background-color: var(--user-primary-hover);
+            border-color: var(--user-primary-hover);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+        }
+    }
+}

@@ -1,0 +1,138 @@
+<div class="seller-page">
+
+  <!-- Welcome banner -->
+  <div class="welcome-banner">
+    <div class="welcome-content">
+      <div>
+        <p class="welcome-greeting">Chào mừng trở lại 👋</p>
+        <h1 class="welcome-name">{{ sellerName }}</h1>
+        <p class="welcome-shop" *ngIf="shopInfo$ | async as shop">
+          <i class="pi pi-shop"></i> {{ shop.name }}
+        </p>
+      </div>
+      <div class="welcome-icon">
+        <i class="pi pi-shop"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <!-- Skeleton -->
+    <ng-container *ngIf="isLoadingStats">
+      <div class="kpi-card" *ngFor="let i of [1,2,3,4]">
+        <p-skeleton height="80px" borderRadius="16px"></p-skeleton>
+      </div>
+    </ng-container>
+
+    <!-- Real data -->
+    <ng-container *ngIf="!isLoadingStats && stats">
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon"><i class="pi pi-box"></i></div>
+        <div class="kpi-body">
+          <p class="kpi-value">{{ stats.totalProducts | number }}</p>
+          <p class="kpi-label">Sản phẩm</p>
+        </div>
+        <a routerLink="/seller/products" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+      </div>
+
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon"><i class="pi pi-clock"></i></div>
+        <div class="kpi-body">
+          <p class="kpi-value">{{ stats.pendingOrders | number }}</p>
+          <p class="kpi-label">Chờ xác nhận</p>
+        </div>
+        <a routerLink="/seller/orders" [queryParams]="{status: 'PENDING'}" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+      </div>
+
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon"><i class="pi pi-truck"></i></div>
+        <div class="kpi-body">
+          <p class="kpi-value">{{ stats.processingOrders | number }}</p>
+          <p class="kpi-label">Đang xử lý</p>
+        </div>
+        <a routerLink="/seller/orders" [queryParams]="{status: 'PROCESSING'}" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+      </div>
+
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-icon"><i class="pi pi-wallet"></i></div>
+        <div class="kpi-body">
+          <p class="kpi-value">{{ formatPrice(stats.totalRevenue) }}</p>
+          <p class="kpi-label">Doanh thu</p>
+        </div>
+        <a routerLink="/seller/finance" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">Đơn hàng gần đây</h2>
+      <a routerLink="/seller/orders" class="section-link">Xem tất cả <i class="pi pi-arrow-right text-xs"></i></a>
+    </div>
+
+    <!-- Skeleton -->
+    <ng-container *ngIf="isLoadingStats">
+      <div class="order-row" *ngFor="let i of [1,2,3]">
+        <p-skeleton height="48px" borderRadius="8px"></p-skeleton>
+      </div>
+    </ng-container>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="!isLoadingStats && (!stats?.recentOrders?.length)">
+      <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
+      <p class="text-gray-500 text-sm">Chưa có đơn hàng nào</p>
+    </div>
+
+    <!-- Orders table -->
+    <div class="orders-table" *ngIf="!isLoadingStats && stats?.recentOrders?.length">
+      <div class="table-header">
+        <span>Mã đơn</span>
+        <span>Sản phẩm</span>
+        <span>Tổng tiền</span>
+        <span>Trạng thái</span>
+        <span>Ngày tạo</span>
+      </div>
+      <a
+        *ngFor="let order of stats?.recentOrders"
+        [routerLink]="['/seller/orders', order.id]"
+        class="table-row"
+      >
+        <span class="order-code">{{ order.orderCode }}</span>
+        <span class="order-product">{{ order.firstItemName }}</span>
+        <span class="order-amount">{{ formatPrice(order.totalAmount ?? 0) }}</span>
+        <span>
+          <span class="badge" [ngClass]="getOrderStatusClass(order.orderStatus)">
+            {{ getOrderStatusLabel(order.orderStatus) }}
+          </span>
+        </span>
+        <span class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="quick-actions">
+    <h2 class="section-title mb-4">Thao tác nhanh</h2>
+    <div class="actions-grid">
+      <a routerLink="/seller/products" [queryParams]="{action: 'create'}" class="action-card action-emerald">
+        <i class="pi pi-plus-circle text-2xl mb-2"></i>
+        <span>Thêm sản phẩm</span>
+      </a>
+      <a routerLink="/seller/orders" class="action-card action-blue">
+        <i class="pi pi-list-check text-2xl mb-2"></i>
+        <span>Quản lý đơn hàng</span>
+      </a>
+      <a routerLink="/seller/reviews" class="action-card action-amber">
+        <i class="pi pi-star text-2xl mb-2"></i>
+        <span>Xem đánh giá</span>
+      </a>
+      <a routerLink="/seller/settings" class="action-card action-gray">
+        <i class="pi pi-cog text-2xl mb-2"></i>
+        <span>Cài đặt shop</span>
+      </a>
+    </div>
+  </div>
+
+</div>

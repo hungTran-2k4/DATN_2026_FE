@@ -1,0 +1,60 @@
+:host {
+    display: block;
+}
+
+.custom-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #e5e7eb transparent;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #e5e7eb;
+        border-radius: 4px;
+    }
+}
+
+// Override PrimeNG paginator
+:host ::ng-deep {
+    .p-paginator {
+        background: transparent;
+        border: none;
+        padding: 0;
+
+        .p-paginator-page,
+        .p-paginator-prev,
+        .p-paginator-next,
+        .p-paginator-first,
+        .p-paginator-last {
+            border-radius: 10px;
+            min-width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .p-paginator-page.p-highlight {
+            background: var(--user-primary);
+            border-color: var(--user-primary);
+            color: white;
+        }
+    }
+
+    .p-dropdown {
+        border-radius: 12px;
+        border-color: #e5e7eb;
+
+        &:not(.p-disabled):hover {
+            border-color: var(--user-primary);
+        }
+
+        &.p-focus {
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+            border-color: var(--user-primary);
+        }
+    }
+}

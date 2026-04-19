@@ -13,7 +13,9 @@ export class LoadingOverlayService {
   show(): void {
     this.pendingRequestCount += 1;
     if (this.pendingRequestCount === 1) {
-      this.loadingSubject.next(true);
+      // Dùng queueMicrotask để tránh NG0100 (ExpressionChangedAfterItHasBeenCheckedError)
+      // khi interceptor gọi show() trong quá trình Angular đang chạy change detection
+      queueMicrotask(() => this.loadingSubject.next(true));
     }
   }
 
@@ -23,7 +25,7 @@ export class LoadingOverlayService {
     }
 
     if (this.pendingRequestCount === 0) {
-      this.loadingSubject.next(false);
+      queueMicrotask(() => this.loadingSubject.next(false));
     }
   }
 }

@@ -31,6 +31,12 @@ export class UserHeaderComponent implements OnInit {
           command: () => this.router.navigate(['/profile']),
         },
         {
+          label: 'Kênh người bán',
+          icon: 'pi pi-shop',
+          visible: this.authSession.isSeller(),
+          command: () => this.router.navigate(['/seller/dashboard']),
+        },
+        {
           label: 'Trang quản trị',
           icon: 'pi pi-cog',
           visible: this.authSession.isAdmin(),
