@@ -1,165 +1,237 @@
+<p-toast position="top-right"></p-toast>
+
 <div class="cart-page bg-[#f5f5f5] min-h-screen py-8 font-inter">
   <div class="container mx-auto px-4 max-w-7xl">
-    
-    <!-- Cart Header (Title and item count) -->
-    <div class="bg-white p-4 rounded-sm shadow-sm mb-4 flex items-center justify-between">
+
+    <!-- Header -->
+    <div class="bg-white rounded-sm shadow-sm mb-4 px-6 py-4 flex items-center justify-between">
       <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
         <i class="pi pi-shopping-cart text-user-primary"></i> GIỎ HÀNG
+        <span class="text-sm font-normal text-gray-400 ml-1">({{ totalItems }} sản phẩm)</span>
       </h1>
-      <span class="text-sm text-gray-500 font-medium">{{getSelectedCount()}} Sản phẩm được chọn</span>
+      <button
+        *ngIf="selectedCount > 0"
+        (click)="removeSelected()"
+        class="text-sm text-red-500 hover:text-red-600 font-medium flex items-center gap-1 transition-colors"
+      >
+        <i class="pi pi-trash text-xs"></i> Xóa đã chọn ({{ selectedCount }})
+      </button>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-6">
-      
-      <!-- LEFT: CART LIST (70%) -->
-      <div class="w-full lg:w-[70%] flex flex-col gap-4">
-        
-        <!-- Table Header (Simulated for Desktop) -->
-        <div class="bg-white px-6 py-4 rounded-sm shadow-sm hidden md:flex items-center text-sm font-semibold text-gray-500 border-b border-gray-100">
-          <div class="w-12 flex items-center">
-            <p-checkbox [(ngModel)]="selectAll" (onChange)="toggleSelectAll()" [binary]="true"></p-checkbox>
-          </div>
-          <div class="flex-1">Sản Phẩm</div>
-          <div class="w-32 text-center">Đơn Giá</div>
-          <div class="w-32 text-center">Số Lượng</div>
-          <div class="w-32 text-center">Số Tiền</div>
-          <div class="w-24 text-center">Thao Tác</div>
-        </div>
-
-        <!-- Shops & Items -->
-        <div *ngFor="let shop of shops" class="bg-white rounded-sm shadow-sm overflow-hidden mb-2">
-          
-          <!-- Shop Name Header -->
-          <div class="px-6 py-4 flex items-center gap-3 border-b border-gray-100 bg-white sticky top-0 z-10">
-            <p-checkbox [(ngModel)]="shop.selected" (onChange)="toggleShopSelection(shop)" [binary]="true"></p-checkbox>
-            <div class="flex items-center gap-2 cursor-pointer hover:text-user-primary transition-colors">
-              <i class="pi pi-shop text-gray-700"></i>
-              <span class="font-bold text-gray-800">{{shop.name}}</span>
-              <i class="pi pi-angle-right text-xs"></i>
-            </div>
-          </div>
-
-          <!-- Item list in this shop -->
-          <div *ngFor="let item of shop.items" class="p-6 flex flex-col md:flex-row items-center gap-4 md:gap-0 border-b border-gray-50 last:border-none transition-colors" [ngClass]="{'bg-gray-50/50 opacity-70': item.outOfStock}">
-            
-            <!-- Selection & Checkbox -->
-            <div class="w-12 md:w-12 flex items-center">
-              <p-checkbox *ngIf="!item.outOfStock" [(ngModel)]="item.selected" (onChange)="toggleItemSelection(shop, item)" [binary]="true"></p-checkbox>
-              <span *ngIf="item.outOfStock" class="bg-gray-400 text-white text-[9px] px-1 py-0.5 rounded-sm whitespace-nowrap -ml-2 select-none">HẾT HÀNG</span>
-            </div>
-
-            <!-- Product Image & Deal Tag -->
-            <div class="relative w-20 h-20 border border-gray-200 rounded shrink-0">
-              <img [ngSrc]="item.image" width="80" height="80" class="w-full h-full object-cover rounded">
-              <img *ngIf="item.isDeal" ngSrc="https://down-vn.img.susercontent.com/file/vn-50009109-17c2f6d2b635db15031d2ba5dcdc0cf9" width="80" height="20" alt="flash sale" class="absolute -bottom-2 -left-1 w-full scale-110 object-contain">
-            </div>
-
-            <!-- Product Info -->
-            <div class="flex-1 flex flex-col pt-1 px-4">
-              <h4 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1" [title]="item.name">{{item.name}}</h4>
-              <img *ngIf="item.isDeal" ngSrc="https://down-vn.img.susercontent.com/file/vn-50009109-a7970d4ab7ee49019cd5ff3bfb0eb4f6" width="40" height="16" class="h-4 object-contain self-start">
-              <span *ngIf="item.outOfStock" class="text-xs text-red-500 mt-1 mb-1">Phân loại hàng này bán hết, vui lòng lựa chọn một phân loại khác.</span>
-            </div>
-            
-            <!-- Variant dropdown -->
-            <div class="w-32 flex flex-col justify-center text-gray-500 hover:text-user-primary cursor-pointer pr-4 shrink-0 mt-1">
-              <div class="flex items-center text-xs gap-1 group">
-                <span class="truncate">Phân Loại Hàng:</span> 
-                <i class="pi pi-angle-down text-[10px] group-hover:rotate-180 transition-transform"></i>
-              </div>
-              <div class="text-sm font-medium text-gray-800 mt-0.5">{{item.variant}}</div>
-            </div>
-
-            <!-- Unit Price -->
-            <div class="w-32 text-center text-sm">
-                <div *ngIf="item.originalPrice" class="text-gray-400 line-through text-xs">{{formatPrice(item.originalPrice)}}</div>
-                <div class="font-medium text-gray-900">{{formatPrice(item.price)}}</div>
-            </div>
-
-            <!-- Quantity Selector -->
-            <div class="w-32 flex justify-center mt-2 md:mt-0">
-               <div class="flex items-center border border-gray-300 rounded overflow-hidden h-8">
-                 <button (click)="decreaseQty(item)" [disabled]="item.quantity <= 1 || item.outOfStock" class="w-8 h-full flex items-center justify-center hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed border-r border-gray-300">
-                   <i class="pi pi-minus text-[10px]"></i>
-                 </button>
-                 <input type="number" [(ngModel)]="item.quantity" [disabled]="item.outOfStock" class="w-10 h-full text-center text-sm font-bold focus:outline-none border-none bg-white">
-                 <button (click)="increaseQty(item)" [disabled]="item.outOfStock" class="w-8 h-full flex items-center justify-center hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed border-l border-gray-300">
-                   <i class="pi pi-plus text-[10px]"></i>
-                 </button>
-               </div>
-            </div>
-
-            <!-- Subtotal -->
-            <div class="w-32 text-center font-bold text-user-primary text-sm mt-2 md:mt-0">
-               {{formatPrice(item.price * item.quantity)}}
-            </div>
-
-            <!-- Row Action -->
-            <div class="w-24 text-center">
-               <button (click)="removeItem(shop, item)" class="text-gray-500 hover:text-red-500 transition-colors text-sm font-medium">Xóa</button>
-            </div>
-          </div>
-
-          <!-- Shop Footer (Voucher simplified) -->
-          <div class="px-6 py-3 border-t border-gray-50 flex items-center justify-end bg-blue-50/10">
-            <span class="text-xs text-blue-500 flex items-center gap-2 cursor-pointer font-medium hover:underline">
-              <i class="pi pi-ticket"></i> Thêm mã giảm giá của Shop
-            </span>
-          </div>
-        </div>
-
+    <!-- Loading skeleton -->
+    <ng-container *ngIf="isLoading">
+      <div class="bg-white rounded-sm shadow-sm p-6 mb-4">
+        <p-skeleton height="60px" styleClass="mb-3"></p-skeleton>
+        <p-skeleton height="100px" styleClass="mb-3"></p-skeleton>
+        <p-skeleton height="100px"></p-skeleton>
       </div>
+    </ng-container>
 
-      <!-- RIGHT: STICKY FOOTER / SUMMARY (30%) -->
-      <div class="w-full lg:w-[30%]">
-        <div class="sticky top-6 flex flex-col gap-4">
-          
-          <!-- Voucher Card -->
-          <div class="bg-white p-5 rounded-sm shadow-sm border border-orange-100">
-             <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-bold flex items-center gap-2 text-gray-800"><i class="pi pi-ticket text-orange-500"></i> Shopee Voucher</span>
-                <span class="text-xs text-blue-600 hover:underline cursor-pointer font-medium">Chọn Hoặc Nhập Mã</span>
-             </div>
-             <p class="text-xs text-gray-400">Giảm tối đa ₫20k phí vận chuyển đơn hàng từ ₫0; Giảm tối đa ₫300k cho đơn từ ₫2tr...</p>
+    <!-- Not logged in -->
+    <ng-container *ngIf="!isLoading && !cart && !authSession.getSession()">
+      <div class="bg-white rounded-sm shadow-sm p-16 text-center">
+        <i class="pi pi-shopping-cart text-6xl text-gray-200 mb-6 block"></i>
+        <h3 class="text-lg font-bold text-gray-700 mb-2">Vui lòng đăng nhập để xem giỏ hàng</h3>
+        <a routerLink="/auth/login" class="inline-flex items-center gap-2 bg-user-primary text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-user-primary-hover transition-colors mt-4">
+          Đăng nhập
+        </a>
+      </div>
+    </ng-container>
+
+    <!-- Empty cart -->
+    <ng-container *ngIf="!isLoading && cart && (!cart.groups || cart.groups.length === 0)">
+      <div class="bg-white rounded-sm shadow-sm p-16 text-center">
+        <i class="pi pi-shopping-bag text-6xl text-gray-200 mb-6 block"></i>
+        <h3 class="text-lg font-bold text-gray-700 mb-2">Giỏ hàng của bạn đang trống</h3>
+        <p class="text-gray-400 text-sm mb-6">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm</p>
+        <a routerLink="/products" class="inline-flex items-center gap-2 bg-user-primary text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-user-primary-hover transition-colors">
+          <i class="pi pi-search text-sm"></i> Khám phá sản phẩm
+        </a>
+      </div>
+    </ng-container>
+
+    <!-- Cart content -->
+    <ng-container *ngIf="!isLoading && cart && cart.groups && cart.groups.length > 0">
+      <div class="flex flex-col lg:flex-row gap-6">
+
+        <!-- LEFT: Cart list -->
+        <div class="w-full lg:w-[68%] flex flex-col gap-3">
+
+          <!-- Table header (desktop) -->
+          <div class="bg-white px-6 py-3 rounded-sm shadow-sm hidden md:grid cart-table-header text-xs font-bold text-gray-400 uppercase tracking-wider">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAll()" class="cart-checkbox" />
+              <span>Sản phẩm</span>
+            </div>
+            <div class="text-center">Đơn giá</div>
+            <div class="text-center">Số lượng</div>
+            <div class="text-center">Thành tiền</div>
+            <div class="text-center">Xóa</div>
           </div>
 
-          <!-- Checkout Summary Card -->
-          <div class="bg-white rounded-sm shadow-sm p-6 border-b-4 border-user-primary">
-            <div class="flex flex-col gap-4">
-              <div class="flex justify-between items-center pb-4 border-b border-gray-100">
-                  <span class="text-gray-600 font-medium">Tổng tiền hàng ({{getSelectedCount()}} sản phẩm):</span>
-                  <span class="text-lg font-bold text-gray-900">{{formatPrice(getTotalPrice())}}</span>
-              </div>
-              
-              <div class="flex flex-col gap-2 py-2">
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-500">Tiết kiệm được:</span>
-                  <span class="text-gray-500">{{formatPrice(getSavedAmount())}}</span>
-                </div>
-              </div>
+          <!-- Shop groups -->
+          <div *ngFor="let group of cart.groups" class="bg-white rounded-sm shadow-sm overflow-hidden">
 
-              <div class="pt-4 flex flex-col gap-4">
-                <div class="flex justify-between items-end">
-                   <span class="text-sm font-medium text-gray-600">Tổng thanh toán:</span>
-                   <span class="text-2xl font-black text-user-primary">{{formatPrice(getTotalPrice())}}</span>
+            <!-- Shop header -->
+            <div class="px-6 py-3 flex items-center gap-3 border-b border-gray-100 bg-gray-50/50">
+              <input type="checkbox" [checked]="isGroupSelected(group)" (change)="toggleGroup(group)" class="cart-checkbox" />
+              <i class="pi pi-shop text-gray-500 text-sm"></i>
+              <span class="font-bold text-gray-800 text-sm">{{ group.shopName }}</span>
+              <span class="text-xs text-gray-400 ml-auto">{{ group.items?.length }} sản phẩm</span>
+            </div>
+
+            <!-- Items -->
+            <div
+              *ngFor="let item of group.items"
+              class="px-6 py-4 border-b border-gray-50 last:border-none transition-colors"
+              [ngClass]="{'opacity-60': isOutOfStock(item)}"
+            >
+              <!-- Mobile layout -->
+              <div class="flex gap-4">
+                <!-- Checkbox + Image -->
+                <div class="flex items-start gap-3 shrink-0">
+                  <input
+                    type="checkbox"
+                    [checked]="isItemSelected(item.id)"
+                    [disabled]="isOutOfStock(item)"
+                    (change)="toggleItem(item)"
+                    class="cart-checkbox mt-1"
+                  />
+                  <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-100 shrink-0 bg-gray-50">
+                    <img
+                      *ngIf="item.variantImageUrl"
+                      [src]="item.variantImageUrl"
+                      [alt]="item.productName"
+                      class="w-full h-full object-cover"
+                      onerror="this.src='https://placehold.co/200x200/f3f4f6/9ca3af?text=No+Image'"
+                    />
+                    <div *ngIf="!item.variantImageUrl" class="w-full h-full flex items-center justify-center">
+                      <i class="pi pi-image text-2xl text-gray-300"></i>
+                    </div>
+                    <div *ngIf="isOutOfStock(item)" class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span class="text-white text-[9px] font-bold">HẾT HÀNG</span>
+                    </div>
+                  </div>
                 </div>
-                
-                <button (click)="proceedToCheckout()" [disabled]="getSelectedCount() === 0" class="w-full h-12 bg-user-primary hover:bg-user-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-sm transition-all shadow-md">
-                   MUA HÀNG ({{getSelectedCount()}})
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-1">{{ item.productName }}</h4>
+                  <p class="text-xs text-gray-400 mb-2">{{ getVariantAttrsText(item) }}</p>
+
+                  <!-- Mobile: price + qty + total -->
+                  <div class="flex flex-wrap items-center gap-4 md:hidden">
+                    <span class="text-user-primary font-bold text-sm">{{ formatPrice(item.unitPrice) }}</span>
+                    <div class="qty-control">
+                      <button (click)="updateQty(item, -1)" [disabled]="(item.quantity ?? 1) <= 1 || updatingItemId === item.id" class="qty-btn">
+                        <i class="pi pi-minus text-[10px]"></i>
+                      </button>
+                      <input type="number" [value]="item.quantity" (change)="setQty(item, +$any($event.target).value)" class="qty-input" min="1" [max]="item.stockAvailable" />
+                      <button (click)="updateQty(item, 1)" [disabled]="(item.quantity ?? 0) >= (item.stockAvailable ?? 0) || updatingItemId === item.id" class="qty-btn">
+                        <i class="pi pi-plus text-[10px]"></i>
+                      </button>
+                    </div>
+                    <span class="text-user-primary font-bold text-sm">{{ formatPrice(item.lineTotal) }}</span>
+                  </div>
+
+                  <!-- Desktop: grid layout -->
+                  <div class="hidden md:grid cart-table-row items-center mt-2">
+                    <div></div><!-- spacer for price col -->
+                    <div class="text-center">
+                      <span class="text-sm font-semibold text-gray-800">{{ formatPrice(item.unitPrice) }}</span>
+                    </div>
+                    <div class="flex justify-center">
+                      <div class="qty-control">
+                        <button (click)="updateQty(item, -1)" [disabled]="(item.quantity ?? 1) <= 1 || updatingItemId === item.id" class="qty-btn">
+                          <i class="pi pi-minus text-[10px]"></i>
+                        </button>
+                        <input type="number" [value]="item.quantity" (change)="setQty(item, +$any($event.target).value)" class="qty-input" min="1" [max]="item.stockAvailable" />
+                        <button (click)="updateQty(item, 1)" [disabled]="(item.quantity ?? 0) >= (item.stockAvailable ?? 0) || updatingItemId === item.id" class="qty-btn">
+                          <i class="pi pi-plus text-[10px]"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <span class="text-sm font-bold text-user-primary">{{ formatPrice(item.lineTotal) }}</span>
+                    </div>
+                    <div class="flex justify-center">
+                      <button (click)="removeItem(item)" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50">
+                        <i class="pi pi-trash text-sm"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Mobile remove -->
+                  <button (click)="removeItem(item)" class="md:hidden text-xs text-gray-400 hover:text-red-500 mt-2 flex items-center gap-1 transition-colors">
+                    <i class="pi pi-trash text-xs"></i> Xóa
+                  </button>
+
+                  <!-- Out of stock warning -->
+                  <p *ngIf="isOutOfStock(item)" class="text-xs text-red-500 mt-1 flex items-center gap-1">
+                    <i class="pi pi-exclamation-circle text-xs"></i>
+                    Sản phẩm này hiện đã hết hàng
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Summary -->
+        <div class="w-full lg:w-[32%]">
+          <div class="sticky top-6 flex flex-col gap-4">
+
+            <!-- Summary card -->
+            <div class="bg-white rounded-sm shadow-sm overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">Tóm tắt đơn hàng</h3>
+              </div>
+              <div class="px-6 py-4 flex flex-col gap-3">
+                <div class="flex justify-between text-sm text-gray-600">
+                  <span>Sản phẩm đã chọn</span>
+                  <span class="font-semibold text-gray-800">{{ selectedCount }}</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600">
+                  <span>Tạm tính</span>
+                  <span class="font-semibold text-gray-800">{{ formatPrice(totalPrice) }}</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-400">
+                  <span>Phí vận chuyển</span>
+                  <span>Tính khi thanh toán</span>
+                </div>
+                <div class="border-t border-gray-100 pt-3 flex justify-between items-center">
+                  <span class="font-bold text-gray-800">Tổng cộng</span>
+                  <span class="text-xl font-black text-user-primary">{{ formatPrice(totalPrice) }}</span>
+                </div>
+              </div>
+              <div class="px-6 pb-6">
+                <button
+                  (click)="proceedToCheckout()"
+                  [disabled]="selectedCount === 0"
+                  class="w-full py-3.5 bg-user-primary hover:bg-user-primary-hover disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-sm text-sm"
+                >
+                  <i class="pi pi-credit-card mr-2"></i>
+                  THANH TOÁN ({{ selectedCount }})
                 </button>
+                <a routerLink="/products" class="block text-center text-sm text-user-primary hover:underline mt-3 font-medium">
+                  <i class="pi pi-arrow-left text-xs mr-1"></i> Tiếp tục mua sắm
+                </a>
               </div>
             </div>
+
+            <!-- Security note -->
+            <div class="flex items-start gap-3 p-4 bg-white rounded-sm shadow-sm text-xs text-gray-500 leading-relaxed">
+              <i class="pi pi-shield text-user-primary mt-0.5 shrink-0"></i>
+              <span>Giao dịch được bảo mật bởi SSL. Nhận hàng hoặc được hoàn tiền 100%.</span>
+            </div>
+
           </div>
-
-          <!-- Additional info -->
-           <div class="flex items-start gap-3 p-3 bg-gray-100/50 rounded-sm text-[11px] text-gray-500 leading-relaxed">
-             <i class="pi pi-shield text-user-primary mt-0.5"></i>
-             <span>Vora đảm bảo. Nhận hàng, hoặc được hoàn lại tiền.</span>
-           </div>
-
         </div>
-      </div>
 
-    </div>
+      </div>
+    </ng-container>
+
   </div>
 </div>

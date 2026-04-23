@@ -3110,6 +3110,133 @@ export class ApiBaseService {
     }
 
     /**
+     * @param shopId (optional) 
+     * @return OK
+     */
+    submitForReview(id: string, shopId: string | undefined): Observable<BooleanApiResponse> {
+        let url_ = this.baseUrl + "/api/Products/{id}/submit-for-review?";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (shopId === null)
+            throw new globalThis.Error("The parameter 'shopId' cannot be null.");
+        else if (shopId !== undefined)
+            url_ += "shopId=" + encodeURIComponent("" + shopId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            withCredentials: true,
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processSubmitForReview(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processSubmitForReview(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BooleanApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BooleanApiResponse>;
+        }));
+    }
+
+    protected processSubmitForReview(response: HttpResponseBase): Observable<BooleanApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BooleanApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = BooleanApiResponse.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    review(id: string, body: ReviewProductRequest | undefined): Observable<BooleanApiResponse> {
+        let url_ = this.baseUrl + "/api/Products/{id}/review";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            withCredentials: true,
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processReview(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processReview(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BooleanApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BooleanApiResponse>;
+        }));
+    }
+
+    protected processReview(response: HttpResponseBase): Observable<BooleanApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BooleanApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @param isMain (optional) 
      * @param file (optional) 
      * @return Created
@@ -10006,6 +10133,7 @@ export class ProductDto implements IProductDto {
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
     images?: ProductImageDto[] | undefined;
+    variants?: ProductVariantDto[] | undefined;
 
     constructor(data?: IProductDto) {
         if (data) {
@@ -10036,6 +10164,11 @@ export class ProductDto implements IProductDto {
                 this.images = [] as any;
                 for (let item of _data["images"])
                     this.images!.push(ProductImageDto.fromJS(item));
+            }
+            if (Array.isArray(_data["variants"])) {
+                this.variants = [] as any;
+                for (let item of _data["variants"])
+                    this.variants!.push(ProductVariantDto.fromJS(item));
             }
         }
     }
@@ -10068,6 +10201,11 @@ export class ProductDto implements IProductDto {
             for (let item of this.images)
                 data["images"].push(item ? item.toJSON() : undefined as any);
         }
+        if (Array.isArray(this.variants)) {
+            data["variants"] = [];
+            for (let item of this.variants)
+                data["variants"].push(item ? item.toJSON() : undefined as any);
+        }
         return data;
     }
 }
@@ -10088,6 +10226,7 @@ export interface IProductDto {
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
     images?: ProductImageDto[] | undefined;
+    variants?: ProductVariantDto[] | undefined;
 }
 
 export class ProductDtoApiResponse implements IProductDtoApiResponse {
@@ -11148,6 +11287,46 @@ export interface IReviewDtoIEnumerablePagedResponse {
     pageSize?: number;
     totalPages?: number;
     totalRecords?: number;
+}
+
+export class ReviewProductRequest implements IReviewProductRequest {
+    action?: string | undefined;
+    note?: string | undefined;
+
+    constructor(data?: IReviewProductRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.action = _data["action"];
+            this.note = _data["note"];
+        }
+    }
+
+    static fromJS(data: any): ReviewProductRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReviewProductRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["action"] = this.action;
+        data["note"] = this.note;
+        return data;
+    }
+}
+
+export interface IReviewProductRequest {
+    action?: string | undefined;
+    note?: string | undefined;
 }
 
 export class RoleDto implements IRoleDto {

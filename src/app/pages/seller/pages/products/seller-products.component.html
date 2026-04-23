@@ -18,17 +18,9 @@
   <div class="toolbar">
     <div class="search-box">
       <i class="pi pi-search search-icon"></i>
-      <input
-        type="text"
-        [(ngModel)]="searchKeyword"
-        (ngModelChange)="onSearch()"
-        placeholder="Tìm kiếm sản phẩm..."
-        class="search-input"
-      />
+      <input type="text" [(ngModel)]="searchKeyword" (ngModelChange)="onSearch()" placeholder="Tìm kiếm sản phẩm..." class="search-input" />
     </div>
-    <button class="btn-outline" (click)="loadProducts()">
-      <i class="pi pi-refresh"></i> Làm mới
-    </button>
+    <button class="btn-outline" (click)="loadProducts()"><i class="pi pi-refresh"></i> Làm mới</button>
   </div>
 
   <!-- Skeleton -->
@@ -47,10 +39,8 @@
   <div class="empty-state" *ngIf="!isLoading && result.items.length === 0">
     <div class="empty-icon"><i class="pi pi-box"></i></div>
     <h3>Chưa có sản phẩm nào</h3>
-    <p>Bắt đầu bằng cách thêm sản phẩm đầu tiên của bạn</p>
-    <button class="btn-primary mt-4" (click)="openCreateDialog()">
-      <i class="pi pi-plus"></i> Thêm sản phẩm
-    </button>
+    <p>Bắt đầu bằng cách thêm sản phẩm đầu tiên</p>
+    <button class="btn-primary mt-4" (click)="openCreateDialog()"><i class="pi pi-plus"></i> Thêm sản phẩm</button>
   </div>
 
   <!-- Products grid -->
@@ -58,12 +48,8 @@
     <div class="product-card" *ngFor="let product of result.items">
       <div class="product-image">
         <img *ngIf="getMainImage(product)" [src]="getMainImage(product)" [alt]="product.name" loading="lazy" onerror="this.style.display='none'" />
-        <div class="product-image-placeholder" *ngIf="!getMainImage(product)">
-          <i class="pi pi-image text-3xl text-gray-300"></i>
-        </div>
-        <span class="product-status-badge" [ngClass]="'status-' + (product.status?.toLowerCase() ?? 'draft')">
-          {{ getStatusLabel(product.status) }}
-        </span>
+        <div class="product-image-placeholder" *ngIf="!getMainImage(product)"><i class="pi pi-image text-3xl text-gray-300"></i></div>
+        <span class="product-status-badge" [ngClass]="'status-' + (product.status?.toLowerCase() ?? 'draft')">{{ getStatusLabel(product.status) }}</span>
       </div>
       <div class="product-info">
         <p class="product-sku">{{ product.sku }}</p>
@@ -71,29 +57,22 @@
         <p class="product-meta"><i class="pi pi-eye text-xs"></i> {{ product.viewCount ?? 0 }} lượt xem</p>
       </div>
       <div class="product-actions">
-        <button (click)="openEditDialog(product)" class="action-btn action-edit" pTooltip="Chỉnh sửa" tooltipPosition="top">
-          <i class="pi pi-pencil"></i>
-        </button>
-        <a [routerLink]="['/product', product.id]" target="_blank" class="action-btn action-view" pTooltip="Xem trang" tooltipPosition="top">
-          <i class="pi pi-external-link"></i>
-        </a>
-        <button (click)="confirmDelete(product)" class="action-btn action-delete" pTooltip="Xóa" tooltipPosition="top">
-          <i class="pi pi-trash"></i>
-        </button>
+        <button (click)="openEditDialog(product)" class="action-btn action-edit" pTooltip="Chỉnh sửa" tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+        <button
+          *ngIf="product.status === 'Draft' || product.status === 'Rejected'"
+          (click)="submitForReview(product)"
+          class="action-btn action-submit"
+          pTooltip="Gửi duyệt" tooltipPosition="top"
+        ><i class="pi pi-send"></i></button>
+        <a [routerLink]="['/product', product.id]" target="_blank" class="action-btn action-view" pTooltip="Xem trang" tooltipPosition="top"><i class="pi pi-external-link"></i></a>
+        <button (click)="confirmDelete(product)" class="action-btn action-delete" pTooltip="Xóa" tooltipPosition="top"><i class="pi pi-trash"></i></button>
       </div>
     </div>
   </div>
 
   <!-- Pagination -->
   <div class="pagination-wrap" *ngIf="!isLoading && result.totalRecords > pageSize">
-    <p-paginator
-      [rows]="pageSize"
-      [totalRecords]="result.totalRecords"
-      [first]="(currentPage - 1) * pageSize"
-      [rowsPerPageOptions]="[10, 20, 50]"
-      (onPageChange)="onPageChange($event)"
-      styleClass="seller-paginator"
-    ></p-paginator>
+    <p-paginator [rows]="pageSize" [totalRecords]="result.totalRecords" [first]="(currentPage - 1) * pageSize" [rowsPerPageOptions]="[10, 20, 50]" (onPageChange)="onPageChange($event)" styleClass="seller-paginator"></p-paginator>
   </div>
 
 </div>
@@ -107,149 +86,252 @@
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
-  [style]="{width: 'min(720px, 96vw)'}"
+  [style]="{width: 'min(820px, 96vw)', maxHeight: '90vh'}"
   (onHide)="closeDialog()"
 >
-  <form [formGroup]="form" (ngSubmit)="saveProduct()" class="product-form" novalidate>
 
-    <div class="form-grid">
+  <!-- ── Step tabs ── -->
+  <div class="step-tabs">
+    <button class="step-tab" [class.active]="currentStep === 'info'" (click)="goToStep('info')">
+      <span class="step-num">1</span> Thông tin
+    </button>
+    <div class="step-divider" [class.done]="activeProductId"></div>
+    <button class="step-tab" [class.active]="currentStep === 'images'" [disabled]="!activeProductId" (click)="goToStep('images')">
+      <span class="step-num">2</span> Ảnh sản phẩm
+    </button>
+    <div class="step-divider" [class.done]="activeProductId"></div>
+    <button class="step-tab" [class.active]="currentStep === 'variants'" [disabled]="!activeProductId" (click)="goToStep('variants')">
+      <span class="step-num">3</span> Biến thể
+    </button>
+  </div>
 
-      <!-- Tên sản phẩm -->
+  <!-- ══ STEP 1: Thông tin cơ bản ══ -->
+  <div *ngIf="currentStep === 'info'" class="step-content">
+    <form [formGroup]="form" novalidate class="form-grid">
+
       <div class="field field-full">
         <label class="field-label">Tên sản phẩm <span class="required">*</span></label>
-        <input
-          pInputText
-          formControlName="name"
-          placeholder="Nhập tên sản phẩm..."
-          class="w-full"
-          [class.p-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
-        />
-        <p class="field-error" *ngIf="form.get('name')?.errors?.['required'] && form.get('name')?.touched">
-          Tên sản phẩm không được để trống.
-        </p>
-        <p class="field-error" *ngIf="form.get('name')?.errors?.['maxlength'] && form.get('name')?.touched">
-          Tên không được vượt quá 255 ký tự.
-        </p>
+        <input pInputText formControlName="name" placeholder="Nhập tên sản phẩm..." class="w-full" [class.p-invalid]="form.get('name')?.invalid && form.get('name')?.touched" />
+        <p class="field-error" *ngIf="form.get('name')?.errors?.['required'] && form.get('name')?.touched">Tên sản phẩm không được để trống.</p>
       </div>
 
-      <!-- SKU -->
       <div class="field">
         <label class="field-label">SKU</label>
         <input pInputText formControlName="sku" placeholder="VD: SP-001" class="w-full" />
-        <p class="field-hint">Mã định danh sản phẩm (tùy chọn)</p>
       </div>
 
-      <!-- Slug -->
       <div class="field">
         <label class="field-label">Slug (URL)</label>
         <div class="slug-input">
           <span class="slug-prefix">sp/</span>
-          <input
-            type="text"
-            formControlName="slug"
-            placeholder="ten-san-pham"
-            class="slug-field"
-          />
+          <input type="text" formControlName="slug" placeholder="ten-san-pham" class="slug-field" />
         </div>
-        <p class="field-hint">Tự động tạo từ tên sản phẩm</p>
       </div>
 
-      <!-- Danh mục -->
       <div class="field">
         <label class="field-label">Danh mục</label>
-        <p-dropdown
-          [options]="categories"
-          formControlName="categoryId"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Chọn danh mục..."
-          [filter]="true"
-          filterPlaceholder="Tìm danh mục..."
-          [showClear]="true"
-          styleClass="w-full"
-          [loading]="isLoadingMeta"
-        ></p-dropdown>
+        <p-dropdown [options]="categories" formControlName="categoryId" optionLabel="name" optionValue="id" placeholder="Chọn danh mục..." [filter]="true" [showClear]="true" styleClass="w-full" [loading]="isLoadingMeta"></p-dropdown>
       </div>
 
-      <!-- Thương hiệu -->
       <div class="field">
         <label class="field-label">Thương hiệu</label>
-        <p-dropdown
-          [options]="brands"
-          formControlName="brandId"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Chọn thương hiệu..."
-          [filter]="true"
-          filterPlaceholder="Tìm thương hiệu..."
-          [showClear]="true"
-          styleClass="w-full"
-          [loading]="isLoadingMeta"
-        ></p-dropdown>
+        <p-dropdown [options]="brands" formControlName="brandId" optionLabel="name" optionValue="id" placeholder="Chọn thương hiệu..." [filter]="true" [showClear]="true" styleClass="w-full" [loading]="isLoadingMeta"></p-dropdown>
       </div>
 
-      <!-- Trạng thái -->
       <div class="field">
         <label class="field-label">Trạng thái</label>
-        <p-dropdown
-          [options]="statusOptions"
-          formControlName="status"
-          optionLabel="label"
-          optionValue="value"
-          styleClass="w-full"
-        ></p-dropdown>
+        <p-dropdown [options]="statusOptions" formControlName="status" optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
       </div>
 
-      <!-- Mô tả ngắn -->
       <div class="field field-full">
         <label class="field-label">Mô tả ngắn</label>
-        <textarea
-          pTextarea
-          formControlName="summary"
-          rows="2"
-          placeholder="Mô tả ngắn hiển thị trong danh sách sản phẩm..."
-          class="w-full resize-none"
-          maxlength="500"
-        ></textarea>
+        <textarea pTextarea formControlName="summary" rows="2" placeholder="Mô tả ngắn hiển thị trong danh sách..." class="w-full resize-none" maxlength="500"></textarea>
         <p class="field-hint text-right">{{ form.get('summary')?.value?.length ?? 0 }}/500</p>
       </div>
 
-      <!-- Mô tả chi tiết -->
       <div class="field field-full">
         <label class="field-label">Mô tả chi tiết</label>
-        <textarea
-          pTextarea
-          formControlName="description"
-          rows="5"
-          placeholder="Mô tả đầy đủ về sản phẩm, tính năng, thông số kỹ thuật..."
-          class="w-full resize-none"
-        ></textarea>
+        <textarea pTextarea formControlName="description" rows="4" placeholder="Mô tả đầy đủ về sản phẩm..." class="w-full resize-none"></textarea>
       </div>
 
+    </form>
+  </div>
+
+  <!-- ══ STEP 2: Ảnh sản phẩm ══ -->
+  <div *ngIf="currentStep === 'images'" class="step-content">
+
+    <!-- Upload zone -->
+    <div class="upload-zone" (click)="imageInput.click()">
+      <input #imageInput type="file" accept="image/*" class="hidden" (change)="onImageFileSelected($event)" />
+      <div *ngIf="!isUploadingImage" class="upload-placeholder">
+        <i class="pi pi-cloud-upload text-4xl text-gray-300 mb-3"></i>
+        <p class="text-sm font-semibold text-gray-600">Nhấn để tải ảnh lên</p>
+        <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — tối đa 5MB</p>
+      </div>
+      <div *ngIf="isUploadingImage" class="upload-placeholder">
+        <i class="pi pi-spin pi-spinner text-3xl text-user-primary mb-3"></i>
+        <p class="text-sm text-gray-500">Đang tải lên...</p>
+      </div>
     </div>
 
-    <!-- Note về variants -->
-    <div class="form-note" *ngIf="!isEditMode">
-      <i class="pi pi-info-circle text-blue-500 shrink-0"></i>
-      <p>Sau khi tạo sản phẩm, bạn có thể thêm <strong>biến thể</strong> (màu sắc, kích thước) và <strong>ảnh sản phẩm</strong> trong trang chỉnh sửa.</p>
+    <!-- Image grid -->
+    <div class="images-grid" *ngIf="productImages.length > 0">
+      <div class="image-item" *ngFor="let img of productImages">
+        <img [src]="img.imageUrl" alt="Product image" class="image-thumb" />
+        <div class="image-overlay">
+          <button
+            (click)="setMainImage(img)"
+            class="img-action-btn"
+            [class.is-main]="img.isMain"
+            [pTooltip]="img.isMain ? 'Ảnh chính' : 'Đặt làm ảnh chính'"
+            tooltipPosition="top"
+          >
+            <i class="pi" [ngClass]="img.isMain ? 'pi-star-fill' : 'pi-star'"></i>
+          </button>
+          <button (click)="deleteImage(img)" class="img-action-btn img-delete" pTooltip="Xóa ảnh" tooltipPosition="top">
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+        <div class="image-main-badge" *ngIf="img.isMain">Ảnh chính</div>
+      </div>
     </div>
 
-  </form>
+    <div class="empty-images" *ngIf="productImages.length === 0">
+      <p class="text-sm text-gray-400 text-center py-4">Chưa có ảnh nào. Tải ảnh lên để hiển thị sản phẩm.</p>
+    </div>
 
-  <!-- Dialog footer -->
+    <div class="step-hint">
+      <i class="pi pi-info-circle text-blue-400"></i>
+      <p>Ảnh đầu tiên tải lên sẽ tự động là <strong>ảnh chính</strong>. Nhấn ⭐ để thay đổi ảnh chính.</p>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: Biến thể ══ -->
+  <div *ngIf="currentStep === 'variants'" class="step-content">
+
+    <div class="variants-header">
+      <div>
+        <p class="text-sm text-gray-500">Thêm các biến thể như màu sắc, kích thước, v.v.</p>
+      </div>
+      <button class="btn-add-variant" (click)="addVariantRow()">
+        <i class="pi pi-plus"></i> Thêm biến thể
+      </button>
+    </div>
+
+    <!-- Empty variants -->
+    <div class="empty-variants" *ngIf="variants.length === 0">
+      <i class="pi pi-tag text-3xl text-gray-300 mb-3"></i>
+      <p class="text-sm text-gray-400">Chưa có biến thể nào. Nhấn "Thêm biến thể" để bắt đầu.</p>
+    </div>
+
+    <!-- Variant rows -->
+    <div class="variant-list">
+      <div class="variant-card" *ngFor="let variant of variants; let i = index">
+        <div class="variant-card-header">
+          <span class="variant-index">Biến thể {{ i + 1 }}</span>
+          <div class="variant-card-actions">
+            <button class="btn-save-variant" (click)="saveVariant(variant, i)" [disabled]="!variant.name || variant.isSaving">
+              <i class="pi pi-spin pi-spinner" *ngIf="variant.isSaving"></i>
+              <i class="pi pi-check" *ngIf="!variant.isSaving"></i>
+              {{ variant.isNew ? 'Lưu' : 'Cập nhật' }}
+            </button>
+            <button class="btn-remove-variant" (click)="removeVariantRow(variant, i)" pTooltip="Xóa biến thể" tooltipPosition="top">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="variant-fields">
+          <!-- Tên biến thể -->
+          <div class="field">
+            <label class="field-label">Tên biến thể <span class="required">*</span></label>
+            <input pInputText [(ngModel)]="variant.name" placeholder="VD: Đỏ - Size M" class="w-full" />
+          </div>
+
+          <!-- SKU -->
+          <div class="field">
+            <label class="field-label">SKU biến thể</label>
+            <input pInputText [(ngModel)]="variant.sku" placeholder="VD: SP-001-RED-M" class="w-full" />
+          </div>
+
+          <!-- Giá -->
+          <div class="field">
+            <label class="field-label">Giá (VNĐ) <span class="required">*</span></label>
+            <p-inputNumber [(ngModel)]="variant.price" [min]="0" mode="decimal" [useGrouping]="true" placeholder="0" styleClass="w-full"></p-inputNumber>
+          </div>
+
+          <!-- Số lượng tồn kho -->
+          <div class="field">
+            <label class="field-label">Số lượng tồn kho <span *ngIf="variant.isNew" class="text-xs text-gray-500">(Ban đầu)</span></label>
+            <p-inputNumber [(ngModel)]="variant.initialStock" [min]="0" [useGrouping]="false" placeholder="0" styleClass="w-full"></p-inputNumber>
+          </div>
+
+          <!-- URL ảnh biến thể -->
+          <div class="field field-full">
+            <label class="field-label">URL ảnh biến thể</label>
+            <div class="p-inputgroup">
+              <input type="file" #variantImageInput (change)="uploadVariantImage($event, i)" accept="image/*" style="display: none" />
+              <button 
+                type="button" 
+                pButton 
+                pTooltip="Tải ảnh lên" 
+                [icon]="uploadingVariantIndices[i] ? 'pi pi-spin pi-spinner' : 'pi pi-cloud-upload'" 
+                (click)="variantImageInput.click()"
+                [disabled]="uploadingVariantIndices[i]"
+                class="p-button-secondary">
+              </button>
+              <input pInputText [(ngModel)]="variant.imageUrl" placeholder="https://..." />
+            </div>
+          </div>
+        </div>
+
+        <!-- Attributes -->
+        <div class="variant-attributes">
+          <div class="attr-header">
+            <span class="field-label">Thuộc tính</span>
+            <button class="btn-add-attr" (click)="addAttribute(variant)">
+              <i class="pi pi-plus text-xs"></i> Thêm
+            </button>
+          </div>
+          <div class="attr-row" *ngFor="let attr of variant.attributes; let ai = index">
+            <input pInputText [(ngModel)]="attr.key" placeholder="Tên (VD: Màu)" class="attr-key" />
+            <span class="attr-sep">:</span>
+            <input pInputText [(ngModel)]="attr.value" placeholder="Giá trị (VD: Đỏ)" class="attr-value" />
+            <button class="attr-remove" (click)="removeAttribute(variant, ai)" *ngIf="variant.attributes.length > 1">
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Dialog footer ── -->
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <button type="button" class="btn-cancel" (click)="closeDialog()">Hủy</button>
-      <button
-        type="button"
-        class="btn-save"
-        [disabled]="form.invalid || isSaving"
-        (click)="saveProduct()"
-      >
+      <button type="button" class="btn-cancel" (click)="closeDialog()">
+        {{ activeProductId ? 'Hoàn tất' : 'Hủy' }}
+      </button>
+
+      <!-- Step 1 footer -->
+      <button *ngIf="currentStep === 'info'" type="button" class="btn-save" [disabled]="form.invalid || isSaving" (click)="saveProductInfo()">
         <i class="pi pi-spin pi-spinner" *ngIf="isSaving"></i>
-        <i class="pi pi-check" *ngIf="!isSaving"></i>
-        {{ isEditMode ? 'Lưu thay đổi' : 'Tạo sản phẩm' }}
+        <i class="pi pi-arrow-right" *ngIf="!isSaving"></i>
+        {{ isEditMode ? 'Lưu & Tiếp theo' : 'Tạo & Tiếp theo' }}
+      </button>
+
+      <!-- Step 2 footer -->
+      <button *ngIf="currentStep === 'images'" type="button" class="btn-save" (click)="goToStep('variants')">
+        <i class="pi pi-arrow-right"></i> Tiếp theo: Biến thể
+      </button>
+
+      <!-- Step 3 footer -->
+      <button *ngIf="currentStep === 'variants'" type="button" class="btn-save" (click)="closeDialog()">
+        <i class="pi pi-check"></i> Hoàn tất
       </button>
     </div>
   </ng-template>
+
 </p-dialog>

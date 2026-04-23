@@ -1,28 +1,168 @@
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+:host {
+    display: block;
 }
 
-/* Make primeNG carousel items stretch properly */
-::ng-deep .p-carousel-item {
-    padding: 0.25rem;
-}
+/* ── Variant chips ── */
+.variant-chip {
+    padding: 7px 16px;
+    border-radius: 10px;
+    border: 2px solid #E5E7EB;
+    background: white;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all .15s;
 
-/* Animations */
-.animate-fade-in {
-    animation: fadeIn 0.4s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+    &:hover:not(:disabled) {
+        border-color: var(--user-primary);
+        color: var(--user-primary);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+}
+
+.variant-chip-selected {
+    border-color: var(--user-primary) !important;
+    background: rgba(16, 185, 129, .08) !important;
+    color: var(--user-primary) !important;
+}
+
+.variant-chip-disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* ── Quantity control ── */
+.qty-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.qty-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F9FAFB;
+    border: none;
+    cursor: pointer;
+    color: #374151;
+    transition: background .15s;
+
+    &:hover:not(:disabled) {
+        background: #F3F4F6;
+        color: var(--user-primary);
     }
+
+    &:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+
+    &:first-child {
+        border-right: 1px solid #E5E7EB;
+    }
+
+    &:last-child {
+        border-left: 1px solid #E5E7EB;
+    }
+}
+
+.qty-value {
+    min-width: 44px;
+    text-align: center;
+    font-size: .95rem;
+    font-weight: 800;
+    color: #1E293B;
+    padding: 0 8px;
+}
+
+/* ── CTA buttons ── */
+.btn-add-cart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 14px;
+    border: 2px solid var(--user-primary);
+    background: white;
+    color: var(--user-primary);
+    font-size: .9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .2s;
+
+    &:hover:not(:disabled) {
+        background: rgba(16, 185, 129, .08);
+        transform: translateY(-1px);
+    }
+
+    &:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        border-color: #D1D5DB;
+        color: #9CA3AF;
+    }
+}
+
+.btn-buy-now {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 32px;
+    border-radius: 14px;
+    border: none;
+    background: var(--user-primary);
+    color: white;
+    font-size: .9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, .3);
+
+    &:hover:not(:disabled) {
+        background: var(--user-primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, .4);
+    }
+
+    &:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+}
+
+/* ── Tabs ── */
+.tab-btn {
+    padding: 14px 24px;
+    font-size: .88rem;
+    font-weight: 700;
+    color: #64748B;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all .15s;
+
+    &:hover {
+        color: var(--user-primary);
+    }
+}
+
+.tab-btn-active {
+    color: var(--user-primary) !important;
+    border-bottom-color: var(--user-primary) !important;
+}
+
+/* ── Price block ── */
+.price-block {
+    background: linear-gradient(135deg, rgba(16, 185, 129, .05) 0%, rgba(16, 185, 129, .02) 100%);
+    border-radius: 14px;
+    padding: 16px 20px;
+    border: 1px solid rgba(16, 185, 129, .15);
 }

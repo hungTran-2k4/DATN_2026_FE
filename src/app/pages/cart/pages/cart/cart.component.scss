@@ -1,20 +1,69 @@
-/* Tweak primeNG checkboxes to match Shopee UI */
-::ng-deep .p-checkbox .p-checkbox-box {
-    width: 18px;
-    height: 18px;
-    border-radius: 2px;
-    border-color: #d1d5db;
+:host { display: block; }
+
+/* ── Table grid ── */
+.cart-table-header,
+.cart-table-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 140px 120px 60px;
+  gap: 8px;
+  align-items: center;
 }
 
-::ng-deep .p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box:hover {
-    border-color: #3b82f6; /* user-primary */
+/* ── Checkbox ── */
+.cart-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--user-primary);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-::ng-deep .p-checkbox .p-checkbox-box.p-highlight {
-    border-color: #3b82f6;
-    background: #3b82f6;
+/* ── Quantity control ── */
+.qty-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 32px;
 }
 
-::ng-deep .p-checkbox .p-checkbox-box .p-checkbox-icon {
-    font-size: 12px;
+.qty-btn {
+  width: 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F9FAFB;
+  border: none;
+  cursor: pointer;
+  color: #374151;
+  transition: background .15s;
+
+  &:hover:not(:disabled) { background: #F3F4F6; color: var(--user-primary); }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+  &:first-child { border-right: 1px solid #E5E7EB; }
+  &:last-child { border-left: 1px solid #E5E7EB; }
+}
+
+.qty-input {
+  width: 44px;
+  height: 100%;
+  text-align: center;
+  font-size: .85rem;
+  font-weight: 700;
+  border: none;
+  outline: none;
+  color: #1E293B;
+  background: white;
+
+  /* Hide number arrows */
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button { -webkit-appearance: none; }
+  -moz-appearance: textfield;
+}
+
+/* ── PrimeNG overrides ── */
+:host ::ng-deep {
+  .p-skeleton { border-radius: 8px; }
 }

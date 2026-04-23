@@ -45,7 +45,7 @@ export class UserAdminRepository {
       };
     }
 
-    return this.apiBase.paging2(query);
+    return this.apiBase.paging3(query);
   }
 
   /**

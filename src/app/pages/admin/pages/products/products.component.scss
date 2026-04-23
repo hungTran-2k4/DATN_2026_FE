@@ -3,3 +3,80 @@
     flex-direction: column;
     gap: 16px;
 }
+
+.step-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 0 20px;
+  border-bottom: 1px solid #F1F5F9;
+  margin-bottom: 20px;
+}
+
+.step-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #9CA3AF;
+  cursor: pointer;
+  transition: all .15s;
+
+  &:hover:not(:disabled) {
+    color: #374151;
+    background: #F8FAFC;
+  }
+
+  &.active {
+    color: #10B981;
+    background: #D1FAE5;
+  }
+
+  &:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+}
+
+.step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: currentColor;
+  color: white;
+  font-size: .72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .step-tab.active & {
+    background: #10B981;
+    color: white;
+  }
+
+  .step-tab:not(.active) & {
+    background: #D1D5DB;
+    color: white;
+  }
+}
+
+.step-divider {
+  flex: 1;
+  height: 1px;
+  background: #E5E7EB;
+  margin: 0 4px;
+
+  &.done {
+    background: #10B981;
+  }
+}
+
+.step-content {
+  min-height: 200px;
+}

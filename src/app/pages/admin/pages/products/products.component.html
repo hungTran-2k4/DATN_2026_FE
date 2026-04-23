@@ -1,20 +1,22 @@
 <section class="admin-page">
+  <p-toast position="top-right"></p-toast>
+  <p-confirmDialog></p-confirmDialog>
   <header class="page-heading">
-    <h3>Quan ly san pham</h3>
-    <p>Theo doi danh muc san pham, SKU va trang thai hien thi tren san.</p>
+    <h3>Quản lý sản phẩm</h3>
+    <p>Theo dõi danh mục sản phẩm, SKU và trạng thái hiển thị trên sàn.</p>
   </header>
 
   <div class="admin-kpi-strip" *ngIf="productStats$ | async as stats">
     <article class="admin-kpi-card is-info">
-      <h4>Tong san pham</h4>
+      <h4>Tổng sản phẩm</h4>
       <p>{{ stats.total }}</p>
     </article>
     <article class="admin-kpi-card is-success">
-      <h4>San pham dang ban</h4>
+      <h4>Sản phẩm đang bán</h4>
       <p>{{ stats.published }}</p>
     </article>
     <article class="admin-kpi-card is-warn">
-      <h4>Dang cho duyet / Draft</h4>
+      <h4>Đang chờ duyệt / Nháp</h4>
       <p>{{ stats.pendingOrDraft }}</p>
     </article>
   </div>
@@ -25,7 +27,7 @@
       <input
         pInputText
         type="text"
-        placeholder="Tim theo ten san pham, SKU, trang thai..."
+        placeholder="Tìm theo tên sản phẩm, SKU, trạng thái..."
         [(ngModel)]="keyword"
         (ngModelChange)="onKeywordChange()"
       />
@@ -34,19 +36,19 @@
     <div class="admin-toolbar-actions">
       <p-button
         icon="pi pi-refresh"
-        label="Lam moi"
+        label="Làm mới"
         [outlined]="true"
         (click)="reloadProducts()"
       ></p-button>
       <p-button
         icon="pi pi-filter-slash"
-        label="Bo loc"
+        label="Bộ lọc"
         [outlined]="true"
         (click)="resetFilter()"
       ></p-button>
       <p-button
         icon="pi pi-file-export"
-        label="Xuat CSV"
+        label="Xuất CSV"
         severity="secondary"
         (click)="exportCurrentProducts()"
       ></p-button>
@@ -63,42 +65,207 @@
     >
       <ng-template pTemplate="header">
         <tr>
-          <th>Ten san pham</th>
+          <th>Tên sản phẩm</th>
           <th>SKU</th>
-          <th>Brand</th>
-          <th>Category</th>
-          <th>Status</th>
-          <th style="width: 130px">Thao tac</th>
+          <th>Cửa hàng</th>
+          <th>Danh mục</th>
+          <th>Trạng thái</th>
+          <th style="width: 140px">Thao tác</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-product>
         <tr>
           <td>{{ product.name || "-" }}</td>
           <td>{{ product.sku || "-" }}</td>
-          <td>{{ product.brandId || "-" }}</td>
-          <td>{{ product.categoryId || "-" }}</td>
+          <td>{{ getShopName(product.shopId) }}</td>
+          <td>{{ getCategoryName(product.categoryId) }}</td>
           <td>
             <p-tag
               [severity]="getStatusSeverity(product.status)"
-              [value]="product.status || 'Unknown'"
+              [value]="getStatusLabel(product.status)"
             ></p-tag>
           </td>
           <td>
-            <p-button
-              icon="pi pi-copy"
-              size="small"
-              [text]="true"
-              (click)="copyProductSku(product.sku)"
-            ></p-button>
+            <!-- Approve button only shows when Pending -->
+            <ng-container *ngIf="product.status === 'Pending'">
+              <p-button
+                icon="pi pi-check-circle"
+                size="small"
+                severity="warn"
+                [text]="true"
+                pTooltip="Kiểm duyệt"
+                (click)="openReviewDialog(product)"
+              ></p-button>
+            </ng-container>
+
+            <!-- Admin management buttons replace the copy button -->
             <p-button
               icon="pi pi-pencil"
               size="small"
+              severity="info"
               [text]="true"
-              (click)="notifyFeaturePending('Cap nhat thong tin san pham')"
+              pTooltip="Chỉnh sửa sản phẩm"
+              (click)="openEditDialog(product)"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              size="small"
+              severity="danger"
+              [text]="true"
+              pTooltip="Xóa sản phẩm"
+              (click)="notifyFeaturePending('Delete Product')"
             ></p-button>
           </td>
         </tr>
       </ng-template>
     </p-table>
   </div>
+
+  <p-dialog
+    [header]="isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thông tin duyệt sản phẩm'"
+    [(visible)]="isReviewDialogVisible"
+    [modal]="true"
+    [style]="{ width: '850px' }"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="isReviewDialogVisible = false; isEditMode = false; selectedProduct = null"
+  >
+    <!-- Bước tabs -->
+    <div class="step-tabs">
+      <button class="step-tab" [class.active]="currentReviewStep === 'info'" (click)="currentReviewStep = 'info'">
+        <span class="step-num">1</span> Thông tin
+      </button>
+      <div class="step-divider done"></div>
+      <button class="step-tab" [class.active]="currentReviewStep === 'images'" (click)="currentReviewStep = 'images'">
+        <span class="step-num">2</span> Ảnh sản phẩm
+      </button>
+      <div class="step-divider done"></div>
+      <button class="step-tab" [class.active]="currentReviewStep === 'variants'" (click)="currentReviewStep = 'variants'">
+        <span class="step-num">3</span> Biến thể
+      </button>
+    </div>
+
+    <!-- Bước 1: Thông tin -->
+    <div *ngIf="currentReviewStep === 'info' && selectedProduct" class="step-content" style="max-height: 60vh; overflow-y: auto; padding: 16px;">
+      <!-- Chế độ Xem (Review) -->
+      <ng-container *ngIf="!isEditMode">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.95rem;">
+          <div><strong>Tên sản phẩm: </strong> {{ selectedProduct.name || '-' }}</div>
+          <div><strong>SKU: </strong> {{ selectedProduct.sku || '-' }}</div>
+          <div><strong>Slug: </strong> {{ selectedProduct.slug || '-' }}</div>
+          <div><strong>Cửa hàng: </strong> {{ getShopName(selectedProduct.shopId) }}</div>
+          <div><strong>Thương hiệu: </strong> {{ getBrandName(selectedProduct.brandId) }}</div>
+          <div><strong>Danh mục: </strong> {{ getCategoryName(selectedProduct.categoryId) }}</div>
+          <div><strong>Lượt xem: </strong> {{ selectedProduct.viewCount || 0 }}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong>Trạng thái: </strong> 
+            <p-tag [severity]="getStatusSeverity(selectedProduct.status)" [value]="getStatusLabel(selectedProduct.status)"></p-tag>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <strong>Tóm tắt: </strong>
+          <p style="margin-top: 4px; color: #555; line-height: 1.5; font-size: 0.95rem;">{{ selectedProduct.summary || 'Không có tóm tắt' }}</p>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <strong>Mô tả chi tiết: </strong>
+          <div style="margin-top: 4px; color: #444; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 0.9rem; line-height: 1.5;" [innerHTML]="selectedProduct.description || 'Không có mô tả chi tiết'"></div>
+        </div>
+      </ng-container>
+
+      <!-- Chế độ Sửa (Edit) -->
+      <form *ngIf="isEditMode" [formGroup]="editForm" class="p-fluid grid" style="gap: 16px;">
+        <div class="field col-12 md:col-6">
+          <label for="name" class="font-bold">Tên sản phẩm</label>
+          <input pInputText id="name" formControlName="name" placeholder="Nhập tên sản phẩm"/>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label for="sku" class="font-bold">SKU</label>
+          <input pInputText id="sku" formControlName="sku" placeholder="Nhập mã SKU"/>
+        </div>
+        <div class="field col-12 md:col-4">
+          <label for="categoryId" class="font-bold">Danh mục</label>
+          <p-dropdown id="categoryId" [options]="categories" formControlName="categoryId" optionLabel="name" optionValue="id" placeholder="Chọn danh mục"></p-dropdown>
+        </div>
+        <div class="field col-12 md:col-4">
+          <label for="brandId" class="font-bold">Thương hiệu</label>
+          <p-dropdown id="brandId" [options]="brands" formControlName="brandId" optionLabel="name" optionValue="id" placeholder="Chọn thương hiệu"></p-dropdown>
+        </div>
+        <div class="field col-12 md:col-4">
+          <label for="status" class="font-bold">Trạng thái</label>
+          <p-dropdown id="status" [options]="[{label:'Đang bán', value:'active'}, {label:'Ẩn', value:'inactive'}]" formControlName="status" optionLabel="label" optionValue="value"></p-dropdown>
+        </div>
+        <div class="field col-12">
+          <label for="summary" class="font-bold">Tóm tắt</label>
+          <textarea pInputTextarea id="summary" formControlName="summary" rows="3" style="width: 100%; border: 1px solid #ced4da; border-radius: 6px; padding: 8px;"></textarea>
+        </div>
+        <div class="field col-12">
+          <label class="font-bold mb-2 block">Mô tả chi tiết</label>
+          <p-editor formControlName="description" [style]="{ height: '200px' }"></p-editor>
+        </div>
+        
+        <div class="col-12 mt-3">
+          <p-button label="Lưu thông tin sản phẩm" icon="pi pi-save" (click)="saveProductInfo()" [loading]="isSaving" [disabled]="editForm.invalid"></p-button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Bước 2: Ảnh sản phẩm -->
+    <div *ngIf="currentReviewStep === 'images' && selectedProduct" class="step-content" style="max-height: 55vh; overflow-y: auto; padding: 16px;">
+      <div *ngIf="selectedProduct.images && selectedProduct.images.length > 0" style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <div *ngFor="let img of selectedProduct.images" style="position: relative; width: 120px; height: 120px; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; background: #f8fafc;">
+          <img [src]="img.imageUrl" alt="Product Image" style="width: 100%; height: 100%; object-fit: cover;"/>
+          <div *ngIf="img.isMain" style="position: absolute; top: 4px; left: 4px; background: #10B981; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Ảnh chính</div>
+        </div>
+      </div>
+      <div *ngIf="isEditMode" class="mt-4 p-3 bg-blue-50 border-round border-1 border-blue-200 text-blue-700">
+        <i class="pi pi-info-circle mr-2"></i> Tính năng thay đổi ảnh của Admin đang được cập nhật. Hiện tại Admin có thể xem ảnh do người bán tải lên.
+      </div>
+    </div>
+
+    <!-- Bước 3: Biến thể -->
+    <div *ngIf="currentReviewStep === 'variants' && selectedProduct" class="step-content" style="max-height: 55vh; overflow-y: auto; padding: 16px;">
+      <div *ngIf="selectedProduct.variants && selectedProduct.variants.length > 0" style="display: flex; flex-direction: column; gap: 16px;">
+        <div *ngFor="let variant of selectedProduct.variants; let i = index" class="admin-panel" style="margin: 0; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;">
+            <strong style="color: #334155;">Biến thể {{ i + 1 }}: {{ variant.name }}</strong>
+            <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; color: #475569;">SKU: {{ variant.sku || '-' }}</span>
+          </div>
+
+          <div class="grid p-fluid">
+            <div class="col-12 md:col-6 field">
+              <label class="font-bold">Giá bán (VNĐ)</label>
+              <p-inputNumber [(ngModel)]="variant.price" mode="currency" currency="VND" locale="vi-VN" [disabled]="!isEditMode"></p-inputNumber>
+            </div>
+            <div class="col-12 md:col-6 field">
+              <label class="font-bold">Số lượng tồn kho</label>
+              <p-inputNumber [(ngModel)]="variant.stockQty" [min]="0" [disabled]="!isEditMode" placeholder="Nhập tồn kho"></p-inputNumber>
+            </div>
+            <div class="col-12" *ngIf="variant.variantAttributes">
+              <div style="font-size: 0.9rem; color: #64748b; margin-top: 4px;">
+                <strong>Thuộc tính: </strong>
+                <span *ngFor="let att of variant.variantAttributes | keyvalue" style="display: inline-block; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 6px;">
+                  {{att.key}}: {{att.value}}
+                </span>
+              </div>
+            </div>
+            <div class="col-12 mt-2" *ngIf="isEditMode">
+              <p-button label="Lưu biến thể & Kho" size="small" [outlined]="true" icon="pi pi-save" (click)="saveVariant(variant)" [loading]="isSaving"></p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <ng-container *ngIf="!isEditMode">
+        <p-button label="Từ chối" icon="pi pi-times" severity="danger" [text]="true" (click)="confirmReviewFromDialog('reject')"></p-button>
+        <p-button label="Duyệt" icon="pi pi-check" severity="success" (click)="confirmReviewFromDialog('approve')"></p-button>
+      </ng-container>
+      <ng-container *ngIf="isEditMode">
+        <p-button label="Đóng" icon="pi pi-times" [outlined]="true" severity="secondary" (click)="isReviewDialogVisible = false"></p-button>
+      </ng-container>
+    </ng-template>
+  </p-dialog>
 </section>

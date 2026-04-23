@@ -1,175 +1,247 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
-import { CarouselModule } from 'primeng/carousel';
-import { NgOptimizedImage } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
+import { catchError, of } from 'rxjs';
+import { MessageService } from 'primeng/api';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
+import {
+  ApiBaseService,
+  GetProductsQuery,
+  ProductDto,
+  ProductImageDto,
+  ProductVariantDto,
+  ReviewDto,
+} from '../../../../shared/api/generated/api-service-base.service';
+import { CartService } from '../../../cart/services/cart.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    ButtonModule,
-    RippleModule,
-    CarouselModule,
-    NgOptimizedImage,
+    CommonModule, FormsModule, RouterLink,
+    SkeletonModule, ToastModule, TooltipModule,
   ],
+  providers: [MessageService],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss',
 })
-export class ProductDetailComponent implements OnInit {
-  // Fake Product Data
-  product = {
-    id: 1,
-    name: 'Loa Bluetooth Sony Extra Bass SRS-XB13',
-    price: 990000,
-    originalPrice: 1290000,
-    rating: 4.8,
-    reviews: 1250,
-    stock: 50,
-    shortDesc:
-      'Tận hưởng âm thanh vòm đỉnh cao với pin cực trâu lên tới 16 giờ. Thiết kế siêu nhỏ gọn và tiện lợi để bạn có thể mang theo bất cứ đâu.',
-    features: [
-      'Chống nước, chống bụi chuẩn IP67',
-      'Pin bền bỉ lên đến 16 giờ',
-      'Dây đeo đa năng đi kèm',
-      'Công nghệ Extra Bass mạnh mẽ',
-    ],
-    images: [
-      'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&q=80&w=200',
-      'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=200',
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=200',
-    ],
-    colors: ['#000000', '#3b82f6', '#ef4444', '#f59e0b'],
-    sizes: [], // Not applicable for speaker, but leaving empty for logic
-  };
+export class ProductDetailComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
 
-  mainImage = this.product.images[0];
-  selectedColor = this.product.colors[0];
+  product: ProductDto | null = null;
+  variants: ProductVariantDto[] = [];
+  reviews: ReviewDto[] = [];
+  relatedProducts: ProductDto[] = [];
+
+  isLoading = true;
+  isAddingToCart = false;
+  reviewsTotal = 0;
+  reviewPage = 1;
+
+  // UI state
+  mainImage = '';
+  selectedVariant: ProductVariantDto | null = null;
   quantity = 1;
-  activeTab = 'description';
+  activeTab: 'description' | 'specs' | 'reviews' = 'description';
 
-  // Fake Bundle
-  bundleProducts = [
-    {
-      name: 'Loa Bluetooth Sony Extra Bass SRS-XB13',
-      price: 990000,
-      isCurrent: true,
-      image: this.product.images[0],
-      checked: true,
-    },
-    {
-      name: 'Dây Vải Sony Đeo Cổ Dù Cực Bền',
-      price: 150000,
-      image:
-        'https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&q=80&w=150',
-      checked: true,
-    },
-  ];
+  // Attribute selection (e.g. Color, Size)
+  attributeKeys: string[] = [];
+  selectedAttributes: Record<string, string> = {};
 
-  // Related Products
-  relatedProducts = [
-    {
-      name: 'Tai nghe chụp tai Sony WH-CH520',
-      price: 1200000,
-      originalPrice: 1500000,
-      discount: 20,
-      rating: 4.8,
-      image:
-        'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=300',
-    },
-    {
-      name: 'Apple AirPods Pro (2nd gen)',
-      price: 4990000,
-      originalPrice: 5500000,
-      discount: 10,
-      rating: 4.9,
-      image:
-        'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&q=80&w=300',
-    },
-    {
-      name: 'Bose QuietComfort 45',
-      price: 6500000,
-      originalPrice: 7000000,
-      discount: 7,
-      rating: 4.7,
-      image:
-        'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=300',
-    },
-    {
-      name: 'JBL Charge 5 Bluetooth',
-      price: 3490000,
-      originalPrice: 3990000,
-      discount: 12,
-      rating: 4.8,
-      image:
-        'https://images.unsplash.com/photo-1589256469067-ea99122bbdc4?auto=format&fit=crop&q=80&w=300',
-    },
-    {
-      name: 'Marshall Emberton II',
-      price: 4290000,
-      originalPrice: 4790000,
-      discount: 10,
-      rating: 4.9,
-      image:
-        'https://images.unsplash.com/photo-1612089851680-33bf3d762e55?auto=format&fit=crop&q=80&w=300',
-    },
-  ];
-
-  responsiveOptions: any[] | undefined;
-
-  constructor() {}
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly api: ApiBaseService,
+    private readonly cartService: CartService,
+    public readonly authSession: AuthSessionService,
+    private readonly messageService: MessageService,
+    private readonly cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
+  ) {}
 
   ngOnInit(): void {
-    this.responsiveOptions = [
-      {
-        breakpoint: '1199px',
-        numVisible: 3,
-        numScroll: 1,
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const id = params['id'];
+      if (id) this.loadProduct(id);
+    });
+  }
+
+  ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+
+  private loadProduct(id: string): void {
+    this.isLoading = true;
+    forkJoin({
+      product: this.api.productsGET(id, undefined).pipe(catchError(() => of({ data: null }))),
+      reviews: this.api.reviewsGET(id, 1, 10).pipe(catchError(() => of({ data: [], totalRecords: 0 }))),
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: ({ product, reviews }) => {
+        this.product = (product as any).data ?? null;
+        this.variants = this.product?.variants ?? [];
+        this.reviews = (reviews as any).data ?? [];
+        this.reviewsTotal = (reviews as any).totalRecords ?? 0;
+
+        if (this.product) {
+          // Set main image
+          const mainImg = this.product.images?.find((i) => i.isMain) ?? this.product.images?.[0];
+          this.mainImage = mainImg?.imageUrl ?? '';
+
+          // Build attribute keys from variants
+          this.buildAttributeKeys();
+
+          // Auto-select first variant
+          if (this.variants.length > 0) {
+            this.selectVariant(this.variants[0]);
+          }
+
+          // Load related products (same category)
+          if (this.product.categoryId) {
+            this.loadRelated(this.product.categoryId, id);
+          }
+        }
+
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
-      {
-        breakpoint: '991px',
-        numVisible: 2,
-        numScroll: 1,
+      error: () => { this.isLoading = false; },
+    });
+  }
+
+  private loadRelated(categoryId: string, excludeId: string): void {
+    const query = new GetProductsQuery({ page: 1, pageSize: 8 });
+    this.api.paging(query).pipe(
+      catchError(() => of({ data: [] })),
+      takeUntil(this.destroy$),
+    ).subscribe((res: any) => {
+      this.relatedProducts = (res.data ?? []).filter((p: ProductDto) => p.id !== excludeId).slice(0, 6);
+    });
+  }
+
+  private buildAttributeKeys(): void {
+    const keys = new Set<string>();
+    this.variants.forEach((v) => {
+      if (v.variantAttributes) {
+        Object.keys(v.variantAttributes).forEach((k) => keys.add(k));
+      }
+    });
+    this.attributeKeys = [...keys];
+  }
+
+  // ── Variant selection ──
+
+  selectVariant(variant: ProductVariantDto): void {
+    this.selectedVariant = variant;
+    if (variant.variantAttributes) {
+      this.selectedAttributes = { ...variant.variantAttributes };
+    }
+    if (variant.imageUrl) {
+      this.mainImage = variant.imageUrl;
+    }
+    this.quantity = 1;
+  }
+
+  selectAttribute(key: string, value: string): void {
+    this.selectedAttributes[key] = value;
+    // Find matching variant
+    const match = this.variants.find((v) => {
+      if (!v.variantAttributes) return false;
+      return Object.entries(this.selectedAttributes).every(([k, val]) => v.variantAttributes![k] === val);
+    });
+    if (match) this.selectVariant(match);
+  }
+
+  getAttributeValues(key: string): string[] {
+    const vals = new Set<string>();
+    this.variants.forEach((v) => {
+      if (v.variantAttributes?.[key]) vals.add(v.variantAttributes[key]);
+    });
+    return [...vals];
+  }
+
+  isAttributeSelected(key: string, value: string): boolean {
+    return this.selectedAttributes[key] === value;
+  }
+
+  isAttributeAvailable(key: string, value: string): boolean {
+    // Check if any variant with this attribute value has stock
+    return this.variants.some((v) =>
+      v.variantAttributes?.[key] === value && (v.stockQty ?? 0) > 0,
+    );
+  }
+
+  // ── Images ──
+
+  setMainImage(img: ProductImageDto): void {
+    this.mainImage = img.imageUrl ?? '';
+  }
+
+  get productImages(): ProductImageDto[] {
+    return this.product?.images ?? [];
+  }
+
+  // ── Quantity ──
+
+  get maxQty(): number { return this.selectedVariant?.stockQty ?? 99; }
+
+  increaseQty(): void { if (this.quantity < this.maxQty) this.quantity++; }
+  decreaseQty(): void { if (this.quantity > 1) this.quantity--; }
+
+  // ── Cart ──
+
+  addToCart(): void {
+    if (!this.selectedVariant?.id) {
+      this.messageService.add({ severity: 'warn', summary: 'Chưa chọn biến thể', detail: 'Vui lòng chọn phân loại sản phẩm.' });
+      return;
+    }
+    if (!this.authSession.getSession()) {
+      this.messageService.add({ severity: 'info', summary: 'Chưa đăng nhập', detail: 'Vui lòng đăng nhập để thêm vào giỏ hàng.' });
+      return;
+    }
+    this.isAddingToCart = true;
+    this.cartService.addToCart(this.selectedVariant.id, this.quantity).subscribe({
+      next: (ok) => {
+        this.isAddingToCart = false;
+        if (ok) {
+          this.messageService.add({ severity: 'success', summary: 'Đã thêm vào giỏ', detail: `${this.product?.name} × ${this.quantity}` });
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể thêm vào giỏ hàng.' });
+        }
       },
-      {
-        breakpoint: '767px',
-        numVisible: 1,
-        numScroll: 1,
-      },
-    ];
+      error: () => { this.isAddingToCart = false; },
+    });
   }
 
-  setMainImage(img: string) {
-    this.mainImage = img;
+  // ── Reviews ──
+
+  get averageRating(): number {
+    if (!this.reviews.length) return 0;
+    return this.reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / this.reviews.length;
   }
 
-  selectColor(color: string) {
-    this.selectedColor = color;
+  getRatingStars(rating: number): number[] {
+    return Array.from({ length: 5 }, (_, i) => i + 1);
   }
 
-  increaseQty() {
-    if (this.quantity < this.product.stock) this.quantity++;
+  // ── Helpers ──
+
+  formatPrice(price?: number): string {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price ?? 0);
   }
 
-  decreaseQty() {
-    if (this.quantity > 1) this.quantity--;
+  getMainImageUrl(): string {
+    return this.mainImage || 'https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image';
   }
 
-  getBundleTotal(): number {
-    return this.bundleProducts
-      .filter((p) => p.checked)
-      .reduce((sum, p) => sum + p.price, 0);
+  getRelatedMainImage(p: ProductDto): string {
+    return p.images?.find((i) => i.isMain)?.imageUrl ?? p.images?.[0]?.imageUrl ?? 'https://placehold.co/300x300/f3f4f6/9ca3af?text=No+Image';
   }
 
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
+  get isOutOfStock(): boolean {
+    if (this.variants.length === 0) return false;
+    if (this.selectedVariant) return (this.selectedVariant.stockQty ?? 0) <= 0;
+    return this.variants.every((v) => (v.stockQty ?? 0) <= 0);
   }
 }
