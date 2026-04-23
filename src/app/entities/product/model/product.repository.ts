@@ -11,7 +11,7 @@ import {
 import {
   PagedResult,
   unwrapPaged,
-} from '../../admin/model/admin-response.util';
+} from '../../../shared/api/admin-response.util';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })

@@ -1,223 +1,195 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
+import { Subject, forkJoin, interval, takeUntil } from 'rxjs';
+import { catchError, of, map } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { CarouselModule } from 'primeng/carousel';
 import { RippleModule } from 'primeng/ripple';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ProductCardComponent, ProductCardData } from '../../../../shared/ui/molecules/product-card/product-card.component';
+import {
+  ApiBaseService,
+  CategoryDto,
+  GetProductsQuery,
+  ProductDto,
+} from '../../../../shared/api/generated/api-service-base.service';
+
+interface CountdownTime { hours: string; minutes: string; seconds: string; }
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
-    CommonModule,
-    CarouselModule,
-    ButtonModule,
-    RippleModule,
-    RouterModule,
-    NgOptimizedImage,
+    CommonModule, CarouselModule, ButtonModule, RippleModule,
+    RouterModule, RouterLink, NgOptimizedImage, SkeletonModule,
+    ProductCardComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent implements OnInit {
-  categories = [
-    {
-      name: 'Computer',
-      icon: 'pi pi-desktop',
-      color: 'bg-blue-50 text-blue-600',
-    },
-    {
-      name: 'Mobile',
-      icon: 'pi pi-mobile',
-      color: 'bg-purple-50 text-purple-600',
-    },
-    {
-      name: 'Headphone',
-      icon: 'pi pi-headphones',
-      color: 'bg-orange-50 text-orange-600',
-    },
-    { name: 'Gaming', icon: 'pi pi-play', color: 'bg-green-50 text-green-600' },
-    { name: 'Camera', icon: 'pi pi-camera', color: 'bg-red-50 text-red-600' },
-    { name: 'Watch', icon: 'pi pi-clock', color: 'bg-teal-50 text-teal-600' },
-    {
-      name: 'Speaker',
-      icon: 'pi pi-volume-up',
-      color: 'bg-yellow-50 text-yellow-600',
-    },
-  ];
+export class HomeComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
 
-  weeklyDeals = [
-    {
-      name: 'Sony Alpha ILCE-7M4',
-      originalPrice: 2800,
-      price: 2399,
-      image:
-        'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=400',
-      discount: 15,
-      soldOut: 85,
-      rating: 4.8,
-    },
-    {
-      name: 'Apple iPhone 15 Pro Max',
-      originalPrice: 1199,
-      price: 1099,
-      image:
-        'https://images.unsplash.com/photo-1696446700622-affb858fc204?auto=format&fit=crop&q=80&w=400',
-      discount: 8,
-      soldOut: 90,
-      rating: 4.9,
-    },
-    {
-      name: 'Sony Headphones WH-CH520',
-      originalPrice: 120,
-      price: 89,
-      image:
-        'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=400',
-      discount: 25,
-      soldOut: 60,
-      rating: 4.5,
-    },
-    {
-      name: 'MacBook Air M2',
-      originalPrice: 1299,
-      price: 1149,
-      image:
-        'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=400',
-      discount: 12,
-      soldOut: 75,
-      rating: 4.9,
-    },
-    {
-      name: 'Logitech G Pro X Superlight',
-      originalPrice: 150,
-      price: 119,
-      image:
-        'https://images.unsplash.com/photo-1527814050087-3793815479ea?auto=format&fit=crop&q=80&w=400',
-      discount: 20,
-      soldOut: 45,
-      rating: 4.7,
-    },
-  ];
+  // ── Data ──
+  categories: CategoryDto[] = [];
+  weeklyDeals: ProductDto[] = [];
+  trendingProducts: ProductDto[] = [];
+  newArrivals: ProductDto[] = [];
 
-  trendingProducts = [
-    {
-      name: 'Apple Watch Series 9',
-      price: 399,
-      image:
-        'https://images.unsplash.com/photo-1434493789847-2f02b0c48209?auto=format&fit=crop&q=80&w=300',
-      sold: 450,
-      total: 500,
-      rating: 4.8,
-    },
-    {
-      name: 'Samsung Galaxy S24 Ultra',
-      price: 1299,
-      image:
-        'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&q=80&w=300',
-      sold: 120,
-      total: 300,
-      rating: 4.7,
-    },
-    {
-      name: 'Nintendo Switch OLED',
-      price: 349,
-      image:
-        'https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&q=80&w=300',
-      sold: 300,
-      total: 350,
-      rating: 4.9,
-    },
-    {
-      name: 'PlayStation 5 Console',
-      price: 499,
-      image:
-        'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&q=80&w=300',
-      sold: 800,
-      total: 1000,
-      rating: 4.9,
-    },
-    {
-      name: 'AirPods Pro (2nd Gen)',
-      price: 249,
-      image:
-        'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&q=80&w=300',
-      sold: 650,
-      total: 700,
-      rating: 4.8,
-    },
-    {
-      name: 'Dyson V15 Detect',
-      price: 749,
-      image:
-        'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&q=80&w=300',
-      sold: 85,
-      total: 150,
-      rating: 4.6,
-    },
-  ];
+  // ── Loading states ──
+  isLoadingDeals = true;
+  isLoadingTrending = true;
+  isLoadingNew = true;
+  isLoadingCategories = true;
 
-  newArrivals = [
-    {
-      name: 'Dell XPS 15',
-      price: 1499,
-      image:
-        'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300',
-      category: 'Laptop',
-    },
-    {
-      name: 'Samsung Neo QLED 4K',
-      price: 1999,
-      image:
-        'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&q=80&w=300',
-      category: 'TV',
-    },
-    {
-      name: 'Bose QuietComfort 45',
-      price: 329,
-      image:
-        'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=300',
-      category: 'Audio',
-    },
-    {
-      name: 'iPad Pro 12.9"',
-      price: 1099,
-      image:
-        'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&q=80&w=300',
-      category: 'Tablet',
-    },
-    {
-      name: 'GoPro HERO12 Black',
-      price: 399,
-      image:
-        'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&q=80&w=300',
-      category: 'Camera',
-    },
-  ];
+  // ── Countdown ──
+  countdown: CountdownTime = { hours: '00', minutes: '00', seconds: '00' };
 
+  // ── Tabs ──
   tabs = ['Theo xu hướng', 'Sản phẩm mới', 'Bán chạy nhất'];
   activeTab = 'Theo xu hướng';
 
-  responsiveOptions: any[] | undefined;
+  // ── Carousel ──
+  responsiveOptions = [
+    { breakpoint: '1199px', numVisible: 3, numScroll: 1 },
+    { breakpoint: '991px', numVisible: 2, numScroll: 1 },
+    { breakpoint: '767px', numVisible: 1, numScroll: 1 },
+  ];
 
-  constructor() {}
+  // ── Static hero categories (UI only) ──
+  heroCategories = [
+    { name: 'Điện thoại', icon: 'pi pi-mobile', color: 'bg-purple-50 text-purple-600' },
+    { name: 'Laptop', icon: 'pi pi-desktop', color: 'bg-blue-50 text-blue-600' },
+    { name: 'Tai nghe', icon: 'pi pi-headphones', color: 'bg-orange-50 text-orange-600' },
+    { name: 'Gaming', icon: 'pi pi-play', color: 'bg-green-50 text-green-600' },
+    { name: 'Camera', icon: 'pi pi-camera', color: 'bg-red-50 text-red-600' },
+    { name: 'Đồng hồ', icon: 'pi pi-clock', color: 'bg-teal-50 text-teal-600' },
+    { name: 'Loa', icon: 'pi pi-volume-up', color: 'bg-yellow-50 text-yellow-600' },
+    { name: 'TV', icon: 'pi pi-tv', color: 'bg-indigo-50 text-indigo-600' },
+  ];
 
-  ngOnInit() {
-    this.responsiveOptions = [
-      {
-        breakpoint: '1199px',
-        numVisible: 3,
-        numScroll: 1,
-      },
-      {
-        breakpoint: '991px',
-        numVisible: 2,
-        numScroll: 1,
-      },
-      {
-        breakpoint: '767px',
-        numVisible: 1,
-        numScroll: 1,
-      },
-    ];
+  constructor(
+    private readonly api: ApiBaseService,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadData();
+    this.startCountdown();
   }
+
+  ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+
+  private loadData(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Load categories
+    this.api.categoriesGET(true).pipe(
+      catchError(() => of({ data: [] })),
+      takeUntil(this.destroy$),
+    ).subscribe((res: any) => {
+      this.categories = (res.data ?? []).slice(0, 8);
+      this.isLoadingCategories = false;
+    });
+
+    // Load weekly deals (newest products)
+    this.api.paging(new GetProductsQuery({ page: 1, pageSize: 8 })).pipe(
+      catchError(() => of({ data: [] })),
+      takeUntil(this.destroy$),
+    ).subscribe((res: any) => {
+      this.weeklyDeals = res.data ?? [];
+      this.isLoadingDeals = false;
+    });
+
+    // Load trending (page 2 for variety)
+    this.api.paging(new GetProductsQuery({ page: 1, pageSize: 6 })).pipe(
+      catchError(() => of({ data: [] })),
+      takeUntil(this.destroy$),
+    ).subscribe((res: any) => {
+      this.trendingProducts = res.data ?? [];
+      this.isLoadingTrending = false;
+    });
+
+    // Load new arrivals (page 3)
+    this.api.paging(new GetProductsQuery({ page: 2, pageSize: 10 })).pipe(
+      catchError(() => of({ data: [] })),
+      takeUntil(this.destroy$),
+    ).subscribe((res: any) => {
+      this.newArrivals = res.data ?? [];
+      this.isLoadingNew = false;
+    });
+  }
+
+  private startCountdown(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const updateCountdown = () => {
+      const now = new Date();
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      const diff = endOfDay.getTime() - now.getTime();
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      this.countdown = {
+        hours: String(hours).padStart(2, '0'),
+        minutes: String(minutes).padStart(2, '0'),
+        seconds: String(seconds).padStart(2, '0'),
+      };
+    };
+
+    updateCountdown();
+    interval(1000).pipe(takeUntil(this.destroy$)).subscribe(updateCountdown);
+  }
+
+  // ── Map to ProductCardData ──
+
+  mapToCard(product: ProductDto): ProductCardData {
+    const mainImg = product.images?.find((i) => i.isMain)?.imageUrl
+      ?? product.images?.[0]?.imageUrl
+      ?? 'https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image';
+
+    const minPrice = product.variants?.length
+      ? Math.min(...product.variants.map((v) => v.price ?? 0))
+      : 0;
+
+    return {
+      id: product.id ?? '',
+      name: product.name ?? '',
+      price: minPrice,
+      image: mainImg,
+      category: product.categoryId ?? '',
+      rating: 4.5,
+    };
+  }
+
+  mapWithDiscount(product: ProductDto, discountPct = 15): ProductCardData {
+    const card = this.mapToCard(product);
+    return {
+      ...card,
+      originalPrice: card.price > 0 ? Math.round(card.price / (1 - discountPct / 100)) : 0,
+      discount: discountPct,
+    };
+  }
+
+  mapTrending(product: ProductDto): ProductCardData {
+    const card = this.mapToCard(product);
+    const stock = product.variants?.reduce((s, v) => s + (v.stockQty ?? 0), 0) ?? 100;
+    return {
+      ...card,
+      soldCount: Math.floor(stock * 0.7),
+      totalStock: stock,
+    };
+  }
+
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  }
+
+  get skeletonItems() { return Array(8).fill(null); }
+  get skeletonTrending() { return Array(6).fill(null); }
+  get skeletonNew() { return Array(5).fill(null); }
 }

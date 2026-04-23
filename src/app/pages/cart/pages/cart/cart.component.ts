@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -10,7 +10,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { CartDto, CartGroupDto, CartItemDto } from '../../../../shared/api/generated/api-service-base.service';
-import { CartService } from '../../services/cart.service';
+import { CartService } from '../../../../features/cart/model/cart.service';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
@@ -27,7 +27,8 @@ import { AuthSessionService } from '../../../../core/services/auth-session.servi
 export class CartComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  cart: CartDto | null = null;
+  private readonly cartService = inject(CartService);
+  cart = this.cartService.cart; // Signal
   isLoading = true;
   updatingItemId = ''; // ID item đang update (spinner)
 
@@ -35,7 +36,6 @@ export class CartComponent implements OnInit, OnDestroy {
   selectedItemIds = new Set<string>();
 
   constructor(
-    private readonly cartService: CartService,
     public readonly authSession: AuthSessionService,
     private readonly messageService: MessageService,
     private readonly router: Router,
@@ -50,9 +50,10 @@ export class CartComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.cartService.cart$.pipe(takeUntil(this.destroy$)).subscribe((cart) => {
-      this.cart = cart;
-      // Auto-select all in-stock items on first load
+    this.cartService.loadCart().subscribe(() => {
+      this.isLoading = false;
+      // Auto-select
+      const cart = this.cart();
       if (cart && this.selectedItemIds.size === 0) {
         cart.groups?.forEach((g) =>
           g.items?.forEach((item) => {
@@ -62,10 +63,7 @@ export class CartComponent implements OnInit, OnDestroy {
           }),
         );
       }
-      this.isLoading = false;
     });
-
-    this.cartService.loadCart().subscribe();
   }
 
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -170,7 +168,7 @@ export class CartComponent implements OnInit, OnDestroy {
   // ── Computed ──
 
   get allAvailableItems(): CartItemDto[] {
-    return this.cart?.groups?.flatMap((g) => g.items?.filter((i) => (i.stockAvailable ?? 0) > 0) ?? []) ?? [];
+    return this.cart()?.groups?.flatMap((g) => g.items?.filter((i) => (i.stockAvailable ?? 0) > 0) ?? []) ?? [];
   }
 
   get selectedItems(): CartItemDto[] {
@@ -184,7 +182,7 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   get totalItems(): number {
-    return this.cart?.totalItems ?? 0;
+    return this.cart()?.totalItems ?? 0;
   }
 
   isOutOfStock(item: CartItemDto): boolean {

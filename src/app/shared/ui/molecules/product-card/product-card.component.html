@@ -1,0 +1,104 @@
+<a
+  [routerLink]="['/product', data.id]"
+  class="product-card group"
+  [ngClass]="{
+    'grid-card': viewMode === 'grid',
+    'list-card': viewMode === 'list'
+  }"
+>
+  <!-- ── Image Section ── -->
+  <div class="image-wrapper">
+    <!-- Badges -->
+    <div class="badges">
+      <span *ngIf="data.discount" class="badge discount-badge">
+        -{{ data.discount }}%
+      </span>
+      <span *ngIf="!data.discount && data.category && !isGuid(data.category)" class="badge category-badge">
+        {{ data.category }}
+      </span>
+    </div>
+
+    <!-- Main Image -->
+    <div class="img-container">
+      <img
+        [src]="data.image"
+        [alt]="data.name"
+        class="product-img"
+        onerror="this.src='https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image'"
+      />
+    </div>
+
+    <!-- Hover Actions Overlay -->
+    <div class="actions-overlay">
+      <div class="action-buttons">
+        <button
+          (click)="onToggleFavorite($event)"
+          class="action-btn favorite-btn"
+          [ngClass]="{ 'is-active': isFavorite }"
+          pTooltip="Yêu thích"
+          tooltipPosition="top"
+        >
+          <i [class]="isFavorite ? 'pi pi-heart-fill' : 'pi pi-heart'"></i>
+        </button>
+        <button
+          (click)="onQuickView($event)"
+          class="action-btn quick-view-btn"
+          pTooltip="Xem nhanh"
+          tooltipPosition="top"
+        >
+          <i class="pi pi-eye"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Content Section ── -->
+  <div class="content-wrapper">
+    <!-- Category & Rating -->
+    <div class="meta-row">
+      <span class="category-name">{{ (!data.category || isGuid(data.category)) ? 'Sản phẩm' : data.category }}</span>
+      <div *ngIf="data.rating" class="rating">
+        <i class="pi pi-star-fill"></i>
+        <span>{{ data.rating }}</span>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <h3 class="product-title" [title]="data.name">
+      {{ data.name }}
+    </h3>
+
+    <!-- Progress Bar (Flash Sale / Trending) -->
+    <div *ngIf="showProgressBar && data.totalStock" class="progress-container">
+      <div class="progress-labels">
+        <span>Đã bán: {{ data.soldCount }}</span>
+        <span>Còn: {{ data.totalStock - (data.soldCount || 0) }}</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" [style.width.%]="soldPercentage"></div>
+      </div>
+    </div>
+
+    <!-- Pricing & Buy Button -->
+    <div class="footer-row">
+      <div class="price-stack">
+        <span *ngIf="data.originalPrice" class="original-price">
+          {{ formatPrice(data.originalPrice) }}
+        </span>
+        <span class="current-price">
+          {{ formatPrice(data.price) }}
+        </span>
+      </div>
+
+      <button
+        (click)="onAddToCart($event)"
+        class="buy-btn"
+        [disabled]="isAdding"
+        pRipple
+      >
+        <i *ngIf="!isAdding" class="pi pi-plus"></i>
+        <i *ngIf="isAdding" class="pi pi-spin pi-spinner text-xs"></i>
+      </button>
+    </div>
+  </div>
+</a>

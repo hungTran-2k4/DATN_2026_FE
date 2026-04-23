@@ -7,7 +7,7 @@ import {
   CreateCategoryCommand,
   UpdateCategoryCommand,
 } from '../../../shared/api/generated/api-service-base.service';
-import { CatalogAdminRepository } from '../../../entities/admin/model/catalog-admin.repository';
+import { CatalogAdminRepository } from '../../../entities/product/model/catalog-admin.repository';
 
 @Injectable({ providedIn: 'root' })
 export class AdminCatalogFacade {

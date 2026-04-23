@@ -5,7 +5,7 @@ import {
   GetProductsQuery,
   ProductDto,
 } from '../../../shared/api/generated/api-service-base.service';
-import { ProductAdminRepository } from '../../../entities/admin/model/product-admin.repository';
+import { ProductAdminRepository } from '../../../entities/product/model/product-admin.repository';
 
 @Injectable({ providedIn: 'root' })
 export class AdminProductsFacade {

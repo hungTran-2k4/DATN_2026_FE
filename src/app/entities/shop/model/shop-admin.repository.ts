@@ -9,7 +9,7 @@ import {
   ShopDto,
   UpdateShopCommand,
 } from '../../../shared/api/generated/api-service-base.service';
-import { unwrapData } from './admin-response.util';
+import { unwrapData } from '../../../shared/api/admin-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class ShopAdminRepository {

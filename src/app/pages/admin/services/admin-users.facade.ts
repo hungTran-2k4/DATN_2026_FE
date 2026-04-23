@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { RoleDto, UserDtoIEnumerablePagedResponse, UserSessionDto, AuditLogDtoIEnumerablePagedResponse } from '../../../shared/api/generated/api-service-base.service';
-import { UserAdminRepository } from '../../../entities/admin/model/user-admin.repository';
+import { UserAdminRepository } from '../../../entities/user/model/user-admin.repository';
 
 @Injectable({ providedIn: 'root' })
 export class AdminUsersFacade {

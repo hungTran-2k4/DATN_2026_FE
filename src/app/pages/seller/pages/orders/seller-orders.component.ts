@@ -14,7 +14,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { OrderSummaryDto, OrderDto } from '../../../../shared/api/generated/api-service-base.service';
 import { SellerFacade } from '../../../../features/seller/seller.facade';
 import { SellerRegistrationService } from '../../../../features/seller-registration/model/seller-registration.service';
-import { OrderPagedResult } from '../../../../entities/seller/model/seller-order.repository';
+import { OrderPagedResult } from '../../../../entities/order/model/seller-order.repository';
 
 @Component({
   selector: 'app-seller-orders',
@@ -162,7 +162,7 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   }
 
   getOrderCurrentStatus(orderId: string): string {
-    return this.result.items.find((o) => o.id === orderId)?.orderStatus ?? '';
+    return this.result.items.find((o: OrderSummaryDto) => o.id === orderId)?.orderStatus ?? '';
   }
 
   canUpdateStatus(status?: string): boolean {

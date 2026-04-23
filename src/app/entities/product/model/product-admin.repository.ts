@@ -12,7 +12,7 @@ import {
   UpdateProductCommand,
   UpdateVariantCommand,
 } from '../../../shared/api/generated/api-service-base.service';
-import { PagedResult, unwrapData, unwrapPaged } from './admin-response.util';
+import { PagedResult, unwrapData, unwrapPaged } from '../../../shared/api/admin-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class ProductAdminRepository {

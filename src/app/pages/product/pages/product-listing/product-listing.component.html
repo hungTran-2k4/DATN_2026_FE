@@ -229,146 +229,22 @@
         <!-- ── Grid View ── -->
         <ng-container *ngIf="!isLoading && result.items.length > 0 && viewMode === 'grid'">
           <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-5">
-            <a
+            <app-product-card
               *ngFor="let product of result.items"
-              [routerLink]="['/product', product.id]"
-              class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
-            >
-              <!-- Image -->
-              <div class="relative aspect-square bg-gray-50 overflow-hidden">
-                <img
-                  [src]="getMainImage(product)"
-                  [alt]="product.name"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                  onerror="this.src='https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image'"
-                />
-                <!-- Status badge -->
-                <div *ngIf="product.status" class="absolute top-3 left-3">
-                  <span
-                    class="text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider"
-                    [ngClass]="{
-                      'bg-emerald-500 text-white': product.status === 'Active' || product.status === 'active',
-                      'bg-yellow-400 text-gray-900': product.status === 'Draft' || product.status === 'draft',
-                      'bg-gray-200 text-gray-600': product.status !== 'Active' && product.status !== 'active' && product.status !== 'Draft' && product.status !== 'draft'
-                    }"
-                  >{{ product.status }}</span>
-                </div>
-                <!-- Hover overlay -->
-                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <div class="flex gap-2">
-                    <button
-                      (click)="$event.preventDefault()"
-                      class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-red-500 hover:scale-110 transition-all"
-                      pTooltip="Yêu thích" tooltipPosition="top"
-                    >
-                      <i class="pi pi-heart text-sm"></i>
-                    </button>
-                    <button
-                      (click)="$event.preventDefault()"
-                      class="w-10 h-10 bg-user-primary rounded-full shadow-lg flex items-center justify-center text-white hover:bg-user-primary-hover hover:scale-110 transition-all"
-                      pTooltip="Thêm vào giỏ" tooltipPosition="top"
-                    >
-                      <i class="pi pi-shopping-cart text-sm"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Info -->
-              <div class="p-4 flex flex-col flex-1">
-                <p class="text-[11px] text-user-primary font-bold uppercase tracking-wider mb-1.5">
-                  {{ product.sku ?? 'SKU' }}
-                </p>
-                <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-3 flex-1">
-                  {{ product.name }}
-                </h3>
-                <div class="flex items-center justify-between mt-auto">
-                  <div class="flex items-center gap-1 text-yellow-400 text-xs">
-                    <i class="pi pi-star-fill"></i>
-                    <i class="pi pi-star-fill"></i>
-                    <i class="pi pi-star-fill"></i>
-                    <i class="pi pi-star-fill"></i>
-                    <i class="pi pi-star-half-fill"></i>
-                    <span class="text-gray-400 ml-1 font-medium">({{ product.viewCount ?? 0 }})</span>
-                  </div>
-                  <button
-                    (click)="$event.preventDefault()"
-                    class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-user-primary hover:text-white transition-all"
-                  >
-                    <i class="pi pi-plus text-xs"></i>
-                  </button>
-                </div>
-              </div>
-            </a>
+              [data]="mapToCardData(product)"
+              [viewMode]="'grid'"
+            ></app-product-card>
           </div>
         </ng-container>
 
         <!-- ── List View ── -->
         <ng-container *ngIf="!isLoading && result.items.length > 0 && viewMode === 'list'">
           <div class="flex flex-col gap-4">
-            <a
+            <app-product-card
               *ngFor="let product of result.items"
-              [routerLink]="['/product', product.id]"
-              class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex gap-0"
-            >
-              <!-- Image -->
-              <div class="w-40 sm:w-52 shrink-0 bg-gray-50 overflow-hidden">
-                <img
-                  [src]="getMainImage(product)"
-                  [alt]="product.name"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                  onerror="this.src='https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image'"
-                />
-              </div>
-              <!-- Info -->
-              <div class="flex-1 p-5 flex flex-col justify-between">
-                <div>
-                  <div class="flex items-start justify-between gap-4 mb-2">
-                    <div>
-                      <p class="text-[11px] text-user-primary font-bold uppercase tracking-wider mb-1">{{ product.sku }}</p>
-                      <h3 class="text-base font-bold text-gray-900 group-hover:text-user-primary transition-colors leading-snug">
-                        {{ product.name }}
-                      </h3>
-                    </div>
-                    <span
-                      *ngIf="product.status"
-                      class="shrink-0 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider"
-                      [ngClass]="{
-                        'bg-emerald-100 text-emerald-700': product.status === 'Active' || product.status === 'active',
-                        'bg-yellow-100 text-yellow-700': product.status === 'Draft' || product.status === 'draft'
-                      }"
-                    >{{ product.status }}</span>
-                  </div>
-                  <p class="text-sm text-gray-500 line-clamp-2 mt-2">{{ product.summary }}</p>
-                </div>
-                <div class="flex items-center justify-between mt-4">
-                  <div class="flex items-center gap-1 text-yellow-400 text-xs">
-                    <i class="pi pi-star-fill"></i><i class="pi pi-star-fill"></i>
-                    <i class="pi pi-star-fill"></i><i class="pi pi-star-fill"></i>
-                    <i class="pi pi-star-half-fill"></i>
-                    <span class="text-gray-400 ml-1">({{ product.viewCount ?? 0 }})</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <button
-                      (click)="$event.preventDefault()"
-                      class="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-red-300 hover:text-red-500 transition-all"
-                    >
-                      <i class="pi pi-heart text-xs"></i>
-                      <span class="hidden sm:inline">Yêu thích</span>
-                    </button>
-                    <button
-                      (click)="$event.preventDefault()"
-                      class="flex items-center gap-1.5 px-4 py-2 bg-user-primary text-white rounded-xl text-sm font-semibold hover:bg-user-primary-hover transition-colors"
-                    >
-                      <i class="pi pi-shopping-cart text-xs"></i>
-                      <span class="hidden sm:inline">Thêm vào giỏ</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </a>
+              [data]="mapToCardData(product)"
+              [viewMode]="'list'"
+            ></app-product-card>
           </div>
         </ng-container>
 

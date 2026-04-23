@@ -1,12 +1,11 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 import { ApiBaseService } from '../../../../shared/api/generated/api-service-base.service';
-import { CartService } from '../../../../pages/cart/services/cart.service';
-import { Observable, of } from 'rxjs';
+import { CartService } from '../../../../features/cart/model/cart.service';
 
 @Component({
   selector: 'app-user-header',
@@ -16,18 +15,16 @@ import { Observable, of } from 'rxjs';
   styleUrl: './user-header.component.scss',
 })
 export class UserHeaderComponent implements OnInit {
+  public readonly cartService = inject(CartService);
   userMenuItems: MenuItem[] = [];
-  cartCount$: Observable<number> = of(0);
 
   constructor(
     public readonly authSession: AuthSessionService,
     private readonly api: ApiBaseService,
     private readonly router: Router,
-    private readonly cartService: CartService,
   ) {}
 
   ngOnInit(): void {
-    this.cartCount$ = this.cartService.totalItems$;
 
     // Load cart nếu đã đăng nhập
     if (this.authSession.getSession()) {

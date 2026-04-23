@@ -16,7 +16,7 @@ import {
   ProductVariantDto,
   ReviewDto,
 } from '../../../../shared/api/generated/api-service-base.service';
-import { CartService } from '../../../cart/services/cart.service';
+import { CartService } from '../../../../features/cart/model/cart.service';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({

@@ -9,9 +9,9 @@ import {
   UpdateProductCommand,
   UpdateStatusRequest,
 } from '../../shared/api/generated/api-service-base.service';
-import { PagedResult } from '../../entities/admin/model/admin-response.util';
-import { SellerProductRepository } from '../../entities/seller/model/seller-product.repository';
-import { SellerOrderRepository, OrderPagedResult } from '../../entities/seller/model/seller-order.repository';
+import { PagedResult } from '../../shared/api/admin-response.util';
+import { SellerProductRepository } from '../../entities/product/model/seller-product.repository';
+import { SellerOrderRepository, OrderPagedResult } from '../../entities/order/model/seller-order.repository';
 import { SellerRepository } from '../../entities/seller/model/seller.repository';
 import { SellerShopInfo } from '../../entities/seller/model/seller.model';
 

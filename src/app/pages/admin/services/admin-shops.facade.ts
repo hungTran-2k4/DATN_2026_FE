@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ShopDto } from '../../../shared/api/generated/api-service-base.service';
-import { ShopAdminRepository } from '../../../entities/admin/model/shop-admin.repository';
+import { ShopAdminRepository } from '../../../entities/shop/model/shop-admin.repository';
 
 @Injectable({ providedIn: 'root' })
 export class AdminShopsFacade {

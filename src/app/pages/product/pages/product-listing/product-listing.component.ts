@@ -17,8 +17,10 @@ import {
   GetProductsQuery,
   ProductDto,
 } from '../../../../shared/api/generated/api-service-base.service';
-import { PagedResult } from '../../../../entities/admin/model/admin-response.util';
+import { PagedResult } from '../../../../shared/api/admin-response.util';
+import { ProductCardComponent, ProductCardData } from '../../../../shared/ui/molecules/product-card/product-card.component';
 import { ProductFacade } from '../../services/product.facade';
+import { MessageService } from 'primeng/api';
 
 interface SortOption {
   label: string;
@@ -40,6 +42,7 @@ interface SortOption {
     PaginatorModule,
     RippleModule,
     TooltipModule,
+    ProductCardComponent,
   ],
   templateUrl: './product-listing.component.html',
   styleUrl: './product-listing.component.scss',
@@ -262,5 +265,19 @@ export class ProductListingComponent implements OnInit, OnDestroy {
 
   get totalActiveFilters(): number {
     return this.selectedCategoryIds.length + this.selectedBrandIds.length;
+  }
+
+  mapToCardData(product: ProductDto): ProductCardData {
+    const variant = product.variants?.[0];
+    const categoryName = this.categories.find(c => c.id === product.categoryId)?.name;
+    
+    return {
+      id: product.id!,
+      name: product.name!,
+      price: variant?.price ?? 0,
+      image: this.getMainImage(product),
+      category: categoryName || product.categoryId, // Fallback to ID if name not found
+      variantId: variant?.id
+    };
   }
 }

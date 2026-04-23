@@ -2,6 +2,7 @@
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
+
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -24,9 +25,17 @@
 
 /* Animations */
 @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
-    100% { transform: translateY(0px); }
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
 }
 
 .animate-float {
@@ -34,33 +43,42 @@
 }
 
 @keyframes slow-zoom {
-    from { transform: scale(1); }
-    to { transform: scale(1.05); }
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.05);
+    }
 }
 
 .hover-zoom:hover img {
     animation: slow-zoom 0.5s forwards;
 }
 
-/* PrimeNG Overrides */
 ::ng-deep {
-    .p-carousel-items-content,
+
+    /* ── Fix carousel 1 hàng ── */
     .p-carousel-items-container {
         display: flex !important;
         flex-wrap: nowrap !important;
         flex-direction: row !important;
-        width: 100% !important;
-        overflow: visible !important; /* Items-container should not hide content, items-content (viewport) will */
-    }
-    
-    .p-carousel-items-content {
-        overflow: hidden !important;
+        align-items: stretch !important;
     }
 
     .p-carousel-item {
+        flex-shrink: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .p-carousel-content {
+        overflow: hidden !important;
+    }
+
+    /* PrimeNG Carousel Overrides */
+    .p-carousel-indicators {
         padding: 0.75rem;
-        flex: 1 0 auto !important; /* Allow PrimeNG to calculate size, but don't wrap */
-        min-width: 0 !important;
     }
 
     .p-carousel-indicators {
@@ -78,16 +96,18 @@
     .p-carousel-indicator.p-highlight button {
         width: 24px;
         border-radius: 4px;
-        background-color: #10B981 !important; /* user-primary */
+        background-color: #10B981 !important;
+        /* user-primary */
     }
 
     /* Hide default navigators if we use custom ones, but here we just style them */
-    .p-carousel-prev, .p-carousel-next {
+    .p-carousel-prev,
+    .p-carousel-next {
         background: white !important;
         width: 40px !important;
         height: 40px !important;
         border-radius: 50% !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
         color: #111827 !important;
         margin: 0 10px !important;
         transition: all 0.2s ease !important;
@@ -103,7 +123,7 @@
 /* Custom Product Card Styles */
 .product-card-pro {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    
+
     &:hover {
         transform: translateY(-8px);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -112,9 +132,22 @@
 
 .category-chip {
     transition: all 0.3s ease;
+
     &:hover {
         background-color: white;
         box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
         transform: translateY(-4px);
+    }
+}
+
+
+/* ── Fix carousel wrap issue ── */
+:host ::ng-deep {
+    .p-carousel-items-content {
+        overflow: hidden !important;
+    }
+
+    .p-carousel-item {
+        min-width: 0 !important;
     }
 }

@@ -7,7 +7,7 @@ import {
   GetProductsQuery,
   ProductDto,
 } from '../../../shared/api/generated/api-service-base.service';
-import { PagedResult } from '../../../entities/admin/model/admin-response.util';
+import { PagedResult } from '../../../shared/api/admin-response.util';
 import { ProductRepository } from '../../../entities/product/model/product.repository';
 
 @Injectable({ providedIn: 'root' })

@@ -28,7 +28,7 @@
     </ng-container>
 
     <!-- Not logged in -->
-    <ng-container *ngIf="!isLoading && !cart && !authSession.getSession()">
+    <ng-container *ngIf="!isLoading && !cart() && !authSession.getSession()">
       <div class="bg-white rounded-sm shadow-sm p-16 text-center">
         <i class="pi pi-shopping-cart text-6xl text-gray-200 mb-6 block"></i>
         <h3 class="text-lg font-bold text-gray-700 mb-2">Vui lòng đăng nhập để xem giỏ hàng</h3>
@@ -39,8 +39,8 @@
     </ng-container>
 
     <!-- Empty cart -->
-    <ng-container *ngIf="!isLoading && cart && (!cart.groups || cart.groups.length === 0)">
-      <div class="bg-white rounded-sm shadow-sm p-16 text-center">
+    <ng-container *ngIf="!isLoading && cart() as cartData">
+      <div *ngIf="!cartData.groups || cartData.groups.length === 0" class="bg-white rounded-sm shadow-sm p-16 text-center">
         <i class="pi pi-shopping-bag text-6xl text-gray-200 mb-6 block"></i>
         <h3 class="text-lg font-bold text-gray-700 mb-2">Giỏ hàng của bạn đang trống</h3>
         <p class="text-gray-400 text-sm mb-6">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm</p>
@@ -51,8 +51,8 @@
     </ng-container>
 
     <!-- Cart content -->
-    <ng-container *ngIf="!isLoading && cart && cart.groups && cart.groups.length > 0">
-      <div class="flex flex-col lg:flex-row gap-6">
+    <ng-container *ngIf="!isLoading && cart() as cartData">
+      <div *ngIf="cartData.groups && cartData.groups.length > 0" class="flex flex-col lg:flex-row gap-6">
 
         <!-- LEFT: Cart list -->
         <div class="w-full lg:w-[68%] flex flex-col gap-3">
@@ -70,7 +70,7 @@
           </div>
 
           <!-- Shop groups -->
-          <div *ngFor="let group of cart.groups" class="bg-white rounded-sm shadow-sm overflow-hidden">
+          <div *ngFor="let group of cartData.groups" class="bg-white rounded-sm shadow-sm overflow-hidden">
 
             <!-- Shop header -->
             <div class="px-6 py-3 flex items-center gap-3 border-b border-gray-100 bg-gray-50/50">

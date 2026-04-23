@@ -7,7 +7,7 @@ import {
   ProductDto,
   UpdateProductCommand,
 } from '../../../shared/api/generated/api-service-base.service';
-import { PagedResult, unwrapPaged } from '../../admin/model/admin-response.util';
+import { PagedResult, unwrapPaged } from '../../../shared/api/admin-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class SellerProductRepository {

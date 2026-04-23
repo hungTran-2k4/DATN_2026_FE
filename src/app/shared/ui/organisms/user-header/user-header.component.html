@@ -84,7 +84,7 @@
         >
           <i class="pi pi-shopping-bag text-xl"></i>
           <span
-            *ngIf="(cartCount$ | async) as count"
+            *ngIf="cartService.totalItems() as count"
             class="absolute top-0 right-0 w-4 h-4 bg-user-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4 border border-white"
           >{{ count > 99 ? '99+' : count }}</span>
         </div>
