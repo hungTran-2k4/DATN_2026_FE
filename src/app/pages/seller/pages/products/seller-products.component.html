@@ -54,9 +54,15 @@
       <div class="product-info">
         <p class="product-sku">{{ product.sku }}</p>
         <h3 class="product-name" [title]="product.name">{{ product.name }}</h3>
-        <p class="product-meta"><i class="pi pi-eye text-xs"></i> {{ product.viewCount ?? 0 }} lượt xem</p>
+        <div class="product-stats">
+          <p class="product-meta"><i class="pi pi-eye"></i> {{ product.viewCount ?? 0 }}</p>
+          <p class="product-stock" [class.out-of-stock]="getTotalStock(product) === 0">
+            <i class="pi pi-box"></i> Kho: <strong>{{ getTotalStock(product) }}</strong>
+          </p>
+        </div>
       </div>
       <div class="product-actions">
+        <button (click)="openRestockDialog(product)" class="action-btn action-restock" pTooltip="Nhập thêm hàng" tooltipPosition="top"><i class="pi pi-box"></i></button>
         <button (click)="openEditDialog(product)" class="action-btn action-edit" pTooltip="Chỉnh sửa" tooltipPosition="top"><i class="pi pi-pencil"></i></button>
         <button
           *ngIf="product.status === 'Draft' || product.status === 'Rejected'"
@@ -150,6 +156,26 @@
       </div>
 
       <div class="field field-full">
+        <div class="flex justify-between items-center mb-2">
+          <label class="field-label">Thông số kỹ thuật (Cố định)</label>
+          <button type="button" class="btn-add-attr" (click)="addBaseAttr()">
+            <i class="pi pi-plus text-xs"></i> Thêm thông số
+          </button>
+        </div>
+        <div class="base-attr-list space-y-2">
+          <div *ngFor="let attr of baseAttrs; let i = index" class="attr-row">
+            <input pInputText [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" placeholder="Tên thông số (VD: Chipset)" class="flex-1" />
+            <span class="attr-sep">:</span>
+            <input pInputText [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" placeholder="Giá trị (VD: Apple A17)" class="flex-[1.5]" />
+            <button type="button" class="attr-remove" (click)="removeBaseAttr(i)" [disabled]="baseAttrs.length === 1">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        </div>
+        <p class="field-hint mt-1 italic">Các thông số này sẽ hiển thị trong bảng chi tiết kỹ thuật của sản phẩm.</p>
+      </div>
+
+      <div class="field field-full">
         <label class="field-label">Mô tả chi tiết</label>
         <textarea pTextarea formControlName="description" rows="4" placeholder="Mô tả đầy đủ về sản phẩm..." class="w-full resize-none"></textarea>
       </div>
@@ -218,6 +244,28 @@
       </button>
     </div>
 
+    <!-- Attribute Keys Config -->
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="text-sm font-bold text-blue-800 flex items-center gap-2">
+          <i class="pi pi-cog"></i> Thiết lập nhóm phân loại chung
+        </h4>
+        <button type="button" class="btn-add-attr bg-blue-100 border-blue-200" (click)="addVariantKey()">
+          <i class="pi pi-plus text-xs"></i> Thêm nhóm
+        </button>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <div *ngFor="let key of variantAttributeKeys; let ki = index" class="flex items-center gap-1 bg-white border rounded-lg p-1 pr-2 shadow-sm">
+          <input pInputText [ngModel]="key" (ngModelChange)="onVariantKeyChange(ki, $event)" 
+            class="p-inputtext-sm border-none focus:ring-0 w-24 font-bold text-gray-700" placeholder="Tên nhóm..." />
+          <button type="button" class="text-red-400 hover:text-red-600 p-1" (click)="removeVariantKey(ki)" [disabled]="variantAttributeKeys.length === 1">
+            <i class="pi pi-times text-xs"></i>
+          </button>
+        </div>
+      </div>
+      <p class="text-[10px] text-blue-400 mt-2 italic">Lưu ý: Thay đổi tên nhóm tại đây sẽ cập nhật cho tất cả biến thể bên dưới.</p>
+    </div>
+
     <!-- Empty variants -->
     <div class="empty-variants" *ngIf="variants.length === 0">
       <i class="pi pi-tag text-3xl text-gray-300 mb-3"></i>
@@ -230,11 +278,6 @@
         <div class="variant-card-header">
           <span class="variant-index">Biến thể {{ i + 1 }}</span>
           <div class="variant-card-actions">
-            <button class="btn-save-variant" (click)="saveVariant(variant, i)" [disabled]="!variant.name || variant.isSaving">
-              <i class="pi pi-spin pi-spinner" *ngIf="variant.isSaving"></i>
-              <i class="pi pi-check" *ngIf="!variant.isSaving"></i>
-              {{ variant.isNew ? 'Lưu' : 'Cập nhật' }}
-            </button>
             <button class="btn-remove-variant" (click)="removeVariantRow(variant, i)" pTooltip="Xóa biến thể" tooltipPosition="top">
               <i class="pi pi-trash"></i>
             </button>
@@ -256,8 +299,14 @@
 
           <!-- Giá -->
           <div class="field">
-            <label class="field-label">Giá (VNĐ) <span class="required">*</span></label>
+            <label class="field-label">Giá bán (VNĐ) <span class="required">*</span></label>
             <p-inputNumber [(ngModel)]="variant.price" [min]="0" mode="decimal" [useGrouping]="true" placeholder="0" styleClass="w-full"></p-inputNumber>
+          </div>
+
+          <!-- Giá gốc -->
+          <div class="field">
+            <label class="field-label">Giá niêm yết (VNĐ) <span class="text-xs text-gray-400">(Để hiển thị gạch giá)</span></label>
+            <p-inputNumber [(ngModel)]="variant.originalPrice" [min]="0" mode="decimal" [useGrouping]="true" placeholder="0" styleClass="w-full"></p-inputNumber>
           </div>
 
           <!-- Số lượng tồn kho -->
@@ -288,18 +337,13 @@
         <!-- Attributes -->
         <div class="variant-attributes">
           <div class="attr-header">
-            <span class="field-label">Thuộc tính</span>
-            <button class="btn-add-attr" (click)="addAttribute(variant)">
-              <i class="pi pi-plus text-xs"></i> Thêm
-            </button>
+            <span class="field-label">Thông tin phân loại</span>
           </div>
-          <div class="attr-row" *ngFor="let attr of variant.attributes; let ai = index">
-            <input pInputText [(ngModel)]="attr.key" placeholder="Tên (VD: Màu)" class="attr-key" />
-            <span class="attr-sep">:</span>
-            <input pInputText [(ngModel)]="attr.value" placeholder="Giá trị (VD: Đỏ)" class="attr-value" />
-            <button class="attr-remove" (click)="removeAttribute(variant, ai)" *ngIf="variant.attributes.length > 1">
-              <i class="pi pi-times text-xs"></i>
-            </button>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1" *ngFor="let attr of variant.attributes">
+              <span class="text-[10px] font-bold text-gray-400 uppercase">{{ attr.key }}</span>
+              <input pInputText [(ngModel)]="attr.value" [placeholder]="'Nhập ' + attr.key + '...'" class="w-full p-inputtext-sm" />
+            </div>
           </div>
         </div>
 
@@ -328,10 +372,70 @@
       </button>
 
       <!-- Step 3 footer -->
-      <button *ngIf="currentStep === 'variants'" type="button" class="btn-save" (click)="closeDialog()">
-        <i class="pi pi-check"></i> Hoàn tất
+      <button *ngIf="currentStep === 'variants'" type="button" class="btn-save" [disabled]="isSaving" (click)="saveAllVariants()">
+        <i class="pi pi-spin pi-spinner" *ngIf="isSaving"></i>
+        <i class="pi pi-check" *ngIf="!isSaving"></i>
+        Hoàn tất
       </button>
     </div>
   </ng-template>
 
+</p-dialog>
+
+<!-- ══════════════════════════════════════
+     DIALOG: Nhập hàng (Restock)
+     ══════════════════════════════════════ -->
+<p-dialog
+  header="Nhập thêm hàng"
+  [(visible)]="showRestockDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: 'min(600px, 96vw)'}"
+>
+  <div class="restock-container" *ngIf="selectedProductForRestock">
+    <div class="product-summary mb-4 flex gap-3 p-3 bg-gray-50 rounded-lg">
+      <img [src]="getMainImage(selectedProductForRestock)" class="w-12 h-12 object-contain rounded bg-white border" />
+      <div>
+        <h4 class="font-bold text-sm">{{ selectedProductForRestock.name }}</h4>
+        <p class="text-xs text-gray-500">Mã: {{ selectedProductForRestock.sku }}</p>
+      </div>
+    </div>
+
+    <div class="variant-restock-list space-y-3">
+      <div *ngFor="let v of restockVariants" class="variant-restock-item p-3 border rounded-lg hover:border-primary transition-colors">
+        <div class="flex gap-3 items-center mb-3">
+          <img [src]="v.imageUrl || getMainImage(selectedProductForRestock)" class="w-10 h-10 object-cover rounded bg-gray-100 border" />
+          <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold text-sm">{{ v.name }}</span>
+              <span class="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">Hiện có: <strong>{{ v.currentStock }}</strong></span>
+            </div>
+            <p class="text-[10px] text-gray-400">SKU: {{ v.sku }}</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <div class="p-inputgroup flex-1">
+            <span class="p-inputgroup-addon bg-white"><i class="pi pi-plus-circle text-primary"></i></span>
+            <p-inputNumber [(ngModel)]="v.addQuantity" [min]="0" placeholder="Số lượng nhập thêm..." class="w-full"></p-inputNumber>
+          </div>
+          <input pInputText [(ngModel)]="v.note" placeholder="Ghi chú nhập hàng..." class="w-1/2" />
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="restockVariants.length === 0" class="py-8 text-center text-gray-400">
+      <i class="pi pi-spin pi-spinner text-2xl mb-2"></i>
+      <p>Đang tải danh sách biến thể...</p>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button class="btn-cancel" (click)="showRestockDialog = false">Hủy</button>
+    <button class="btn-save" (click)="submitRestock()" [disabled]="isRestocking || restockVariants.length === 0">
+      <i class="pi pi-spin pi-spinner" *ngIf="isRestocking"></i>
+      <i class="pi pi-check" *ngIf="!isRestocking"></i>
+      Xác nhận nhập hàng
+    </button>
+  </ng-template>
 </p-dialog>

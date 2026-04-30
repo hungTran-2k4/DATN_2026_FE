@@ -16,6 +16,7 @@ import {
   CategoryDto,
   GetProductsQuery,
   ProductDto,
+  FilterDescriptor,
 } from '../../../../shared/api/generated/api-service-base.service';
 import { PagedResult } from '../../../../shared/api/admin-response.util';
 import { ProductCardComponent, ProductCardData } from '../../../../shared/ui/molecules/product-card/product-card.component';
@@ -49,7 +50,6 @@ interface SortOption {
 })
 export class ProductListingComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
-  private readonly searchSubject = new Subject<string>();
 
   // Data
   result: PagedResult<ProductDto> = {
@@ -61,6 +61,9 @@ export class ProductListingComponent implements OnInit, OnDestroy {
   };
   categories: CategoryDto[] = [];
   brands: BrandDto[] = [];
+  currentCategory: CategoryDto | null = null;
+  childCategories: CategoryDto[] = [];
+  displayCategories: CategoryDto[] = [];
 
   // State
   isLoading = true;
@@ -74,7 +77,10 @@ export class ProductListingComponent implements OnInit, OnDestroy {
   priceRange: [number, number] = [0, 50000000];
   priceRangeValues: number[] = [0, 50000000];
   currentPage = 1;
-  pageSize = 12;
+  pageSize = 20; // Initial load 20
+  isInitialLoad = true;
+  isLoadingMore = false;
+  hasMore = true;
 
   sortOptions: SortOption[] = [
     { label: 'Mới nhất', value: 'newest' },
@@ -101,16 +107,17 @@ export class ProductListingComponent implements OnInit, OnDestroy {
       this.searchKeyword = params['q'] ?? '';
       this.currentPage = +(params['page'] ?? 1);
       this.pageSize = +(params['pageSize'] ?? 12);
+      
+      const catId = params['cat'];
+      if (catId) {
+        this.selectedCategoryIds = [catId];
+      } else {
+        this.selectedCategoryIds = [];
+      }
+      
       this.loadProducts();
+      this.updateCurrentCategory();
     });
-
-    // Debounce search input
-    this.searchSubject
-      .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.currentPage = 1;
-        this.syncUrlAndLoad();
-      });
 
     this.loadFilters();
   }
@@ -120,13 +127,54 @@ export class ProductListingComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadProducts(): void {
+  private loadProducts(append: boolean = false): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    this.isLoading = true;
+    
+    if (append) {
+      this.isLoadingMore = true;
+    } else {
+      this.isLoading = true;
+      this.currentPage = 1;
+      this.pageSize = 20; // Reset to initial size for new searches/filters
+    }
+
+    // Build filter descriptors
+    const categoryFilters = this.selectedCategoryIds.map(id => new FilterDescriptor({
+      field: 'CategoryId',
+      operator: 'eq',
+      value: id
+    }));
+
+    const brandFilters = this.selectedBrandIds.map(id => new FilterDescriptor({
+      field: 'BrandId',
+      operator: 'eq',
+      value: id
+    }));
+
+    const mainFilters: FilterDescriptor[] = [];
+    
+    if (categoryFilters.length > 0) {
+      mainFilters.push(new FilterDescriptor({
+        logic: 'or',
+        filters: categoryFilters
+      }));
+    }
+
+    if (brandFilters.length > 0) {
+      mainFilters.push(new FilterDescriptor({
+        logic: 'or',
+        filters: brandFilters
+      }));
+    }
+
     const query = new GetProductsQuery({
       search: this.searchKeyword || undefined,
       page: this.currentPage,
       pageSize: this.pageSize,
+      filter: mainFilters.length > 0 ? new FilterDescriptor({
+        logic: 'and',
+        filters: mainFilters
+      }) : undefined
     });
 
     this.productFacade
@@ -134,12 +182,21 @@ export class ProductListingComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          this.result = res;
-          this.isLoading = false;
+          if (append) {
+            this.result.items = [...this.result.items, ...res.items];
+            this.result.totalRecords = res.totalRecords;
+            this.isLoadingMore = false;
+          } else {
+            this.result = res;
+            this.isLoading = false;
+          }
+          
+          this.hasMore = this.result.items.length < this.result.totalRecords;
           this.cdr.detectChanges();
         },
         error: () => {
           this.isLoading = false;
+          this.isLoadingMore = false;
           this.cdr.detectChanges();
         },
       });
@@ -150,7 +207,10 @@ export class ProductListingComponent implements OnInit, OnDestroy {
     this.productFacade
       .getCategories()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((cats) => (this.categories = cats));
+      .subscribe((cats) => {
+        this.categories = cats;
+        this.updateCurrentCategory();
+      });
 
     this.productFacade
       .getBrands()
@@ -158,8 +218,34 @@ export class ProductListingComponent implements OnInit, OnDestroy {
       .subscribe((brands) => (this.brands = brands));
   }
 
-  onSearchInput(): void {
-    this.searchSubject.next(this.searchKeyword);
+  private updateCurrentCategory(): void {
+    if (this.selectedCategoryIds.length === 1 && this.categories.length > 0) {
+      const catId = this.selectedCategoryIds[0];
+      this.currentCategory = this.findCategoryById(this.categories, catId);
+      this.childCategories = this.currentCategory?.children || [];
+      
+      // Scoped categories: current + children
+      if (this.currentCategory) {
+        this.displayCategories = [this.currentCategory, ...this.childCategories];
+      } else {
+        this.displayCategories = this.categories;
+      }
+    } else {
+      this.currentCategory = null;
+      this.childCategories = [];
+      this.displayCategories = this.categories;
+    }
+  }
+
+  private findCategoryById(cats: CategoryDto[], id: string): CategoryDto | null {
+    for (const cat of cats) {
+      if (cat.id === id) return cat;
+      if (cat.children && cat.children.length > 0) {
+        const found = this.findCategoryById(cat.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
   onSearchSubmit(): void {
@@ -172,22 +258,35 @@ export class ProductListingComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
-  onPageChange(event: PaginatorState): void {
-    this.currentPage = (event.page ?? 0) + 1;
-    this.pageSize = event.rows ?? 12;
+  loadMore(): void {
+    if (this.isLoadingMore || !this.hasMore) return;
+    
+    if (this.currentPage === 1 && this.pageSize === 20) {
+      this.currentPage = 3; // Start from offset 20
+    } else {
+      this.currentPage++;
+    }
+    
+    this.pageSize = 10;
+    this.loadProducts(true);
+  }
+
+  clearCategoryFilter(): void {
+    this.selectedCategoryIds = [];
     this.syncUrlAndLoad();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.updateCurrentCategory();
   }
 
   toggleCategory(id: string): void {
-    const idx = this.selectedCategoryIds.indexOf(id);
-    if (idx >= 0) {
-      this.selectedCategoryIds.splice(idx, 1);
+    // Single selection for category in Shopee style
+    if (this.selectedCategoryIds.includes(id)) {
+      this.selectedCategoryIds = [];
     } else {
-      this.selectedCategoryIds.push(id);
+      this.selectedCategoryIds = [id];
     }
     this.currentPage = 1;
-    this.loadProducts();
+    this.syncUrlAndLoad();
+    this.updateCurrentCategory();
   }
 
   toggleBrand(id: string): void {
@@ -222,8 +321,9 @@ export class ProductListingComponent implements OnInit, OnDestroy {
     const queryParams: any = {};
     if (this.searchKeyword) queryParams['q'] = this.searchKeyword;
     if (this.currentPage > 1) queryParams['page'] = this.currentPage;
+    if (this.selectedCategoryIds.length === 1) queryParams['cat'] = this.selectedCategoryIds[0];
+    
     this.router.navigate([], { queryParams, replaceUrl: true });
-    this.loadProducts();
   }
 
   getMainImage(product: ProductDto): string {

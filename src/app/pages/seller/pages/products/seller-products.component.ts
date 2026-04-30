@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, forkJoin, takeUntil } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, forkJoin, takeUntil, combineLatest, startWith, filter, switchMap, tap, map } from 'rxjs';
 import { catchError, of } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -19,6 +19,7 @@ import { RouterLink } from '@angular/router';
 import {
   ApiBaseService,
   BrandDto,
+  BulkSaveVariantsCommand,
   CategoryDto,
   CreateProductCommand,
   CreateVariantCommand,
@@ -26,9 +27,11 @@ import {
   ProductDto,
   ProductImageDto,
   ProductVariantDto,
+  RestockCommand,
   UpdateProductCommand,
   UpdateStockCommand,
   UpdateVariantCommand,
+  VariantSaveItem,
 } from '../../../../shared/api/generated/api-service-base.service';
 import { PagedResult } from '../../../../shared/api/admin-response.util';
 import { SellerFacade } from '../../../../features/seller/seller.facade';
@@ -41,6 +44,7 @@ export interface VariantRow {
   name: string;
   sku: string;
   price: number;
+  originalPrice?: number;
   initialStock: number;
   imageUrl: string;
   attributes: { key: string; value: string }[];
@@ -64,6 +68,7 @@ export interface VariantRow {
 export class SellerProductsComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
+  private readonly pageSubject = new Subject<{ page: number; rows: number }>();
   private readonly formDestroy$ = new Subject<void>();
 
   shopId = '';
@@ -85,6 +90,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
   // ── Dropdown data ──
   categories: CategoryDto[] = [];
   brands: BrandDto[] = [];
+  baseAttrs: { key: string, value: string }[] = [];
   isLoadingMeta = false;
 
   readonly statusOptions = [
@@ -99,8 +105,15 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
 
   // ── Variants ──
   variants: VariantRow[] = [];
+  variantAttributeKeys: string[] = ['Màu sắc']; // Mặc định có 1 nhóm
   isLoadingVariants = false;
   uploadingVariantIndices: { [index: number]: boolean } = {};
+
+  // ── Restock state ──
+  showRestockDialog = false;
+  selectedProductForRestock: ProductDto | null = null;
+  restockVariants: any[] = [];
+  isRestocking = false;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -117,15 +130,38 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     this.initForm();
     if (!isPlatformBrowser(this.platformId)) return;
 
-    this.sellerService.shopInfo$.pipe(takeUntil(this.destroy$)).subscribe((shop) => {
-      if (shop?.id) { this.shopId = shop.id; this.loadProducts(); }
+    // Tối ưu hóa việc gọi API: Kết hợp shopId và các trigger (paging, search)
+    combineLatest({
+      shop: this.sellerService.shopInfo$.pipe(
+        filter(s => !!s?.id),
+        distinctUntilChanged((a, b) => a?.id === b?.id)
+      ),
+      trigger: this.searchSubject.pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        startWith(this.searchKeyword)
+      ),
+      page: this.pageSubject.pipe(
+        startWith({ page: this.currentPage, rows: this.pageSize })
+      )
+    }).pipe(
+      takeUntil(this.destroy$),
+      tap(() => this.isLoading = true),
+      switchMap(({ shop, trigger, page }) => {
+        this.shopId = shop!.id!;
+        this.searchKeyword = trigger;
+        return this.sellerFacade.getProducts(this.shopId, trigger || undefined, page.page, page.rows);
+      })
+    ).subscribe({
+      next: (res) => {
+        this.result = res;
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => { this.isLoading = false; }
     });
+
     this.sellerService.initState();
-
-    this.searchSubject.pipe(
-      debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$),
-    ).subscribe(() => { this.currentPage = 1; this.loadProducts(); });
-
     this.loadMeta();
   }
 
@@ -171,17 +207,20 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     });
   }
 
+  getTotalStock(product: ProductDto): number {
+    if (!product.variants?.length) return 0;
+    return product.variants.reduce((acc, v) => acc + (v.stockQty ?? 0), 0);
+  }
+
   // ── Products list ──
 
   loadProducts(): void {
-    if (!this.shopId) return;
-    this.isLoading = true;
-    this.sellerFacade.getProducts(this.shopId, this.searchKeyword || undefined, this.currentPage, this.pageSize)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({ next: (r) => { this.result = r; this.isLoading = false; }, error: () => { this.isLoading = false; } });
+    this.pageSubject.next({ page: this.currentPage, rows: this.pageSize });
   }
 
-  onSearch(): void { this.searchSubject.next(this.searchKeyword); }
+  onSearch(): void {
+    this.searchSubject.next(this.searchKeyword);
+  }
 
   onPageChange(e: PaginatorState): void {
     this.currentPage = (e.page ?? 0) + 1;
@@ -198,6 +237,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     this.currentStep = 'info';
     this.productImages = [];
     this.variants = [];
+    this.baseAttrs = [{ key: '', value: '' }];
     this.initForm();
     this.showDialog = true;
     this.cdr.detectChanges();
@@ -208,11 +248,44 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     this.activeProductId = product.id ?? '';
     this.currentStep = 'info';
     this.productImages = [...(product.images ?? [])];
+    
+    // Parse base attributes
+    try {
+      if (product.baseAttributes) {
+        const parsed = JSON.parse(product.baseAttributes);
+        this.baseAttrs = Object.keys(parsed).map(k => ({ key: k, value: parsed[k] }));
+      } else {
+        this.baseAttrs = [];
+      }
+    } catch {
+      this.baseAttrs = [];
+    }
+    if (this.baseAttrs.length === 0) {
+      this.baseAttrs.push({ key: '', value: '' });
+    }
+
+    // Build unique attribute keys for the product
+    const keys = new Set<string>();
+    product.variants?.forEach(v => {
+      if (v.variantAttributes) {
+        Object.keys(v.variantAttributes).forEach(k => keys.add(k));
+      }
+    });
+    this.variantAttributeKeys = keys.size > 0 ? Array.from(keys) : ['Màu sắc'];
+
     this.initForm(product);
     this.showDialog = true;
     this.cdr.detectChanges();
     // Load variants
     this.loadVariantsForProduct(product.id!);
+  }
+
+  addBaseAttr(): void {
+    this.baseAttrs.push({ key: '', value: '' });
+  }
+
+  removeBaseAttr(index: number): void {
+    this.baseAttrs.splice(index, 1);
   }
 
   closeDialog(): void {
@@ -233,6 +306,11 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     this.isSaving = true;
     const v = this.form.value;
 
+    // Convert base attributes to JSON
+    const attrsObj: any = {};
+    this.baseAttrs.filter(a => a.key && a.value).forEach(a => attrsObj[a.key] = a.value);
+    const baseAttrsJson = JSON.stringify(attrsObj);
+
     if (this.isEditMode && this.activeProductId) {
       const cmd = new UpdateProductCommand({
         id: this.activeProductId,
@@ -240,6 +318,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
         summary: v.summary || undefined, description: v.description || undefined,
         status: v.status, categoryId: v.categoryId || undefined,
         brandId: v.brandId || undefined, shopId: this.shopId,
+        baseAttributes: baseAttrsJson
       });
       this.sellerFacade.updateProduct(this.activeProductId, this.shopId, cmd).subscribe({
         next: (ok) => {
@@ -257,6 +336,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
         summary: v.summary || undefined, description: v.description || undefined,
         status: v.status, categoryId: v.categoryId || undefined,
         brandId: v.brandId || undefined, shopId: this.shopId,
+        baseAttributes: baseAttrsJson
       });
       this.sellerFacade.createProduct(cmd).subscribe({
         next: (id) => {
@@ -357,31 +437,77 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     this.api.productsGET(productId, this.shopId).subscribe({
       next: (res) => {
         this.isLoadingVariants = false;
-        if (res.data?.variants) {
+        if (res.data?.variants && res.data.variants.length > 0) {
+          // Extract shared keys from existing variants
+          const keys = new Set<string>();
+          res.data.variants.forEach((v: any) => {
+            if (v.variantAttributes) {
+              Object.keys(v.variantAttributes).forEach(k => keys.add(k));
+            }
+          });
+          this.variantAttributeKeys = keys.size > 0 ? Array.from(keys) : ['Màu sắc'];
+
           this.variants = res.data.variants.map((v: any) => {
-            const attrs = v.variantAttributes ? Object.keys(v.variantAttributes).map(k => ({ key: k, value: v.variantAttributes[k] })) : [{ key: '', value: '' }];
+            // Ensure every variant has all shared keys
+            const attrs = this.variantAttributeKeys.map(k => ({
+              key: k,
+              value: v.variantAttributes?.[k] ?? ''
+            }));
+            
             return {
               id: v.id,
               name: v.name || '',
               sku: v.sku || '',
               price: v.price || 0,
+              originalPrice: v.originalPrice,
               initialStock: v.stockQty || 0,
               imageUrl: v.imageUrl || '',
-              attributes: attrs.length > 0 ? attrs : [{ key: '', value: '' }],
+              attributes: attrs,
               isNew: false,
               isSaving: false
             };
           });
+        } else {
+          this.variantAttributeKeys = ['Màu sắc'];
+          this.variants = [];
         }
       },
       error: () => { this.isLoadingVariants = false; },
     });
   }
 
+  addVariantKey(): void {
+    const newKey = `Thuộc tính ${this.variantAttributeKeys.length + 1}`;
+    this.variantAttributeKeys.push(newKey);
+    // Add to all variants
+    this.variants.forEach(v => {
+      v.attributes.push({ key: newKey, value: '' });
+    });
+  }
+
+  removeVariantKey(index: number): void {
+    const key = this.variantAttributeKeys[index];
+    this.variantAttributeKeys.splice(index, 1);
+    // Remove from all variants
+    this.variants.forEach(v => {
+      v.attributes = v.attributes.filter(a => a.key !== key);
+    });
+  }
+
+  onVariantKeyChange(index: number, newKey: string): void {
+    const oldKey = this.variantAttributeKeys[index];
+    if (oldKey === newKey) return;
+    this.variantAttributeKeys[index] = newKey;
+    this.variants.forEach(v => {
+      const attr = v.attributes.find(a => a.key === oldKey);
+      if (attr) attr.key = newKey;
+    });
+  }
+
   addVariantRow(): void {
     this.variants.push({
       name: '', sku: '', price: 0, initialStock: 0, imageUrl: '',
-      attributes: [{ key: '', value: '' }],
+      attributes: this.variantAttributeKeys.map(k => ({ key: k, value: '' })),
       isNew: true, isSaving: false,
     });
   }
@@ -394,63 +520,56 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     variant.attributes.splice(idx, 1);
   }
 
-  saveVariant(variant: VariantRow, index: number): void {
-    if (!variant.name || !this.activeProductId) return;
-    variant.isSaving = true;
+  saveAllVariants(): void {
+    if (this.variants.length === 0) {
+      this.closeDialog();
+      return;
+    }
 
-    const attrs: { [key: string]: string } = {};
-    variant.attributes.filter((a) => a.key && a.value).forEach((a) => (attrs[a.key] = a.value));
+    // Filter variants that have a name (minimum required field)
+    const validVariants = this.variants.filter(v => !!v.name);
+    if (validVariants.length === 0) {
+      this.closeDialog();
+      return;
+    }
 
-    if (variant.isNew) {
-      const cmd = new CreateVariantCommand({
-        productId: this.activeProductId,
-        shopId: this.shopId,
+    this.isSaving = true;
+
+    const variantItems = validVariants.map((variant) => {
+      const attrs: { [key: string]: string } = {};
+      variant.attributes
+        .filter((a) => a.key && a.value)
+        .forEach((a) => (attrs[a.key] = a.value));
+
+      return new VariantSaveItem({
+        id: variant.id || undefined,
         name: variant.name,
         sku: variant.sku || undefined,
         price: variant.price,
+        originalPrice: variant.originalPrice || undefined,
         imageUrl: variant.imageUrl || undefined,
         variantAttributes: Object.keys(attrs).length ? attrs : undefined,
         initialStock: variant.initialStock,
       });
-      this.api.variantsPOST(this.activeProductId, cmd).subscribe({
-        next: (res) => {
-          variant.isSaving = false;
-          if (res.data?.id) {
-            variant.id = res.data.id;
-            variant.isNew = false;
-            this.messageService.add({ severity: 'success', summary: 'Đã thêm biến thể', detail: variant.name });
-          }
-        },
-        error: () => { variant.isSaving = false; this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể thêm biến thể.' }); },
-      });
-    } else if (variant.id) {
-      const cmd = new UpdateVariantCommand({
-        id: variant.id, shopId: this.shopId, name: variant.name,
-        sku: variant.sku || undefined, price: variant.price,
-        imageUrl: variant.imageUrl || undefined,
-        variantAttributes: Object.keys(attrs).length ? attrs : undefined
-      });
-      this.api.variantsPUT(this.activeProductId, variant.id!, cmd).subscribe({
-        next: () => {
-          // Update stock qty
-          const stockCmd = new UpdateStockCommand({ variantId: variant.id, physicalQuantity: variant.initialStock || 0 });
-          this.api.update(stockCmd).subscribe({
-            next: () => {
-              variant.isSaving = false;
-              this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã cập nhật thông tin và số lượng biến thể' });
-            },
-            error: () => {
-              variant.isSaving = false;
-              this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Đã lưu cấu hình nhưng cập nhật tồn kho thất bại' });
-            }
-          });
-        },
-        error: () => {
-          variant.isSaving = false;
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể cập nhật biến thể' });
-        }
-      });
-    }
+    });
+
+    const command = new BulkSaveVariantsCommand({
+      productId: this.activeProductId!,
+      shopId: this.shopId,
+      variants: variantItems,
+    });
+
+    this.api.variantsBulkSave(this.activeProductId!, command).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã lưu cấu hình biến thể.' });
+        this.closeDialog();
+      },
+      error: () => {
+        this.isSaving = false;
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi lưu biến thể. Hãy kiểm tra lại tồn kho và giá trị.' });
+      }
+    });
   }
 
   removeVariantRow(variant: VariantRow, index: number): void {
@@ -523,6 +642,65 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
           error: () => this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xóa sản phẩm.' }),
         });
       },
+    });
+  }
+  
+  // ── Restock logic ──
+
+  openRestockDialog(product: ProductDto): void {
+    this.selectedProductForRestock = product;
+    this.restockVariants = [];
+    this.showRestockDialog = true;
+    
+    this.api.productsGET(product.id!, this.shopId).subscribe({
+      next: (res) => {
+        if (res.data?.variants) {
+          this.restockVariants = res.data.variants.map((v: any) => ({
+            id: v.id,
+            name: v.name,
+            sku: v.sku,
+            currentStock: v.stockQty || 0,
+            addQuantity: 0,
+            note: ''
+          }));
+        }
+      }
+    });
+  }
+
+  submitRestock(): void {
+    const validRestocks = this.restockVariants.filter(v => v.addQuantity > 0);
+    if (validRestocks.length === 0) {
+      this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập số lượng cho ít nhất một biến thể.' });
+      return;
+    }
+
+    this.isRestocking = true;
+    const requests = validRestocks.map(v => 
+      this.api.restock(new RestockCommand({
+        variantId: v.id,
+        quantity: v.addQuantity,
+        shopId: this.shopId,
+        note: v.note || 'Nhập hàng bổ sung'
+      }))
+    );
+
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        this.isRestocking = false;
+        const successCount = results.filter(r => r.success).length;
+        if (successCount > 0) {
+          this.messageService.add({ severity: 'success', summary: 'Thành công', detail: `Đã nhập hàng cho ${successCount} biến thể.` });
+          this.showRestockDialog = false;
+          this.loadProducts();
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể nhập hàng. Vui lòng thử lại.' });
+        }
+      },
+      error: () => {
+        this.isRestocking = false;
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra trong quá trình nhập hàng.' });
+      }
     });
   }
 

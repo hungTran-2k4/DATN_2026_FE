@@ -95,11 +95,12 @@
             <!-- Price -->
             <div class="price-block mb-6">
               <span class="text-3xl font-black text-user-primary">
-                {{ formatPrice(selectedVariant?.price) }}
+                {{ getPriceDisplay() }}
               </span>
-              <span class="text-sm text-gray-400 ml-2" *ngIf="!selectedVariant && variants.length > 1">
-                (Chọn biến thể để xem giá)
-              </span>
+              <div class="mt-1 flex items-center gap-2" *ngIf="!selectedVariant && attributeKeys.length > 0">
+                <i class="pi pi-info-circle text-xs text-amber-500"></i>
+                <span class="text-xs text-amber-600 font-medium">Vui lòng chọn đầy đủ phân loại để xem giá chính xác</span>
+              </div>
             </div>
 
             <!-- Summary -->

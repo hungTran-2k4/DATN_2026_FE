@@ -64,6 +64,7 @@ export class AdminProductsPageComponent {
   keyword = '';
   isReviewDialogVisible = false;
   selectedProduct: ProductDto | null = null;
+  selectedCategoryId: string | null = null;
   currentReviewStep: 'info' | 'images' | 'variants' = 'info';
   isEditMode = false;
   isSaving = false;
@@ -140,7 +141,8 @@ export class AdminProductsPageComponent {
 
   resetFilter(): void {
     this.keyword = '';
-    this.filteredProducts$ = this.products$;
+    this.selectedCategoryId = null;
+    this.onKeywordChange();
   }
 
   exportProducts(products: ProductDto[]): void {
@@ -366,17 +368,25 @@ export class AdminProductsPageComponent {
   }
 
   private applySearch(products: ProductDto[]): ProductDto[] {
+    let result = products;
     const keyword = this.keyword.trim().toLowerCase();
-    if (!keyword) {
-      return products;
+
+    // Filter by Category
+    if (this.selectedCategoryId) {
+      result = result.filter(p => p.categoryId === this.selectedCategoryId);
     }
 
-    return products.filter((product) => {
-      return (
-        product.name?.toLowerCase().includes(keyword) ||
-        product.sku?.toLowerCase().includes(keyword) ||
-        product.status?.toLowerCase().includes(keyword)
-      );
-    });
+    // Filter by Keyword
+    if (keyword) {
+      result = result.filter((product) => {
+        return (
+          product.name?.toLowerCase().includes(keyword) ||
+          product.sku?.toLowerCase().includes(keyword) ||
+          product.status?.toLowerCase().includes(keyword)
+        );
+      });
+    }
+
+    return result;
   }
 }

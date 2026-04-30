@@ -132,25 +132,46 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   // ── Variant selection ──
 
-  selectVariant(variant: ProductVariantDto): void {
+  selectVariant(variant: ProductVariantDto | null): void {
     this.selectedVariant = variant;
-    if (variant.variantAttributes) {
-      this.selectedAttributes = { ...variant.variantAttributes };
-    }
-    if (variant.imageUrl) {
-      this.mainImage = variant.imageUrl;
+    if (variant) {
+      if (variant.variantAttributes) {
+        this.selectedAttributes = { ...variant.variantAttributes };
+      }
+      if (variant.imageUrl) {
+        this.mainImage = variant.imageUrl;
+      }
     }
     this.quantity = 1;
   }
 
   selectAttribute(key: string, value: string): void {
-    this.selectedAttributes[key] = value;
-    // Find matching variant
-    const match = this.variants.find((v) => {
-      if (!v.variantAttributes) return false;
-      return Object.entries(this.selectedAttributes).every(([k, val]) => v.variantAttributes![k] === val);
-    });
-    if (match) this.selectVariant(match);
+    if (this.selectedAttributes[key] === value) {
+      delete this.selectedAttributes[key];
+    } else {
+      this.selectedAttributes[key] = value;
+    }
+
+    // Check if we have selected all necessary attributes
+    const isFullySelected = this.attributeKeys.every(k => !!this.selectedAttributes[k]);
+
+    if (isFullySelected) {
+      const match = this.variants.find((v) => {
+        if (!v.variantAttributes) return false;
+        return this.attributeKeys.every(k => v.variantAttributes![k] === this.selectedAttributes[k]);
+      });
+      if (match) {
+        this.selectedVariant = match;
+        if (match.imageUrl) this.mainImage = match.imageUrl;
+      } else {
+        this.selectedVariant = null;
+      }
+    } else {
+      this.selectedVariant = null;
+    }
+    
+    this.quantity = 1;
+    this.cdr.detectChanges();
   }
 
   getAttributeValues(key: string): string[] {
@@ -165,11 +186,24 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     return this.selectedAttributes[key] === value;
   }
 
+  /**
+   * Smart logic: Is this specific attribute value available GIVEN the other currently selected attributes?
+   */
   isAttributeAvailable(key: string, value: string): boolean {
-    // Check if any variant with this attribute value has stock
-    return this.variants.some((v) =>
-      v.variantAttributes?.[key] === value && (v.stockQty ?? 0) > 0,
-    );
+    // A value is available if there exists at least one variant that:
+    // 1. Has this [key: value]
+    // 2. Matches ALL OTHER selected attributes
+    // 3. Has stock > 0
+    return this.variants.some(v => {
+      if (!v.variantAttributes || (v.stockQty ?? 0) <= 0) return false;
+      if (v.variantAttributes[key] !== value) return false;
+      
+      // Must match other selections
+      return Object.entries(this.selectedAttributes).every(([sKey, sVal]) => {
+        if (sKey === key) return true; // Skip current key
+        return v.variantAttributes![sKey] === sVal;
+      });
+    });
   }
 
   // ── Images ──
@@ -192,8 +226,15 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   // ── Cart ──
 
   addToCart(): void {
+    const isFullySelected = this.attributeKeys.every(k => !!this.selectedAttributes[k]);
+    
+    if (this.attributeKeys.length > 0 && !isFullySelected) {
+      this.messageService.add({ severity: 'warn', summary: 'Chưa chọn đủ thông tin', detail: 'Vui lòng chọn đầy đủ các tùy chọn sản phẩm.' });
+      return;
+    }
+
     if (!this.selectedVariant?.id) {
-      this.messageService.add({ severity: 'warn', summary: 'Chưa chọn biến thể', detail: 'Vui lòng chọn phân loại sản phẩm.' });
+      this.messageService.add({ severity: 'warn', summary: 'Chưa chọn phân loại', detail: 'Vui lòng chọn phân loại sản phẩm để tiếp tục.' });
       return;
     }
     if (!this.authSession.getSession()) {
@@ -229,6 +270,20 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   formatPrice(price?: number): string {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price ?? 0);
+  }
+
+  getPriceDisplay(): string {
+    if (this.selectedVariant) {
+      return this.formatPrice(this.selectedVariant.price);
+    }
+    if (this.variants.length === 0) return this.formatPrice(0);
+    
+    const prices = this.variants.map(v => v.price ?? 0);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    
+    if (min === max) return this.formatPrice(min);
+    return `${this.formatPrice(min)} - ${this.formatPrice(max)}`;
   }
 
   getMainImageUrl(): string {

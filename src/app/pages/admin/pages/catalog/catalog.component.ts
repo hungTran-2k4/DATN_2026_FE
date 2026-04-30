@@ -164,11 +164,21 @@ export class AdminCatalogPageComponent {
       
       group.items.forEach(item => {
         // Add the level 1 category
-        groupOptions.push({ label: item.name, value: { name: item.name, parentSuggest: group.group } });
+        const label1 = item.name;
+        groupOptions.push({ 
+          label: label1, 
+          value: { name: item.name, parentSuggest: group.group },
+          searchField: this.normalizeSearchText(`${group.group} ${label1}`)
+        });
         
         // Add children categories
         item.children.forEach(child => {
-          groupOptions.push({ label: `--- ${child}`, value: { name: child, parentSuggest: item.name } });
+          const label2 = child;
+          groupOptions.push({ 
+            label: `--- ${label2}`, 
+            value: { name: child, parentSuggest: item.name },
+            searchField: this.normalizeSearchText(`${group.group} ${item.name} ${label2}`)
+          });
         });
       });
 
@@ -178,6 +188,15 @@ export class AdminCatalogPageComponent {
       });
     });
     this.templateOptions = options;
+  }
+
+  private normalizeSearchText(text: string): string {
+    if (!text) return '';
+    return text.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'd');
   }
 
   applyTemplate(event: any): void {

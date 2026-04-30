@@ -214,6 +214,13 @@
   line-height: 1.4;
 }
 
+.product-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
 .product-meta {
   font-size: .75rem;
   color: #9CA3AF;
@@ -221,6 +228,31 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  i { font-size: 10px; }
+}
+
+.product-stock {
+  font-size: .75rem;
+  color: #64748B;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  i {
+    font-size: 10px;
+    color: #10B981;
+  }
+
+  strong {
+    color: #1E293B;
+  }
+
+  &.out-of-stock {
+    color: #EF4444;
+    i { color: #EF4444; }
+    strong { color: #EF4444; }
+  }
 }
 
 .product-actions {
@@ -950,3 +982,25 @@
     padding: 14px 24px 18px;
   }
 }
+
+/* ── Restock Styles ── */
+.variant-restock-item {
+  transition: all .2s;
+  background: white;
+
+  &:hover {
+    border-color: #10B981;
+    background: #F0FDF4;
+  }
+}
+
+:host ::ng-deep {
+  .p-inputgroup-addon {
+    border-radius: 10px 0 0 10px;
+    border-color: #E5E7EB;
+  }
+  
+  .p-inputnumber .p-inputtext {
+    border-radius: 0 10px 10px 0 !important;
+  }
+}

@@ -42,6 +42,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   isLoadingTrending = true;
   isLoadingNew = true;
   isLoadingCategories = true;
+  isLoadingAll = false;
+
+  // ── All Products (Pagination) ──
+  allProducts: ProductDto[] = [];
+  allProductsPage = 1;
+  allProductsPageSize = 10;
+  hasMoreProducts = true;
 
   // ── Countdown ──
   countdown: CountdownTime = { hours: '00', minutes: '00', seconds: '00' };
@@ -89,7 +96,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       catchError(() => of({ data: [] })),
       takeUntil(this.destroy$),
     ).subscribe((res: any) => {
-      this.categories = (res.data ?? []).slice(0, 8);
+      const allRootCats = res.data ?? [];
+      // Filter: Only root categories (no parent)
+      this.categories = allRootCats.filter((c: any) => !c.parentId).slice(0, 10);
       this.isLoadingCategories = false;
     });
 
@@ -119,6 +128,36 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.newArrivals = res.data ?? [];
       this.isLoadingNew = false;
     });
+
+    this.loadAllProducts();
+  }
+
+  loadAllProducts(): void {
+    if (this.isLoadingAll || !this.hasMoreProducts) return;
+    this.isLoadingAll = true;
+
+    this.api.paging(new GetProductsQuery({
+      page: this.allProductsPage,
+      pageSize: this.allProductsPageSize
+    })).pipe(
+      catchError(() => of({ data: [], totalRecords: 0 })),
+      takeUntil(this.destroy$),
+    ).subscribe((res: any) => {
+      const newItems = res.data ?? [];
+      this.allProducts = [...this.allProducts, ...newItems];
+      this.isLoadingAll = false;
+      
+      if (newItems.length < this.allProductsPageSize || this.allProducts.length >= (res.totalRecords ?? 0)) {
+        this.hasMoreProducts = false;
+      }
+    });
+  }
+
+  loadMore(): void {
+    if (this.hasMoreProducts) {
+      this.allProductsPage++;
+      this.loadAllProducts();
+    }
   }
 
   private startCountdown(): void {
@@ -152,26 +191,25 @@ export class HomeComponent implements OnInit, OnDestroy {
       ?? product.images?.[0]?.imageUrl
       ?? 'https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image';
 
-    const minPrice = product.variants?.length
-      ? Math.min(...product.variants.map((v) => v.price ?? 0))
-      : 0;
+    const minVariant = product.variants?.length
+      ? product.variants.reduce((prev, curr) => ((prev.price ?? 0) < (curr.price ?? 0) ? prev : curr))
+      : null;
+
+    const price = minVariant?.price ?? 0;
+    const originalPrice = minVariant?.originalPrice;
+    const discount = (price > 0 && originalPrice && originalPrice > price) 
+      ? Math.round(((originalPrice - price) / originalPrice) * 100)
+      : undefined;
 
     return {
       id: product.id ?? '',
       name: product.name ?? '',
-      price: minPrice,
+      price: price,
+      originalPrice: originalPrice,
+      discount: discount,
       image: mainImg,
       category: product.categoryId ?? '',
-      rating: 4.5,
-    };
-  }
-
-  mapWithDiscount(product: ProductDto, discountPct = 15): ProductCardData {
-    const card = this.mapToCard(product);
-    return {
-      ...card,
-      originalPrice: card.price > 0 ? Math.round(card.price / (1 - discountPct / 100)) : 0,
-      discount: discountPct,
+      rating: 4.5, // TODO: Map actual rating from ProductRatingDto if available
     };
   }
 
@@ -187,6 +225,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   formatPrice(price: number): string {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  }
+
+  get displayCategories() {
+    return this.categories.length > 0 ? this.categories : this.heroCategories;
   }
 
   get skeletonItems() { return Array(8).fill(null); }

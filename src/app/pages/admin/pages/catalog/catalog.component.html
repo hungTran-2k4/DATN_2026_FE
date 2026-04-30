@@ -154,6 +154,7 @@
           [group]="true"
           placeholder="Chọn một danh mẫu chuẩn để tự động điền..." 
           [filter]="true"
+          filterBy="label,searchField"
           filterPlaceholder="Tìm kiếm mẫu..."
           (onChange)="applyTemplate($event)"
           styleClass="w-full border-blue-200 bg-white shadow-sm"
@@ -190,12 +191,12 @@
           </div>
           
           <div class="flex-1">
-            <p-fileUpload #fubauto mode="basic" name="demo[]" accept="image/*" [maxFileSize]="1000000" 
+            <p-fileUpload #fubauto mode="basic" name="demo[]" accept="image/*" [maxFileSize]="5000000" 
                 [auto]="true" [customUpload]="true" (uploadHandler)="onFileUpload($event)"
                 chooseLabel="Chọn ảnh mới" chooseIcon="pi pi-upload" styleClass="p-button-outlined p-button-sm w-full">
             </p-fileUpload>
             <p class="text-xs text-gray-400 mt-2">
-              Chấp nhận JPG, PNG, WEBP. Dung lượng tối đa 1MB.
+              Chấp nhận JPG, PNG, WEBP. Dung lượng tối đa 5MB.
             </p>
           </div>
         </div>

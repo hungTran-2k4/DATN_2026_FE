@@ -32,6 +32,19 @@
         (ngModelChange)="onKeywordChange()"
       />
     </p-iconfield>
+    
+    <p-dropdown 
+      [options]="categories" 
+      [(ngModel)]="selectedCategoryId" 
+      optionLabel="name" 
+      optionValue="id" 
+      placeholder="Tất cả danh mục" 
+      [showClear]="true"
+      [filter]="true"
+      (onChange)="onKeywordChange()"
+      styleClass="admin-category-filter"
+      [style]="{'min-width': '200px'}"
+    ></p-dropdown>
 
     <div class="admin-toolbar-actions">
       <p-button
@@ -224,37 +237,56 @@
       </div>
     </div>
 
-    <!-- Bước 3: Biến thể -->
-    <div *ngIf="currentReviewStep === 'variants' && selectedProduct" class="step-content" style="max-height: 55vh; overflow-y: auto; padding: 16px;">
-      <div *ngIf="selectedProduct.variants && selectedProduct.variants.length > 0" style="display: flex; flex-direction: column; gap: 16px;">
-        <div *ngFor="let variant of selectedProduct.variants; let i = index" class="admin-panel" style="margin: 0; padding: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;">
-            <strong style="color: #334155;">Biến thể {{ i + 1 }}: {{ variant.name }}</strong>
-            <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; color: #475569;">SKU: {{ variant.sku || '-' }}</span>
+    <div *ngIf="currentReviewStep === 'variants' && selectedProduct" class="step-content" style="max-height: 60vh; overflow-y: auto; padding: 16px;">
+      <div *ngIf="selectedProduct.variants && selectedProduct.variants.length > 0" class="flex flex-col gap-4">
+        <div *ngFor="let variant of selectedProduct.variants; let i = index" class="variant-card-admin">
+          
+          <div class="variant-header">
+            <span class="variant-title">Biến thể {{ i + 1 }}: {{ variant.name }}</span>
+            <span class="variant-sku">SKU: {{ variant.sku || '-' }}</span>
           </div>
 
-          <div class="grid p-fluid">
-            <div class="col-12 md:col-6 field">
-              <label class="font-bold">Giá bán (VNĐ)</label>
-              <p-inputNumber [(ngModel)]="variant.price" mode="currency" currency="VND" locale="vi-VN" [disabled]="!isEditMode"></p-inputNumber>
-            </div>
-            <div class="col-12 md:col-6 field">
-              <label class="font-bold">Số lượng tồn kho</label>
-              <p-inputNumber [(ngModel)]="variant.stockQty" [min]="0" [disabled]="!isEditMode" placeholder="Nhập tồn kho"></p-inputNumber>
-            </div>
-            <div class="col-12" *ngIf="variant.variantAttributes">
-              <div style="font-size: 0.9rem; color: #64748b; margin-top: 4px;">
-                <strong>Thuộc tính: </strong>
-                <span *ngFor="let att of variant.variantAttributes | keyvalue" style="display: inline-block; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 6px;">
-                  {{att.key}}: {{att.value}}
-                </span>
+          <div class="variant-body">
+            <!-- Ảnh biến thể -->
+            <div class="variant-image-box">
+              <img *ngIf="variant.imageUrl" [src]="variant.imageUrl" [alt]="variant.name" />
+              <div *ngIf="!variant.imageUrl" class="no-image">
+                <i class="pi pi-image text-2xl"></i>
               </div>
             </div>
-            <div class="col-12 mt-2" *ngIf="isEditMode">
-              <p-button label="Lưu biến thể & Kho" size="small" [outlined]="true" icon="pi pi-save" (click)="saveVariant(variant)" [loading]="isSaving"></p-button>
+
+            <!-- Thông tin giá & kho -->
+            <div class="variant-info-grid p-fluid">
+              <div class="field">
+                <label class="font-bold text-xs text-gray-500 mb-1 block">Giá bán (VNĐ)</label>
+                <p-inputNumber [(ngModel)]="variant.price" mode="currency" currency="VND" locale="vi-VN" [disabled]="!isEditMode"></p-inputNumber>
+              </div>
+              <div class="field">
+                <label class="font-bold text-xs text-gray-500 mb-1 block">Số lượng tồn kho</label>
+                <p-inputNumber [(ngModel)]="variant.stockQty" [min]="0" [disabled]="!isEditMode" placeholder="Nhập tồn kho"></p-inputNumber>
+              </div>
+              
+              <!-- Thuộc tính (Attributes) -->
+              <div class="col-span-2" *ngIf="variant.variantAttributes">
+                <div class="variant-attributes-list">
+                  <span *ngFor="let att of variant.variantAttributes | keyvalue" class="attr-badge">
+                    <strong>{{att.key}}:</strong> {{att.value}}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Nút lưu cho Admin nếu ở chế độ Edit -->
+              <div class="col-span-2 mt-2" *ngIf="isEditMode">
+                <p-button label="Cập nhật biến thể này" size="small" [outlined]="true" icon="pi pi-save" (click)="saveVariant(variant)" [loading]="isSaving"></p-button>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+      
+      <div *ngIf="!selectedProduct.variants || selectedProduct.variants.length === 0" class="text-center py-8 text-gray-400">
+        <i class="pi pi-tag text-4xl mb-2"></i>
+        <p>Sản phẩm này không có biến thể nào.</p>
       </div>
     </div>
 
