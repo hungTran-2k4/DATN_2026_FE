@@ -4701,6 +4701,256 @@ export class ApiBaseService {
    * @param body (optional)
    * @return OK
    */
+  createPaymentUrl(
+    body: CreatePaymentUrlRequest | undefined,
+  ): Observable<CreatePaymentUrlResponse> {
+    let url_ = this.baseUrl + '/api/payments/create-payment-url';
+    url_ = url_.replace(/[?&]$/, '');
+
+    const content_ = JSON.stringify(body);
+
+    let options_: any = {
+      body: content_,
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('post', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processCreatePaymentUrl(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processCreatePaymentUrl(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<CreatePaymentUrlResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<CreatePaymentUrlResponse>;
+        }),
+      );
+  }
+
+  protected processCreatePaymentUrl(
+    response: HttpResponseBase,
+  ): Observable<CreatePaymentUrlResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = CreatePaymentUrlResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status === 400) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result400: any = null;
+          let resultData400 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result400 = ProblemDetails.fromJS(resultData400);
+          return throwException(
+            'Bad Request',
+            status,
+            _responseText,
+            _headers,
+            result400,
+          );
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  vnpayIpn(): Observable<void> {
+    let url_ = this.baseUrl + '/api/payments/vnpay-ipn';
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({}),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processVnpayIpn(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processVnpayIpn(response_ as any);
+            } catch (e) {
+              return _observableThrow(e) as any as Observable<void>;
+            }
+          } else return _observableThrow(response_) as any as Observable<void>;
+        }),
+      );
+  }
+
+  protected processVnpayIpn(response: HttpResponseBase): Observable<void> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return _observableOf(null as any);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  vnpayReturn(): Observable<void> {
+    let url_ = this.baseUrl + '/api/payments/vnpay-return';
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({}),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processVnpayReturn(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processVnpayReturn(response_ as any);
+            } catch (e) {
+              return _observableThrow(e) as any as Observable<void>;
+            }
+          } else return _observableThrow(response_) as any as Observable<void>;
+        }),
+      );
+  }
+
+  protected processVnpayReturn(response: HttpResponseBase): Observable<void> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return _observableOf(null as any);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @param body (optional)
+   * @return OK
+   */
   paging(
     body: GetProductsQuery | undefined,
   ): Observable<ProductDtoIEnumerablePagedResponse> {
@@ -13474,6 +13724,82 @@ export interface ICreateCategoryCommand {
   displayOrder?: number;
 }
 
+export class CreatePaymentUrlRequest implements ICreatePaymentUrlRequest {
+  orderId?: string;
+
+  constructor(data?: ICreatePaymentUrlRequest) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.orderId = _data['orderId'];
+    }
+  }
+
+  static fromJS(data: any): CreatePaymentUrlRequest {
+    data = typeof data === 'object' ? data : {};
+    let result = new CreatePaymentUrlRequest();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['orderId'] = this.orderId;
+    return data;
+  }
+}
+
+export interface ICreatePaymentUrlRequest {
+  orderId?: string;
+}
+
+export class CreatePaymentUrlResponse implements ICreatePaymentUrlResponse {
+  success?: boolean;
+  paymentUrl?: string | undefined;
+
+  constructor(data?: ICreatePaymentUrlResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.success = _data['success'];
+      this.paymentUrl = _data['paymentUrl'];
+    }
+  }
+
+  static fromJS(data: any): CreatePaymentUrlResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new CreatePaymentUrlResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['success'] = this.success;
+    data['paymentUrl'] = this.paymentUrl;
+    return data;
+  }
+}
+
+export interface ICreatePaymentUrlResponse {
+  success?: boolean;
+  paymentUrl?: string | undefined;
+}
+
 export class CreateProductCommand implements ICreateProductCommand {
   name?: string | undefined;
   sku?: string | undefined;
@@ -14606,6 +14932,7 @@ export class OrderSummaryDto implements IOrderSummaryDto {
   orderCode?: string | undefined;
   orderStatus?: string | undefined;
   paymentMethod?: string | undefined;
+  paymentStatus?: string | undefined;
   totalAmount?: number;
   totalItems?: number;
   firstItemName?: string | undefined;
@@ -14626,6 +14953,7 @@ export class OrderSummaryDto implements IOrderSummaryDto {
       this.orderCode = _data['orderCode'];
       this.orderStatus = _data['orderStatus'];
       this.paymentMethod = _data['paymentMethod'];
+      this.paymentStatus = _data['paymentStatus'];
       this.totalAmount = _data['totalAmount'];
       this.totalItems = _data['totalItems'];
       this.firstItemName = _data['firstItemName'];
@@ -14648,6 +14976,7 @@ export class OrderSummaryDto implements IOrderSummaryDto {
     data['orderCode'] = this.orderCode;
     data['orderStatus'] = this.orderStatus;
     data['paymentMethod'] = this.paymentMethod;
+    data['paymentStatus'] = this.paymentStatus;
     data['totalAmount'] = this.totalAmount;
     data['totalItems'] = this.totalItems;
     data['firstItemName'] = this.firstItemName;
@@ -14663,6 +14992,7 @@ export interface IOrderSummaryDto {
   orderCode?: string | undefined;
   orderStatus?: string | undefined;
   paymentMethod?: string | undefined;
+  paymentStatus?: string | undefined;
   totalAmount?: number;
   totalItems?: number;
   firstItemName?: string | undefined;

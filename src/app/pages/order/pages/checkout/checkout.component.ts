@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { DialogModule } from 'primeng/dialog';
@@ -9,6 +10,14 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { NgOptimizedImage } from '@angular/common';
+import {
+  ApiBaseService,
+  CheckoutCommand,
+  CreatePaymentUrlRequest,
+  CartItemDto,
+  AddAddressCommand,
+} from '../../../../shared/api/generated/api-service-base.service';
+import { CartService } from '../../../../features/cart/model/cart.service';
 
 @Component({
   selector: 'app-checkout',
@@ -29,54 +38,18 @@ import { NgOptimizedImage } from '@angular/common';
   styleUrl: './checkout.component.scss',
 })
 export class CheckoutComponent implements OnInit {
-  // --- MOCK CART DATA ---
-  cartItems = [
-    {
-      name: 'Giày Thể Thao Nam Nữ Dễ Phối Đồ, Bền Đẹp, Êm Chân',
-      variant: 'Đồng xu box bill, 41',
-      image:
-        'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=200',
-      price: 320000,
-      quantity: 1,
-    },
-    {
-      name: 'BST 50 - Áo thun nam nữ form rộng vải dày mịn cá tính',
-      variant: 'Mẫu 1, Size XS',
-      image:
-        'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=200',
-      price: 20900,
-      quantity: 2,
-    },
-  ];
-
-  merchandiseSubtotal = 361800; // 320000 + 41800
+  cartItems: CartItemDto[] = [];
+  merchandiseSubtotal = 0;
   shippingFee = 35000;
-  discount = 15000;
-  totalPayment = 381800;
+  discount = 0;
+  totalPayment = 0;
 
-  // --- ADDRESS LOGIC ---
-  savedAddresses = [
-    {
-      id: 1,
-      name: 'Nguyễn Văn A',
-      phone: '(+84) 912345678',
-      address: '123 Đường Điện Biên Phủ, Phường Đa Kao, Quận 1, TP Hồ Chí Minh',
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: 'Trần Thị B',
-      phone: '(+84) 987654321',
-      address: '456 Lê Lợi, Phường Bến Nghé, Quận 1, TP Hồ Chí Minh',
-      isDefault: false,
-    },
-  ];
-  selectedAddressId: number | null = 1;
+  savedAddresses: any[] = [];
+  selectedAddressId: string | null = null;
 
   showAddressDialog: boolean = false;
   showNewAddressForm: boolean = false;
 
-  // Form Model for New Address
   newAddress = {
     name: '',
     phone: '',
@@ -90,18 +63,17 @@ export class CheckoutComponent implements OnInit {
   districts: any[] = [];
   wards: any[] = [];
 
-  // --- SHIPPING & PAYMENT OPTIONS ---
   shippingOptions = [
     {
       id: 'express',
       name: 'Giao Hàng Nhanh',
-      duration: 'Nhận hàng vào 13 - 14 tháng 4',
+      duration: 'Nhận hàng sau 2-3 ngày',
       price: 35000,
     },
     {
       id: 'standard',
       name: 'Giao Hàng Tiết Kiệm',
-      duration: 'Nhận hàng vào 15 - 17 tháng 4',
+      duration: 'Nhận hàng sau 4-5 ngày',
       price: 15000,
     },
   ];
@@ -113,29 +85,60 @@ export class CheckoutComponent implements OnInit {
       name: 'Thanh toán khi nhận hàng (COD)',
       icon: 'pi-money-bill',
     },
-    {
-      id: 'banking',
-      name: 'Thanh toán Chuyển khoản',
-      icon: 'pi-building-columns',
-    },
     { id: 'vnpay', name: 'Thẻ ATM Nội địa / VNPAY', icon: 'pi-credit-card' },
   ];
   selectedPayment: string = 'cod';
-
   orderNote: string = '';
+  isPlacingOrder = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apiService: ApiBaseService,
+    private cartService: CartService,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
     this.fetchProvinces();
+    this.loadCartData();
+    this.loadAddresses();
   }
 
-  // --- API LOGIC FOR OPEN API PROVINCES ---
+  loadAddresses() {
+    this.apiService.addressesGET().subscribe({
+      next: (res) => {
+        if (res.data) {
+          this.savedAddresses = res.data.map((a: any) => ({
+            id: a.id,
+            name: a.fullName,
+            phone: a.phoneNumber,
+            address: a.detailedAddress,
+            isDefault: a.isDefault
+          }));
+          const defaultAddr = this.savedAddresses.find(a => a.isDefault);
+          if (defaultAddr) {
+            this.selectedAddressId = defaultAddr.id;
+          } else if (this.savedAddresses.length > 0) {
+            this.selectedAddressId = this.savedAddresses[0].id;
+          }
+        }
+      }
+    });
+  }
+
+  loadCartData() {
+    this.cartService.loadCart().subscribe((cart) => {
+      if (cart) {
+        this.cartItems = (cart.groups || []).flatMap((g) => g.items || []);
+        this.merchandiseSubtotal = cart.grandTotal || 0;
+        this.updateTotal();
+      }
+    });
+  }
+
   fetchProvinces() {
     this.http.get<any[]>('https://provinces.open-api.vn/api/p/').subscribe({
-      next: (data) => {
-        this.provinces = data;
-      },
+      next: (data) => (this.provinces = data),
       error: (err) => console.error('Failed to fetch provinces', err),
     });
   }
@@ -145,16 +148,13 @@ export class CheckoutComponent implements OnInit {
     this.wards = [];
     this.newAddress.district = null;
     this.newAddress.ward = null;
-
     if (this.newAddress.province) {
       this.http
         .get<any>(
           `https://provinces.open-api.vn/api/p/${this.newAddress.province.code}?depth=2`,
         )
         .subscribe({
-          next: (data) => {
-            this.districts = data.districts || [];
-          },
+          next: (data) => (this.districts = data.districts || []),
         });
     }
   }
@@ -168,14 +168,11 @@ export class CheckoutComponent implements OnInit {
           `https://provinces.open-api.vn/api/d/${this.newAddress.district.code}?depth=2`,
         )
         .subscribe({
-          next: (data) => {
-            this.wards = data.wards || [];
-          },
+          next: (data) => (this.wards = data.wards || []),
         });
     }
   }
 
-  // --- DIALOG ACTIONS ---
   openAddressModal() {
     this.showAddressDialog = true;
     this.showNewAddressForm = false;
@@ -202,30 +199,40 @@ export class CheckoutComponent implements OnInit {
       return;
     }
     const fullAddress = `${this.newAddress.street}, ${this.newAddress.ward.name}, ${this.newAddress.district.name}, ${this.newAddress.province.name}`;
-    const newId = new Date().getTime();
-
-    this.savedAddresses.push({
-      id: newId,
-      name: this.newAddress.name,
-      phone: this.newAddress.phone,
-      address: fullAddress,
-      isDefault: false,
+    
+    // Save to backend
+    this.apiService.addressesPOST(new AddAddressCommand({
+       fullName: this.newAddress.name,
+       phoneNumber: this.newAddress.phone,
+       provinceId: this.newAddress.province.code,
+       districtId: this.newAddress.district.code,
+       wardId: this.newAddress.ward.code,
+       detailedAddress: fullAddress,
+       isDefault: this.savedAddresses.length === 0,
+    })).subscribe({
+       next: (res) => {
+          if (res.success && res.data) {
+             this.loadAddresses();
+             this.selectedAddressId = res.data.id!;
+             this.showNewAddressForm = false;
+             this.showAddressDialog = false;
+          } else {
+             alert('Lỗi lưu địa chỉ: ' + res.message);
+          }
+       },
+       error: () => alert('Lỗi hệ thống khi lưu địa chỉ')
     });
-
-    this.selectedAddressId = newId;
-    this.showNewAddressForm = false; // back to selection
   }
 
-  // --- HELPER ---
   getSelectedAddress() {
     return this.savedAddresses.find((a) => a.id === this.selectedAddressId);
   }
 
-  formatPrice(price: number): string {
+  formatPrice(price?: number): string {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
-    }).format(price);
+    }).format(price || 0);
   }
 
   updateTotal() {
@@ -238,14 +245,63 @@ export class CheckoutComponent implements OnInit {
   }
 
   placeOrder() {
-    console.log('Placing order:', {
-      address: this.getSelectedAddress(),
-      items: this.cartItems,
-      shipping: this.selectedShipping,
-      payment: this.selectedPayment,
-      note: this.orderNote,
-      total: this.totalPayment,
+    if (this.cartItems.length === 0) {
+      alert('Giỏ hàng trống!');
+      return;
+    }
+
+    if (!this.selectedAddressId) {
+      alert('Vui lòng chọn hoặc thêm địa chỉ nhận hàng!');
+      return;
+    }
+
+    this.isPlacingOrder = true;
+    const address = this.getSelectedAddress();
+
+    const command = new CheckoutCommand({
+      cartItemIds: this.cartItems.map((item) => item.id!),
+      customerNote: this.orderNote,
+      shippingAddressId: this.selectedAddressId!,
+      paymentMethod: this.selectedPayment === 'vnpay' ? 'VNPAY' : 'COD'
     });
-    alert('Đặt hàng thành công!');
+
+    this.apiService.checkout(command).subscribe({
+      next: (res) => {
+        const orderId = res.data?.[0]?.id;
+        if (!orderId) {
+          alert('Không thể tạo đơn hàng.');
+          this.isPlacingOrder = false;
+          return;
+        }
+
+        if (this.selectedPayment === 'vnpay') {
+          const payReq = new CreatePaymentUrlRequest({ orderId });
+          this.apiService.createPaymentUrl(payReq).subscribe({
+            next: (payRes) => {
+              if (payRes.success && payRes.paymentUrl) {
+                window.location.href = payRes.paymentUrl;
+              } else {
+                alert(
+                  'Lỗi tạo liên kết thanh toán. Vui lòng thử lại trong Lịch sử đơn hàng.',
+                );
+                this.router.navigate(['/user/profile/orders']);
+              }
+            },
+            error: () => {
+              alert('Lỗi kết nối thanh toán.');
+              this.router.navigate(['/user/profile/orders']);
+            },
+          });
+        } else {
+          alert('Đặt hàng thành công!');
+          this.cartService.clearCart().subscribe();
+          this.router.navigate(['/profile'], { queryParams: { tab: 'purchases' } });
+        }
+      },
+      error: (err) => {
+        this.isPlacingOrder = false;
+        alert('Có lỗi xảy ra khi đặt hàng.');
+      },
+    });
   }
 }

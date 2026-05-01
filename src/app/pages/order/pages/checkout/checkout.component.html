@@ -92,7 +92,7 @@
           <!-- Block 4: Note -->
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
              <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-comments text-gray-500"></i> Lời Nhắn (Tùy chọn)</h2>
-             <textarea pInputTextarea [rows]="3" [(ngModel)]="orderNote" placeholder="Lưu ý cho người bán..." class="w-full bg-gray-50/50 border-gray-200 rounded-xl"></textarea>
+             <textarea pTextarea [rows]="3" [(ngModel)]="orderNote" placeholder="Lưu ý cho người bán..." class="w-full bg-gray-50/50 border-gray-200 rounded-xl"></textarea>
           </div>
 
        </div>
@@ -106,15 +106,15 @@
              <div class="flex flex-col gap-4 mb-6 border-b border-gray-100 pb-6 max-h-[300px] overflow-y-auto no-scrollbar">
                 <div *ngFor="let item of cartItems" class="flex gap-4 items-center">
                     <div class="relative w-16 h-16 rounded-lg border border-gray-200 shrink-0">
-                      <img [ngSrc]="item.image" width="64" height="64" class="w-full h-full object-cover rounded-lg">
+                      <img [ngSrc]="item.variantImageUrl || 'https://placehold.co/200'" width="64" height="64" class="w-full h-full object-cover rounded-lg">
                       <span class="absolute -top-2 -right-2 bg-gray-600 text-white w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold z-10">{{item.quantity}}</span>
                     </div>
                    <div class="flex-1 flex flex-col justify-center min-w-0">
-                     <h4 class="text-sm font-semibold text-gray-800 line-clamp-1 mb-1">{{item.name}}</h4>
-                     <span class="text-xs text-gray-500 line-clamp-1">{{item.variant}}</span>
+                     <h4 class="text-sm font-semibold text-gray-800 line-clamp-1 mb-1">{{item.productName}}</h4>
+                     <span class="text-xs text-gray-500 line-clamp-1">{{item.variantName}}</span>
                    </div>
                    <div class="font-bold text-gray-900 text-sm whitespace-nowrap">
-                     {{formatPrice(item.price * item.quantity)}}
+                     {{formatPrice(item.lineTotal)}}
                    </div>
                 </div>
              </div>
@@ -148,8 +148,9 @@
              </div>
 
              <!-- Action -->
-             <button (click)="placeOrder()" class="w-full h-14 bg-user-primary hover:bg-user-primary-hover text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all outline-none">
-               ĐẶT HÀNG NGAY
+             <button (click)="placeOrder()" [disabled]="isPlacingOrder" class="w-full h-14 bg-user-primary hover:bg-user-primary-hover text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all outline-none flex items-center justify-center gap-2">
+               <i class="pi pi-spin pi-spinner" *ngIf="isPlacingOrder"></i>
+               {{ isPlacingOrder ? 'ĐANG XỬ LÝ...' : 'ĐẶT HÀNG NGAY' }}
              </button>
 
              <!-- Terms -->
@@ -232,7 +233,7 @@
 
        <div class="flex flex-col gap-2 mb-6">
           <label class="text-sm font-semibold text-gray-700">Địa chỉ cụ thể</label>
-          <textarea pInputTextarea [rows]="2" [(ngModel)]="newAddress.street" placeholder="Số nhà, Tên đường..." class="w-full"></textarea>
+          <textarea pTextarea [rows]="2" [(ngModel)]="newAddress.street" placeholder="Số nhà, Tên đường..." class="w-full"></textarea>
        </div>
 
        <div class="flex justify-end pt-4 border-t border-gray-100">

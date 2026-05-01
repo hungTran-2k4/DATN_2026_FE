@@ -39,6 +39,11 @@ export const routes: Routes = [
         data: { prerender: false },
         loadComponent: () => import('./pages/order/pages/checkout/checkout.component').then(m => m.CheckoutComponent),
       },
+      {
+        path: 'checkout/payment-result',
+        data: { prerender: false },
+        loadComponent: () => import('./pages/order/pages/payment-result/payment-result.component').then(m => m.PaymentResultComponent),
+      },
       // ── Seller Onboarding — dùng UserLayout (header user, không sidebar seller) ──
       {
         path: 'seller/onboarding',

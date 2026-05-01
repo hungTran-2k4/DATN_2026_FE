@@ -168,4 +168,28 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   canUpdateStatus(status?: string): boolean {
     return ['PENDING', 'PROCESSING', 'SHIPPED'].includes(status ?? '');
   }
+
+  getPaymentStatusLabel(status?: string): string {
+    const map: Record<string, string> = { 
+      'Pending': 'Chờ thanh toán', 'PENDING': 'Chờ thanh toán',
+      'Paid': 'Đã thanh toán', 'PAID': 'Đã thanh toán',
+      'Failed': 'Thất bại', 'FAILED': 'Thất bại',
+      'Refunded': 'Đã hoàn tiền', 'REFUNDED': 'Đã hoàn tiền',
+      'Unpaid': 'Chưa thanh toán', 'UNPAID': 'Chưa thanh toán',
+      'Processing': 'Đang xử lý', 'PROCESSING': 'Đang xử lý'
+    };
+    return map[status ?? ''] ?? status ?? 'Chưa rõ';
+  }
+
+  getPaymentStatusClass(status?: string): string {
+    const map: Record<string, string> = { 
+      'Pending': 'badge-warning', 'PENDING': 'badge-warning',
+      'Paid': 'badge-success', 'PAID': 'badge-success',
+      'Failed': 'badge-danger', 'FAILED': 'badge-danger',
+      'Refunded': 'badge-info', 'REFUNDED': 'badge-info',
+      'Unpaid': 'badge-warning', 'UNPAID': 'badge-warning',
+      'Processing': 'badge-info', 'PROCESSING': 'badge-info'
+    };
+    return map[status ?? ''] ?? 'badge-default';
+  }
 }

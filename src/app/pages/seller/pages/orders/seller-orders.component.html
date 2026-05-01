@@ -47,6 +47,11 @@
           <div class="order-meta">
             <span><i class="pi pi-shopping-bag text-xs"></i> {{ order.totalItems }} sản phẩm</span>
             <span><i class="pi pi-calendar text-xs"></i> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span class="badge" [ngClass]="order.paymentMethod === 'VNPAY' ? 'badge-primary' : 'badge-default'" style="margin-left: 8px;">
+               <i class="pi pi-credit-card text-xs mr-1" *ngIf="order.paymentMethod === 'VNPAY'"></i>
+               <i class="pi pi-money-bill text-xs mr-1" *ngIf="order.paymentMethod !== 'VNPAY'"></i>
+               {{ order.paymentMethod === 'VNPAY' ? 'VNPay' : 'COD' }}
+            </span>
           </div>
         </div>
         <div class="order-right">
@@ -62,6 +67,8 @@
               *ngIf="canUpdateStatus(order.orderStatus)"
               (click)="openStatusUpdate(order)"
               class="action-btn-sm action-update"
+              [disabled]="order.paymentMethod === 'VNPAY' && order.orderStatus === 'PENDING' && order.paymentStatus !== 'PAID'"
+              [title]="order.paymentMethod === 'VNPAY' && order.orderStatus === 'PENDING' && order.paymentStatus !== 'PAID' ? 'Không thể cập nhật đơn VNPay chưa thanh toán' : ''"
             >
               <i class="pi pi-check-circle"></i> Cập nhật
             </button>
@@ -103,6 +110,9 @@
         <p class="detail-code">{{ selectedOrder.orderCode }}</p>
         <span class="badge" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
           {{ getStatusLabel(selectedOrder.orderStatus) }}
+        </span>
+        <span class="badge" style="margin-left: 8px;" [ngClass]="getPaymentStatusClass(selectedOrder.paymentStatus)">
+          Thanh toán: {{ getPaymentStatusLabel(selectedOrder.paymentStatus) }}
         </span>
       </div>
       <div class="detail-amount">{{ formatPrice(selectedOrder.totalAmount) }}</div>

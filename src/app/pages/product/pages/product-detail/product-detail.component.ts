@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import { catchError, of } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -55,6 +55,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly api: ApiBaseService,
     private readonly cartService: CartService,
     public readonly authSession: AuthSessionService,
@@ -249,6 +250,36 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
           this.messageService.add({ severity: 'success', summary: 'Đã thêm vào giỏ', detail: `${this.product?.name} × ${this.quantity}` });
         } else {
           this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể thêm vào giỏ hàng.' });
+        }
+      },
+      error: () => { this.isAddingToCart = false; },
+    });
+  }
+
+  buyNow(): void {
+    const isFullySelected = this.attributeKeys.every(k => !!this.selectedAttributes[k]);
+    
+    if (this.attributeKeys.length > 0 && !isFullySelected) {
+      this.messageService.add({ severity: 'warn', summary: 'Chưa chọn đủ thông tin', detail: 'Vui lòng chọn đầy đủ các tùy chọn sản phẩm.' });
+      return;
+    }
+
+    if (!this.selectedVariant?.id) {
+      this.messageService.add({ severity: 'warn', summary: 'Chưa chọn phân loại', detail: 'Vui lòng chọn phân loại sản phẩm để tiếp tục.' });
+      return;
+    }
+    if (!this.authSession.getSession()) {
+      this.messageService.add({ severity: 'info', summary: 'Chưa đăng nhập', detail: 'Vui lòng đăng nhập để tiếp tục.' });
+      return;
+    }
+    this.isAddingToCart = true;
+    this.cartService.addToCart(this.selectedVariant.id, this.quantity).subscribe({
+      next: (ok) => {
+        this.isAddingToCart = false;
+        if (ok) {
+           this.router.navigate(['/checkout']);
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xử lý yêu cầu.' });
         }
       },
       error: () => { this.isAddingToCart = false; },

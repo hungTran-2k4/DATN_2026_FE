@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -17,6 +17,7 @@ import {
 import { SellerRegistrationService } from '../../../../features/seller-registration/model/seller-registration.service';
 import { Observable } from 'rxjs';
 import { SellerRegistrationState } from '../../../../entities/seller/model/seller.model';
+import { UserOrdersComponent } from './user-orders/user-orders.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -24,6 +25,7 @@ import { SellerRegistrationState } from '../../../../entities/seller/model/selle
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule,
     RouterLink, ButtonModule, InputTextModule, RadioButtonModule, ToastModule, NgOptimizedImage,
+    UserOrdersComponent
   ],
   providers: [MessageService],
   templateUrl: './profile.component.html',
@@ -54,9 +56,24 @@ export class ProfileComponent implements OnInit {
     private readonly messageService: MessageService,
     private readonly sellerService: SellerRegistrationService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
+    // Read tab from query params
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'];
+      if (tab) {
+        this.activeMenu = tab.toLowerCase() as any;
+        // If tab is under 'others' group
+        if (['purchases', 'vouchers', 'coins'].includes(tab)) {
+           this.activeGroup = 'others';
+        } else {
+           this.activeGroup = 'account';
+        }
+      }
+    });
+
     const session = this.authSession.getSession();
     if (session) {
       this.sessionUserName = session.userName || '';

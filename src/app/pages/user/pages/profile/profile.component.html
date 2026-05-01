@@ -209,8 +209,14 @@
         </div>
       </div>
 
+      <!-- Purchases -->
+      <div *ngIf="activeMenu === 'purchases'" class="bg-white rounded-sm shadow-sm border border-gray-100 p-6 animate-fade-in min-h-[500px]">
+        <h2 class="text-xl font-medium text-gray-900 mb-6">Đơn mua của tôi</h2>
+        <app-user-orders></app-user-orders>
+      </div>
+
       <!-- Placeholder for other menus -->
-      <div *ngIf="activeMenu !== 'profile'" class="bg-white rounded-sm shadow-sm border border-gray-100 p-8 animate-fade-in flex flex-col items-center justify-center min-h-[500px]">
+      <div *ngIf="activeMenu !== 'profile' && activeMenu !== 'purchases'" class="bg-white rounded-sm shadow-sm border border-gray-100 p-8 animate-fade-in flex flex-col items-center justify-center min-h-[500px]">
           <i class="pi pi-cog text-5xl text-gray-300 mb-4"></i>
           <h3 class="text-xl text-gray-800 font-medium capitalize">Chức năng {{ activeMenu }}</h3>
           <p class="text-sm text-gray-500 mt-2">Tính năng đang trong quá trình nâng cấp và sẽ sớm ra mắt.</p>

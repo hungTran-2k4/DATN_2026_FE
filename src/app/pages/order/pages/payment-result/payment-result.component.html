@@ -1,0 +1,125 @@
+<div
+  class="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-inter"
+>
+  <div
+    class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-100"
+  >
+    <!-- Header -->
+    <div
+      class="h-2 bg-user-primary w-full"
+      [ngClass]="{
+        'bg-green-500': status === 'success',
+        'bg-red-500': status === 'failed',
+        'bg-blue-500': status === 'loading',
+      }"
+    ></div>
+
+    <div class="p-8 text-center">
+      <!-- Loading State -->
+      <div
+        *ngIf="status === 'loading'"
+        class="flex flex-col items-center animate-fade-in"
+      >
+        <i class="pi pi-spin pi-spinner text-6xl text-blue-500 mb-6"></i>
+        <h2 class="text-2xl font-black text-gray-900 mb-2">
+          Đang xử lý giao dịch
+        </h2>
+        <p class="text-gray-500">{{ message }}</p>
+      </div>
+
+      <!-- Success State -->
+      <div
+        *ngIf="status === 'success'"
+        class="flex flex-col items-center animate-fade-in"
+      >
+        <div
+          class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner"
+        >
+          <i class="pi pi-check text-4xl text-green-600"></i>
+        </div>
+        <h2 class="text-2xl font-black text-gray-900 mb-2">
+          Thanh toán thành công!
+        </h2>
+        <p class="text-gray-500 mb-8">{{ message }}</p>
+
+        <div
+          class="w-full bg-gray-50 rounded-xl p-4 mb-8 border border-gray-100 text-left"
+        >
+          <div class="flex justify-between mb-3">
+            <span class="text-gray-500 text-sm">Mã đơn hàng:</span>
+            <span class="font-bold text-gray-900">{{ orderId }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">Số tiền thanh toán:</span>
+            <span class="font-black text-green-600">{{ amount }}</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col w-full gap-3">
+          <button
+            pButton
+            class="p-button-outlined p-button-secondary w-full justify-center font-bold"
+            (click)="goToOrder()"
+          >
+            Xem chi tiết đơn hàng
+          </button>
+          <button
+            pButton
+            class="bg-user-primary hover:bg-user-primary-hover text-white border-none w-full justify-center font-bold"
+            (click)="goToHome()"
+          >
+            Tiếp tục mua sắm
+          </button>
+        </div>
+      </div>
+
+      <!-- Failed State -->
+      <div
+        *ngIf="status === 'failed'"
+        class="flex flex-col items-center animate-fade-in"
+      >
+        <div
+          class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6 shadow-inner"
+        >
+          <i class="pi pi-times text-4xl text-red-600"></i>
+        </div>
+        <h2 class="text-2xl font-black text-gray-900 mb-2">
+          Thanh toán thất bại
+        </h2>
+        <p class="text-gray-500 mb-8">{{ message }}</p>
+
+        <div
+          *ngIf="orderId"
+          class="w-full bg-gray-50 rounded-xl p-4 mb-8 border border-gray-100 text-left"
+        >
+          <div class="flex justify-between mb-3">
+            <span class="text-gray-500 text-sm">Mã đơn hàng:</span>
+            <span class="font-bold text-gray-900">{{ orderId }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">Số tiền (dự kiến):</span>
+            <span class="font-black text-gray-900">{{ amount }}</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col w-full gap-3">
+          <button
+            *ngIf="orderId"
+            pButton
+            class="bg-user-primary hover:bg-user-primary-hover text-white border-none w-full justify-center font-bold"
+            (click)="retryPayment()"
+          >
+            Thử thanh toán lại
+          </button>
+          <button
+            pButton
+            class="p-button-outlined p-button-secondary w-full justify-center font-bold"
+            (click)="goToHome()"
+          >
+            Về trang chủ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

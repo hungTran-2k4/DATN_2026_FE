@@ -170,7 +170,7 @@
                 {{ isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ' }}
               </button>
               <button
-                (click)="addToCart()"
+                (click)="buyNow()"
                 [disabled]="isOutOfStock || isAddingToCart"
                 class="btn-buy-now"
               >
