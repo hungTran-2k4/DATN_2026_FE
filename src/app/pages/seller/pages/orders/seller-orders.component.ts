@@ -54,7 +54,7 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   readonly statusTabs = [
     { label: 'Tất cả', value: '' },
     { label: 'Chờ xác nhận', value: 'PENDING' },
-    { label: 'Đang xử lý', value: 'PROCESSING' },
+    { label: 'Chờ lấy hàng', value: 'PROCESSING' },
     { label: 'Đang giao', value: 'SHIPPED' },
     { label: 'Đã giao', value: 'DELIVERED' },
     { label: 'Trả hàng', value: 'RETURNED' },

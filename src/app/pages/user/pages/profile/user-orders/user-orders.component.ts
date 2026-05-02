@@ -36,7 +36,7 @@ export class UserOrdersComponent implements OnInit {
   statusTabs = [
     { label: 'Tất cả', value: undefined },
     { label: 'Chờ xác nhận', value: 'PENDING' },
-    { label: 'Đang xử lý', value: 'PROCESSING' },
+    { label: 'Chờ lấy hàng', value: 'PROCESSING' },
     { label: 'Đang giao', value: 'SHIPPED' },
     { label: 'Đã giao', value: 'DELIVERED' },
     { label: 'Trả hàng', value: 'RETURNED' },
