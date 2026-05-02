@@ -57,13 +57,15 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     { label: 'Đang xử lý', value: 'PROCESSING' },
     { label: 'Đang giao', value: 'SHIPPED' },
     { label: 'Đã giao', value: 'DELIVERED' },
+    { label: 'Trả hàng', value: 'RETURNED' },
     { label: 'Đã hủy', value: 'CANCELLED' },
   ];
 
   readonly nextStatusOptions: Record<string, { label: string; value: string }[]> = {
     PENDING: [{ label: 'Xác nhận đơn', value: 'PROCESSING' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
-    PROCESSING: [{ label: 'Giao cho shipper', value: 'SHIPPED' }],
+    PROCESSING: [{ label: 'Giao cho shipper', value: 'SHIPPED' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
     SHIPPED: [{ label: 'Xác nhận đã giao', value: 'DELIVERED' }],
+    DELIVERED: [{ label: 'Trả hàng/Hoàn tiền', value: 'RETURNED' }],
   };
 
   constructor(
@@ -144,12 +146,12 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status?: string): string {
-    const map: Record<string, string> = { PENDING: 'Chờ xác nhận', PROCESSING: 'Đang xử lý', SHIPPED: 'Đang giao', DELIVERED: 'Đã giao', CANCELLED: 'Đã hủy' };
+    const map: Record<string, string> = { PENDING: 'Chờ xác nhận', PROCESSING: 'Chờ lấy hàng', SHIPPED: 'Đang giao', DELIVERED: 'Đã giao', RETURNED: 'Trả hàng', CANCELLED: 'Đã hủy' };
     return map[status ?? ''] ?? status ?? '';
   }
 
   getStatusClass(status?: string): string {
-    const map: Record<string, string> = { PENDING: 'badge-warning', PROCESSING: 'badge-info', SHIPPED: 'badge-primary', DELIVERED: 'badge-success', CANCELLED: 'badge-danger' };
+    const map: Record<string, string> = { PENDING: 'badge-warning', PROCESSING: 'badge-info', SHIPPED: 'badge-primary', DELIVERED: 'badge-success', RETURNED: 'badge-warning', CANCELLED: 'badge-danger' };
     return map[status ?? ''] ?? 'badge-default';
   }
 

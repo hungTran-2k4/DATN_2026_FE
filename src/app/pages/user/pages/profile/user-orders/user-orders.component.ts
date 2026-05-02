@@ -39,6 +39,7 @@ export class UserOrdersComponent implements OnInit {
     { label: 'Đang xử lý', value: 'PROCESSING' },
     { label: 'Đang giao', value: 'SHIPPED' },
     { label: 'Đã giao', value: 'DELIVERED' },
+    { label: 'Trả hàng', value: 'RETURNED' },
     { label: 'Đã hủy', value: 'CANCELLED' },
   ];
 
@@ -86,9 +87,10 @@ export class UserOrdersComponent implements OnInit {
   getStatusLabel(status?: string): string {
     const map: Record<string, string> = {
       PENDING: 'Chờ xác nhận',
-      PROCESSING: 'Đang xử lý',
+      PROCESSING: 'Chờ lấy hàng',
       SHIPPED: 'Đang giao',
       DELIVERED: 'Đã giao',
+      RETURNED: 'Trả hàng',
       CANCELLED: 'Đã hủy',
     };
     return map[status ?? ''] ?? status ?? '';
@@ -100,6 +102,7 @@ export class UserOrdersComponent implements OnInit {
       PROCESSING: 'bg-blue-100 text-blue-700',
       SHIPPED: 'bg-indigo-100 text-indigo-700',
       DELIVERED: 'bg-green-100 text-green-700',
+      RETURNED: 'bg-orange-100 text-orange-700',
       CANCELLED: 'bg-red-100 text-red-700',
     };
     return map[status ?? ''] ?? 'bg-gray-100 text-gray-700';
