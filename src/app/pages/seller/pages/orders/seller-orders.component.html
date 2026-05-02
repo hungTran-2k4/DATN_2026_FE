@@ -107,30 +107,68 @@
   <div *ngIf="!isLoadingDetail && selectedOrder" class="order-detail">
     <div class="detail-header">
       <div>
-        <p class="detail-code">{{ selectedOrder.orderCode }}</p>
-        <span class="badge" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
-          {{ getStatusLabel(selectedOrder.orderStatus) }}
-        </span>
-        <span class="badge" style="margin-left: 8px;" [ngClass]="getPaymentStatusClass(selectedOrder.paymentStatus)">
-          Thanh toán: {{ getPaymentStatusLabel(selectedOrder.paymentStatus) }}
-        </span>
+        <p class="detail-code">#{{ selectedOrder.orderCode }}</p>
+        <div class="flex gap-2 flex-wrap mt-1">
+          <span class="badge" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
+            {{ getStatusLabel(selectedOrder.orderStatus) }}
+          </span>
+          <span class="badge" [ngClass]="getPaymentStatusClass(selectedOrder.paymentStatus)">
+            <i class="pi pi-credit-card text-[10px] mr-1"></i>
+            {{ getPaymentStatusLabel(selectedOrder.paymentStatus) }}
+          </span>
+          <span class="badge badge-default">
+            <i class="pi pi-calendar text-[10px] mr-1"></i>
+            {{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
       </div>
       <div class="detail-amount">{{ formatPrice(selectedOrder.totalAmount) }}</div>
     </div>
 
     <div class="detail-section">
-      <h4>Địa chỉ giao hàng</h4>
-      <p>{{ selectedOrder.shippingAddress }}</p>
+      <h4>Thông tin nhận hàng</h4>
+      <div class="address-box">
+        <div class="addr-user">
+          <i class="pi pi-user text-xs"></i>
+          <span>{{ parseAddress(selectedOrder.shippingAddress).fullName }}</span>
+          <span class="text-gray-400 mx-1">|</span>
+          <span>{{ parseAddress(selectedOrder.shippingAddress).phoneNumber }}</span>
+        </div>
+        <div class="addr-text">
+          <i class="pi pi-map-marker text-xs mr-1"></i>
+          {{ parseAddress(selectedOrder.shippingAddress).detailedAddress }}
+        </div>
+      </div>
     </div>
 
     <div class="detail-section">
-      <h4>Sản phẩm</h4>
+      <h4>Danh sách sản phẩm</h4>
       <div class="detail-items">
         <div class="detail-item" *ngFor="let item of selectedOrder.items">
-          <div class="item-name">{{ item.productNameSnapshot }}</div>
-          <div class="item-qty">x{{ item.quantity }}</div>
-          <div class="item-price">{{ formatPrice(item.unitPrice) }}</div>
-          <div class="item-subtotal">{{ formatPrice(item.subTotal) }}</div>
+          <div class="item-info">
+            <div class="item-thumb">
+               <img *ngIf="item.variantImageUrl" [src]="item.variantImageUrl" [alt]="item.productNameSnapshot" class="w-full h-full object-cover rounded-md">
+               <i *ngIf="!item.variantImageUrl" class="pi pi-image text-gray-300"></i>
+            </div>
+            <div class="item-text">
+              <div class="item-name">{{ item.productNameSnapshot }}</div>
+              <div class="item-variant" *ngIf="item.variantName">
+                 <span class="text-xs text-gray-500">Biến thể: {{ item.variantName }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="item-qty-row">
+            <span class="md:hidden font-bold">Số lượng:</span>
+            <div class="item-qty">x{{ item.quantity }}</div>
+          </div>
+          <div class="item-qty-row">
+            <span class="md:hidden font-bold">Đơn giá:</span>
+            <div class="item-price">{{ formatPrice(item.unitPrice) }}</div>
+          </div>
+          <div class="item-qty-row">
+            <span class="md:hidden font-bold">Thành tiền:</span>
+            <div class="item-subtotal">{{ formatPrice(item.subTotal) }}</div>
+          </div>
         </div>
       </div>
     </div>

@@ -74,13 +74,126 @@
                 class="bg-user-primary text-white border-0 hover:bg-user-primary-hover px-4 py-2 text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2">
           <i class="pi pi-credit-card"></i> Thanh toán ngay
         </button>
-        <button pButton class="p-button-outlined p-button-secondary px-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-50 transition-colors border-gray-300 text-gray-700">
+        <button 
+          pButton 
+          (click)="openDetail(order)"
+          class="p-button-outlined p-button-secondary px-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-50 transition-colors border-gray-300 text-gray-700">
           Chi tiết đơn hàng
         </button>
       </div>
 
     </div>
   </div>
+
+  <!-- ── Order Detail Dialog ── -->
+  <p-dialog
+    header="Chi tiết đơn hàng"
+    [(visible)]="showDetail"
+    [modal]="true"
+    [style]="{width: 'min(640px, 96vw)'}"
+    [contentStyle]="{'overflow': 'auto', 'max-height': 'calc(92vh - 70px)'}"
+    [draggable]="false"
+    [resizable]="false"
+    [blockScroll]="true"
+    appendTo="body"
+    class="user-order-dialog"
+  >
+    <div *ngIf="isLoadingDetail" class="p-6">
+      <p-skeleton height="240px" borderRadius="12px"></p-skeleton>
+    </div>
+
+    <div *ngIf="!isLoadingDetail && selectedOrder" class="order-detail-wrap">
+      <!-- Order Summary Header -->
+      <div class="flex justify-between items-start mb-8">
+        <div class="flex-1 min-w-0 pr-4">
+          <h3 class="text-xl font-black text-gray-900 tracking-tight mb-1">#{{ selectedOrder.orderCode }}</h3>
+          <p class="text-xs text-gray-500 font-medium">Đặt lúc: {{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          <div class="flex gap-2 mt-3">
+            <span class="px-3 py-1 text-[11px] font-bold rounded-full shadow-sm" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
+              {{ getStatusLabel(selectedOrder.orderStatus) }}
+            </span>
+            <span class="px-3 py-1 text-[11px] font-bold rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+               <i class="pi pi-credit-card text-[10px] mr-1"></i>
+               {{ selectedOrder.paymentMethod === 'VNPAY' ? 'VNPay' : 'COD' }}
+            </span>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-[11px] font-bold text-gray-400 uppercase mb-1">Tổng cộng</p>
+          <p class="text-2xl font-black text-user-primary">{{ formatPrice(selectedOrder.totalAmount) }}</p>
+        </div>
+      </div>
+
+      <!-- Shipping Info -->
+      <div class="mb-8">
+        <h4 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3">Địa chỉ nhận hàng</h4>
+        <div class="address-box">
+          <div class="addr-header">
+            <i class="pi pi-user-edit text-user-primary"></i>
+            <span>{{ parseAddress(selectedOrder.shippingAddress).fullName }}</span>
+            <span class="text-gray-200 mx-1">|</span>
+            <span class="text-gray-600">{{ parseAddress(selectedOrder.shippingAddress).phoneNumber }}</span>
+          </div>
+          <div class="addr-detail">
+            <i class="pi pi-map-marker text-user-primary"></i>
+            <span>{{ parseAddress(selectedOrder.shippingAddress).detailedAddress }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product List -->
+      <div class="mb-8">
+        <h4 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">Sản phẩm đã mua</h4>
+        <div class="flex flex-col gap-4">
+          <div *ngFor="let item of selectedOrder.items" class="item-card flex gap-4 p-4 bg-white border border-gray-100 rounded-2xl">
+            <div class="item-thumb">
+               <img *ngIf="item.variantImageUrl" [src]="item.variantImageUrl" [alt]="item.productNameSnapshot">
+               <i *ngIf="!item.variantImageUrl" class="pi pi-image"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h5 class="text-sm font-bold text-gray-800 line-clamp-1 mb-1">{{ item.productNameSnapshot }}</h5>
+              <p class="text-[11px] text-gray-500 bg-gray-50 inline-block px-2 py-0.5 rounded border border-gray-100" *ngIf="item.variantName">
+                Phân loại: {{ item.variantName }}
+              </p>
+              <div class="flex justify-between items-end mt-3">
+                <div class="text-xs text-gray-500 font-medium">
+                   <span class="text-gray-400">SL:</span> x{{ item.quantity }}
+                   <span class="mx-2 text-gray-200">|</span>
+                   <span>{{ formatPrice(item.unitPrice) }}</span>
+                </div>
+                <p class="text-sm font-extrabold text-gray-900">{{ formatPrice(item.subTotal) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Breakdown -->
+      <div class="payment-summary">
+        <div class="summary-row">
+          <span>Tiền hàng</span>
+          <span class="font-bold text-gray-800">{{ formatPrice(selectedOrder.totalAmount - (selectedOrder.shippingFee || 0)) }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Phí vận chuyển</span>
+          <span class="font-bold text-gray-800">{{ formatPrice(selectedOrder.shippingFee) }}</span>
+        </div>
+        <div class="summary-row total-final">
+          <span class="total-label">Tổng thanh toán</span>
+          <span class="total-value">{{ formatPrice(selectedOrder.totalAmount) }}</span>
+        </div>
+      </div>
+
+      <!-- Note -->
+      <div *ngIf="selectedOrder.customerNote" class="mt-8 p-4 bg-green-50 rounded-2xl border border-green-100 flex gap-3">
+        <i class="pi pi-info-circle text-green-600 mt-0.5 text-lg"></i>
+        <div class="text-xs text-gray-700">
+          <span class="font-bold block text-green-800 mb-1">Ghi chú của bạn:</span>
+          {{ selectedOrder.customerNote }}
+        </div>
+      </div>
+    </div>
+  </p-dialog>
 
   <!-- Pagination -->
   <div class="mt-6 flex justify-end" *ngIf="!isLoading && totalRecords > pageSize">

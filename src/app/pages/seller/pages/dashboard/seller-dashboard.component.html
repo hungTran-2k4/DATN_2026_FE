@@ -86,29 +86,31 @@
     </div>
 
     <!-- Orders table -->
-    <div class="orders-table" *ngIf="!isLoadingStats && stats?.recentOrders?.length">
-      <div class="table-header">
-        <span>Mã đơn</span>
-        <span>Sản phẩm</span>
-        <span>Tổng tiền</span>
-        <span>Trạng thái</span>
-        <span>Ngày tạo</span>
-      </div>
-      <a
-        *ngFor="let order of stats?.recentOrders"
-        [routerLink]="['/seller/orders', order.id]"
-        class="table-row"
-      >
-        <span class="order-code">{{ order.orderCode }}</span>
-        <span class="order-product">{{ order.firstItemName }}</span>
-        <span class="order-amount">{{ formatPrice(order.totalAmount ?? 0) }}</span>
-        <span>
-          <span class="badge" [ngClass]="getOrderStatusClass(order.orderStatus)">
-            {{ getOrderStatusLabel(order.orderStatus) }}
+    <div class="orders-table-container" *ngIf="!isLoadingStats && stats?.recentOrders?.length">
+      <div class="orders-table">
+        <div class="table-header">
+          <span>Mã đơn</span>
+          <span>Sản phẩm</span>
+          <span>Tổng tiền</span>
+          <span>Trạng thái</span>
+          <span>Ngày tạo</span>
+        </div>
+        <a
+          *ngFor="let order of stats?.recentOrders"
+          [routerLink]="['/seller/orders', order.id]"
+          class="table-row"
+        >
+          <span class="order-code">{{ order.orderCode }}</span>
+          <span class="order-product">{{ order.firstItemName }}</span>
+          <span class="order-amount">{{ formatPrice(order.totalAmount ?? 0) }}</span>
+          <span>
+            <span class="badge" [ngClass]="getOrderStatusClass(order.orderStatus)">
+              {{ getOrderStatusLabel(order.orderStatus) }}
+            </span>
           </span>
-        </span>
-        <span class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</span>
-      </a>
+          <span class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</span>
+        </a>
+      </div>
     </div>
   </div>
 

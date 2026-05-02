@@ -1,0 +1,183 @@
+:host {
+  display: block;
+}
+
+.user-orders {
+  max-width: 100%;
+}
+
+/* ── Custom scrollbar for tabs ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Order Detail Wrap ── */
+.order-detail-wrap {
+  padding: 10px 0;
+}
+
+.text-user-primary {
+  color: var(--user-primary, #10B981);
+}
+
+.bg-user-primary {
+  background-color: var(--user-primary, #10B981);
+}
+
+.hover\:bg-user-primary-hover:hover {
+  background-color: var(--user-primary-hover, #059669);
+}
+
+/* ── Item Styles ── */
+.item-card {
+  transition: all 0.2s ease;
+  &:hover {
+    border-color: rgba(16, 185, 129, 0.2);
+    background-color: #f0fdfa;
+  }
+}
+
+.item-thumb {
+  width: 64px;
+  height: 64px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #f1f5f9;
+  flex-shrink: 0;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  i {
+    color: #cbd5e1;
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Address Box ── */
+.address-box {
+  background-color: #f0fdfa;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #ccfbf1;
+  
+  .addr-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    color: #0f766e;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+  }
+  
+  .addr-detail {
+    font-size: 0.85rem;
+    color: #0d9488;
+    line-height: 1.6;
+    display: flex;
+    gap: 8px;
+    
+    i {
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+  }
+}
+
+/* ── Totals ── */
+.payment-summary {
+  background-color: #fff;
+  padding: 16px 0;
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #64748b;
+    
+    &.total-final {
+      margin-top: 12px;
+      padding-top: 16px;
+      border-top: 1px dashed #e2e8f0;
+      color: #1e293b;
+      
+      .total-label {
+        font-weight: 700;
+        font-size: 1rem;
+      }
+      
+      .total-value {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--user-primary, #10B981);
+      }
+    }
+  }
+}
+
+/* ── PrimeNG Overrides ── */
+:host ::ng-deep {
+  .user-order-dialog {
+    .p-dialog {
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .p-dialog-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      flex-shrink: 0;
+      
+      .p-dialog-title {
+        font-weight: 800;
+        color: #1e293b;
+        font-size: 1.15rem;
+      }
+    }
+    
+    .p-dialog-content {
+      padding: 24px;
+      background: #fff;
+      border-radius: 0 0 20px 20px;
+      overflow-y: auto !important;
+      flex-grow: 1;
+      
+      /* Webkit scrollbar styling */
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background: #f8fafc;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+        &:hover {
+          background: #94a3b8;
+        }
+      }
+    }
+    
+    .p-dialog-footer {
+      display: none;
+    }
+  }
+}

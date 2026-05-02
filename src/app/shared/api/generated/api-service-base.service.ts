@@ -14875,6 +14875,9 @@ export class OrderItemDto implements IOrderItemDto {
   id?: string;
   variantId?: string | undefined;
   productNameSnapshot?: string | undefined;
+  variantName?: string | undefined;
+  variantImageUrl?: string | undefined;
+  variantAttributes?: string | undefined;
   unitPrice?: number;
   quantity?: number;
   readonly subTotal?: number;
@@ -14893,6 +14896,9 @@ export class OrderItemDto implements IOrderItemDto {
       this.id = _data['id'];
       this.variantId = _data['variantId'];
       this.productNameSnapshot = _data['productNameSnapshot'];
+      this.variantName = _data['variantName'];
+      this.variantImageUrl = _data['variantImageUrl'];
+      this.variantAttributes = _data['variantAttributes'];
       this.unitPrice = _data['unitPrice'];
       this.quantity = _data['quantity'];
       (this as any).subTotal = _data['subTotal'];
@@ -14911,6 +14917,9 @@ export class OrderItemDto implements IOrderItemDto {
     data['id'] = this.id;
     data['variantId'] = this.variantId;
     data['productNameSnapshot'] = this.productNameSnapshot;
+    data['variantName'] = this.variantName;
+    data['variantImageUrl'] = this.variantImageUrl;
+    data['variantAttributes'] = this.variantAttributes;
     data['unitPrice'] = this.unitPrice;
     data['quantity'] = this.quantity;
     data['subTotal'] = this.subTotal;
@@ -14922,6 +14931,9 @@ export interface IOrderItemDto {
   id?: string;
   variantId?: string | undefined;
   productNameSnapshot?: string | undefined;
+  variantName?: string | undefined;
+  variantImageUrl?: string | undefined;
+  variantAttributes?: string | undefined;
   unitPrice?: number;
   quantity?: number;
   subTotal?: number;

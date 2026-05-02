@@ -75,7 +75,7 @@
 
         <button 
           (click)="goToSellerCenter()"
-          *ngIf="!authSession.isAdmin()"
+          *ngIf="authSession.isSeller()"
           class="flex items-center gap-2 py-2 text-left transition-colors mt-4 pt-4 border-t border-gray-200 w-full group"
           [ngClass]="authSession.isSeller() ? 'text-user-primary font-medium' : 'text-gray-700 hover:text-user-primary'"
         >
@@ -195,7 +195,8 @@
               <i *ngIf="!avatarUrl" class="pi pi-user text-4xl text-gray-300"></i>
             </div>
             
-            <button type="button" class="border border-gray-300 px-4 py-2 text-sm text-gray-700 bg-white hover:bg-gray-50 rounded-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-colors" (click)="uploadAvatar()">
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept=".jpeg,.jpg,.png" class="hidden" />
+            <button type="button" class="border border-gray-300 px-4 py-2 text-sm text-gray-700 bg-white hover:bg-gray-50 rounded-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-colors" (click)="fileInput.click()">
               Chọn Ảnh
             </button>
 

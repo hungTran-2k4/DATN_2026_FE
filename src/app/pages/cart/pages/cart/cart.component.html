@@ -1,51 +1,56 @@
 <p-toast position="top-right"></p-toast>
 
-<div class="cart-page bg-[#f5f5f5] min-h-screen py-8 font-inter">
-  <div class="container mx-auto px-4 max-w-7xl">
+<div class="cart-page bg-gray-50 min-h-screen py-4 md:py-8 font-inter">
+  <div class="container mx-auto px-2 sm:px-4 max-w-7xl">
 
     <!-- Header -->
-    <div class="bg-white rounded-sm shadow-sm mb-4 px-6 py-4 flex items-center justify-between">
-      <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+    <div class="bg-white rounded-xl shadow-sm mb-4 px-4 md:px-6 py-4 flex items-center justify-between border border-gray-100">
+      <h1 class="text-lg md:text-xl font-black text-gray-900 flex items-center gap-2">
         <i class="pi pi-shopping-cart text-user-primary"></i> GIỎ HÀNG
-        <span class="text-sm font-normal text-gray-400 ml-1">({{ totalItems }} sản phẩm)</span>
+        <span class="text-xs font-medium text-gray-400 ml-1">({{ totalItems }} sản phẩm)</span>
       </h1>
       <button
         *ngIf="selectedCount > 0"
         (click)="removeSelected()"
-        class="text-sm text-red-500 hover:text-red-600 font-medium flex items-center gap-1 transition-colors"
+        class="text-xs md:text-sm text-red-500 hover:text-red-600 font-bold flex items-center gap-1 transition-colors px-3 py-2 bg-red-50 rounded-lg"
       >
-        <i class="pi pi-trash text-xs"></i> Xóa đã chọn ({{ selectedCount }})
+        <i class="pi pi-trash text-xs"></i> <span class="hidden sm:inline">Xóa đã chọn</span> ({{ selectedCount }})
       </button>
     </div>
 
     <!-- Loading skeleton -->
     <ng-container *ngIf="isLoading">
-      <div class="bg-white rounded-sm shadow-sm p-6 mb-4">
-        <p-skeleton height="60px" styleClass="mb-3"></p-skeleton>
-        <p-skeleton height="100px" styleClass="mb-3"></p-skeleton>
-        <p-skeleton height="100px"></p-skeleton>
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+        <p-skeleton height="60px" styleClass="mb-4"></p-skeleton>
+        <p-skeleton height="120px" styleClass="mb-4"></p-skeleton>
+        <p-skeleton height="120px"></p-skeleton>
       </div>
     </ng-container>
 
     <!-- Not logged in -->
     <ng-container *ngIf="!isLoading && !cart() && !authSession.getSession()">
-      <div class="bg-white rounded-sm shadow-sm p-16 text-center">
-        <i class="pi pi-shopping-cart text-6xl text-gray-200 mb-6 block"></i>
-        <h3 class="text-lg font-bold text-gray-700 mb-2">Vui lòng đăng nhập để xem giỏ hàng</h3>
-        <a routerLink="/auth/login" class="inline-flex items-center gap-2 bg-user-primary text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-user-primary-hover transition-colors mt-4">
-          Đăng nhập
+      <div class="bg-white rounded-2xl shadow-sm p-10 md:p-20 text-center border border-gray-100">
+        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="pi pi-shopping-cart text-4xl text-gray-200"></i>
+        </div>
+        <h3 class="text-lg md:text-xl font-black text-gray-800 mb-2">Vui lòng đăng nhập</h3>
+        <p class="text-gray-500 text-sm mb-8">Bạn cần đăng nhập để quản lý giỏ hàng của mình</p>
+        <a routerLink="/auth/login" class="inline-flex items-center gap-2 bg-user-primary text-white px-8 py-3 rounded-xl font-black hover:bg-user-primary-hover transition-all shadow-lg shadow-user-primary/20">
+          Đăng nhập ngay
         </a>
       </div>
     </ng-container>
 
     <!-- Empty cart -->
     <ng-container *ngIf="!isLoading && cart() as cartData">
-      <div *ngIf="!cartData.groups || cartData.groups.length === 0" class="bg-white rounded-sm shadow-sm p-16 text-center">
-        <i class="pi pi-shopping-bag text-6xl text-gray-200 mb-6 block"></i>
-        <h3 class="text-lg font-bold text-gray-700 mb-2">Giỏ hàng của bạn đang trống</h3>
-        <p class="text-gray-400 text-sm mb-6">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm</p>
-        <a routerLink="/products" class="inline-flex items-center gap-2 bg-user-primary text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-user-primary-hover transition-colors">
-          <i class="pi pi-search text-sm"></i> Khám phá sản phẩm
+      <div *ngIf="!cartData.groups || cartData.groups.length === 0" class="bg-white rounded-2xl shadow-sm p-10 md:p-20 text-center border border-gray-100">
+        <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="pi pi-shopping-bag text-5xl text-gray-200"></i>
+        </div>
+        <h3 class="text-lg md:text-xl font-black text-gray-800 mb-2">Giỏ hàng trống</h3>
+        <p class="text-gray-500 text-sm mb-8">Hãy lấp đầy giỏ hàng bằng những sản phẩm tuyệt vời</p>
+        <a routerLink="/products" class="inline-flex items-center gap-2 bg-user-primary text-white px-8 py-3 rounded-xl font-black hover:bg-user-primary-hover transition-all shadow-lg shadow-user-primary/20">
+          <i class="pi pi-search text-sm"></i> Khám phá ngay
         </a>
       </div>
     </ng-container>
@@ -55,10 +60,10 @@
       <div *ngIf="cartData.groups && cartData.groups.length > 0" class="flex flex-col lg:flex-row gap-6">
 
         <!-- LEFT: Cart list -->
-        <div class="w-full lg:w-[68%] flex flex-col gap-3">
+        <div class="w-full lg:w-[68%] flex flex-col gap-4">
 
-          <!-- Table header (desktop) -->
-          <div class="bg-white px-6 py-3 rounded-sm shadow-sm hidden md:grid cart-table-header text-xs font-bold text-gray-400 uppercase tracking-wider">
+          <!-- Table header (Desktop only) -->
+          <div class="bg-white px-6 py-4 rounded-xl shadow-sm hidden lg:grid cart-table-header text-[10px] font-black text-gray-400 uppercase tracking-widest border border-gray-100">
             <div class="flex items-center gap-3">
               <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAll()" class="cart-checkbox" />
               <span>Sản phẩm</span>
@@ -66,82 +71,88 @@
             <div class="text-center">Đơn giá</div>
             <div class="text-center">Số lượng</div>
             <div class="text-center">Thành tiền</div>
-            <div class="text-center">Xóa</div>
+            <div class="text-center">Thao tác</div>
           </div>
 
           <!-- Shop groups -->
-          <div *ngFor="let group of cartData.groups" class="bg-white rounded-sm shadow-sm overflow-hidden">
+          <div *ngFor="let group of cartData.groups" class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
 
             <!-- Shop header -->
-            <div class="px-6 py-3 flex items-center gap-3 border-b border-gray-100 bg-gray-50/50">
+            <div class="px-4 md:px-6 py-4 flex items-center gap-3 border-b border-gray-100 bg-gray-50/30">
               <input type="checkbox" [checked]="isGroupSelected(group)" (change)="toggleGroup(group)" class="cart-checkbox" />
-              <i class="pi pi-shop text-gray-500 text-sm"></i>
-              <span class="font-bold text-gray-800 text-sm">{{ group.shopName }}</span>
-              <span class="text-xs text-gray-400 ml-auto">{{ group.items?.length }} sản phẩm</span>
+              <div class="flex items-center gap-2">
+                <i class="pi pi-shop text-user-primary text-sm"></i>
+                <span class="font-black text-gray-900 text-sm">{{ group.shopName }}</span>
+              </div>
+              <div class="ml-auto flex items-center gap-2">
+                <span class="text-[10px] font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">{{ group.items?.length }} sản phẩm</span>
+              </div>
             </div>
 
             <!-- Items -->
             <div
               *ngFor="let item of group.items"
-              class="px-6 py-4 border-b border-gray-50 last:border-none transition-colors"
-              [ngClass]="{'opacity-60': isOutOfStock(item)}"
+              class="item-container px-4 md:px-6 py-5 border-b border-gray-50 last:border-none transition-all hover:bg-gray-50/50"
+              [ngClass]="{'opacity-60 grayscale-[0.5]': isOutOfStock(item)}"
             >
-              <!-- Mobile layout -->
-              <div class="flex gap-4">
-                <!-- Checkbox + Image -->
-                <div class="flex items-start gap-3 shrink-0">
-                  <input
-                    type="checkbox"
-                    [checked]="isItemSelected(item.id)"
-                    [disabled]="isOutOfStock(item)"
-                    (change)="toggleItem(item)"
-                    class="cart-checkbox mt-1"
-                  />
-                  <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-100 shrink-0 bg-gray-50">
+              <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                
+                <!-- Info Section (Checkbox + Image + Title) -->
+                <div class="flex items-start gap-3 lg:flex-1 min-w-0">
+                  <div class="pt-2 lg:pt-0">
+                    <input
+                      type="checkbox"
+                      [checked]="isItemSelected(item.id)"
+                      [disabled]="isOutOfStock(item)"
+                      (change)="toggleItem(item)"
+                      class="cart-checkbox"
+                    />
+                  </div>
+                  
+                  <div class="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-gray-100 shrink-0 bg-white shadow-sm">
                     <img
                       *ngIf="item.variantImageUrl"
                       [src]="item.variantImageUrl"
                       [alt]="item.productName"
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover transition-transform hover:scale-110"
                       onerror="this.src='https://placehold.co/200x200/f3f4f6/9ca3af?text=No+Image'"
                     />
-                    <div *ngIf="!item.variantImageUrl" class="w-full h-full flex items-center justify-center">
-                      <i class="pi pi-image text-2xl text-gray-300"></i>
+                    <div *ngIf="!item.variantImageUrl" class="w-full h-full flex items-center justify-center bg-gray-50">
+                      <i class="pi pi-image text-2xl text-gray-200"></i>
                     </div>
-                    <div *ngIf="isOutOfStock(item)" class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <span class="text-white text-[9px] font-bold">HẾT HÀNG</span>
+                    <div *ngIf="isOutOfStock(item)" class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span class="text-white text-[10px] font-black tracking-tighter">HẾT HÀNG</span>
+                    </div>
+                  </div>
+
+                  <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <h4 class="text-sm lg:text-base font-bold text-gray-900 line-clamp-2 leading-snug mb-1 hover:text-user-primary transition-colors cursor-pointer">
+                      {{ item.productName }}
+                    </h4>
+                    <div class="flex flex-wrap gap-1.5 mt-1">
+                       <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
+                          {{ getVariantAttrsText(item) }}
+                       </span>
+                    </div>
+                    
+                    <!-- Mobile only: Price -->
+                    <div class="mt-2 lg:hidden">
+                       <span class="text-user-primary font-black text-sm">{{ formatPrice(item.unitPrice) }}</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Info -->
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-1">{{ item.productName }}</h4>
-                  <p class="text-xs text-gray-400 mb-2">{{ getVariantAttrsText(item) }}</p>
+                <!-- Action Section (Qty + Total) -->
+                <div class="flex items-center justify-between lg:contents">
+                   
+                   <!-- Desktop Price -->
+                   <div class="hidden lg:block text-center w-[120px]">
+                      <span class="text-sm font-bold text-gray-900">{{ formatPrice(item.unitPrice) }}</span>
+                   </div>
 
-                  <!-- Mobile: price + qty + total -->
-                  <div class="flex flex-wrap items-center gap-4 md:hidden">
-                    <span class="text-user-primary font-bold text-sm">{{ formatPrice(item.unitPrice) }}</span>
-                    <div class="qty-control">
-                      <button (click)="updateQty(item, -1)" [disabled]="(item.quantity ?? 1) <= 1 || updatingItemId === item.id" class="qty-btn">
-                        <i class="pi pi-minus text-[10px]"></i>
-                      </button>
-                      <input type="number" [value]="item.quantity" (change)="setQty(item, +$any($event.target).value)" class="qty-input" min="1" [max]="item.stockAvailable" />
-                      <button (click)="updateQty(item, 1)" [disabled]="(item.quantity ?? 0) >= (item.stockAvailable ?? 0) || updatingItemId === item.id" class="qty-btn">
-                        <i class="pi pi-plus text-[10px]"></i>
-                      </button>
-                    </div>
-                    <span class="text-user-primary font-bold text-sm">{{ formatPrice(item.lineTotal) }}</span>
-                  </div>
-
-                  <!-- Desktop: grid layout -->
-                  <div class="hidden md:grid cart-table-row items-center mt-2">
-                    <div></div><!-- spacer for price col -->
-                    <div class="text-center">
-                      <span class="text-sm font-semibold text-gray-800">{{ formatPrice(item.unitPrice) }}</span>
-                    </div>
-                    <div class="flex justify-center">
-                      <div class="qty-control">
+                   <!-- Qty Control -->
+                   <div class="flex items-center justify-center lg:w-[140px]">
+                      <div class="qty-control shadow-sm">
                         <button (click)="updateQty(item, -1)" [disabled]="(item.quantity ?? 1) <= 1 || updatingItemId === item.id" class="qty-btn">
                           <i class="pi pi-minus text-[10px]"></i>
                         </button>
@@ -150,81 +161,102 @@
                           <i class="pi pi-plus text-[10px]"></i>
                         </button>
                       </div>
-                    </div>
-                    <div class="text-center">
-                      <span class="text-sm font-bold text-user-primary">{{ formatPrice(item.lineTotal) }}</span>
-                    </div>
-                    <div class="flex justify-center">
-                      <button (click)="removeItem(item)" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50">
+                   </div>
+
+                   <!-- Line Total -->
+                   <div class="text-right lg:text-center lg:w-[120px]">
+                      <span class="text-base lg:text-sm font-black text-user-primary">{{ formatPrice(item.lineTotal) }}</span>
+                      <div class="lg:hidden text-[9px] font-bold text-gray-400 uppercase">Thành tiền</div>
+                   </div>
+
+                   <!-- Delete Btn -->
+                   <div class="hidden lg:flex justify-center w-[60px]">
+                      <button (click)="removeItem(item)" class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all rounded-xl hover:bg-red-50 border border-transparent hover:border-red-100">
                         <i class="pi pi-trash text-sm"></i>
                       </button>
-                    </div>
-                  </div>
-
-                  <!-- Mobile remove -->
-                  <button (click)="removeItem(item)" class="md:hidden text-xs text-gray-400 hover:text-red-500 mt-2 flex items-center gap-1 transition-colors">
-                    <i class="pi pi-trash text-xs"></i> Xóa
-                  </button>
-
-                  <!-- Out of stock warning -->
-                  <p *ngIf="isOutOfStock(item)" class="text-xs text-red-500 mt-1 flex items-center gap-1">
-                    <i class="pi pi-exclamation-circle text-xs"></i>
-                    Sản phẩm này hiện đã hết hàng
-                  </p>
+                   </div>
                 </div>
+
+                <!-- Mobile extra actions -->
+                <div class="flex items-center justify-between lg:hidden pt-2 mt-1 border-t border-gray-50">
+                   <button (click)="removeItem(item)" class="text-[10px] font-bold text-red-500 flex items-center gap-1.5 px-2.5 py-1.5 bg-red-50 rounded-lg">
+                      <i class="pi pi-trash text-[10px]"></i> Xóa
+                   </button>
+                   <p *ngIf="isOutOfStock(item)" class="text-[10px] font-black text-red-600 flex items-center gap-1">
+                      <i class="pi pi-exclamation-triangle"></i> Tạm hết hàng
+                   </p>
+                </div>
+
               </div>
             </div>
-
           </div>
-
         </div>
 
         <!-- RIGHT: Summary -->
         <div class="w-full lg:w-[32%]">
-          <div class="sticky top-6 flex flex-col gap-4">
+          <div class="sticky top-24 flex flex-col gap-4">
 
             <!-- Summary card -->
-            <div class="bg-white rounded-sm shadow-sm overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="font-bold text-gray-800">Tóm tắt đơn hàng</h3>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+              <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+                <h3 class="font-black text-gray-900 flex items-center gap-2">
+                   <i class="pi pi-receipt text-user-primary"></i>
+                   TÓM TẮT ĐƠN HÀNG
+                </h3>
               </div>
-              <div class="px-6 py-4 flex flex-col gap-3">
-                <div class="flex justify-between text-sm text-gray-600">
-                  <span>Sản phẩm đã chọn</span>
-                  <span class="font-semibold text-gray-800">{{ selectedCount }}</span>
+              <div class="px-6 py-6 flex flex-col gap-4">
+                <div class="flex justify-between items-center text-sm">
+                  <span class="font-bold text-gray-500 uppercase tracking-tighter">Sản phẩm đã chọn</span>
+                  <span class="font-black text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">{{ selectedCount }}</span>
                 </div>
-                <div class="flex justify-between text-sm text-gray-600">
-                  <span>Tạm tính</span>
-                  <span class="font-semibold text-gray-800">{{ formatPrice(totalPrice) }}</span>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="font-bold text-gray-500 uppercase tracking-tighter">Tạm tính</span>
+                  <span class="font-black text-gray-900 text-base">{{ formatPrice(totalPrice) }}</span>
                 </div>
-                <div class="flex justify-between text-sm text-gray-400">
-                  <span>Phí vận chuyển</span>
-                  <span>Tính khi thanh toán</span>
+                <div class="flex justify-between items-center text-[10px]">
+                  <span class="font-bold text-gray-400 uppercase">Phí vận chuyển</span>
+                  <span class="font-bold text-user-primary italic">Miễn phí cho đơn hàng này</span>
                 </div>
-                <div class="border-t border-gray-100 pt-3 flex justify-between items-center">
-                  <span class="font-bold text-gray-800">Tổng cộng</span>
-                  <span class="text-xl font-black text-user-primary">{{ formatPrice(totalPrice) }}</span>
+                <div class="border-t-2 border-dashed border-gray-100 pt-5 mt-2 flex justify-between items-center">
+                  <span class="font-black text-gray-900 text-lg">TỔNG CỘNG</span>
+                  <div class="text-right">
+                    <span class="text-2xl font-black text-user-primary block leading-none">{{ formatPrice(totalPrice) }}</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase mt-1 block">Đã bao gồm VAT (nếu có)</span>
+                  </div>
                 </div>
               </div>
               <div class="px-6 pb-6">
                 <button
                   (click)="proceedToCheckout()"
                   [disabled]="selectedCount === 0"
-                  class="w-full py-3.5 bg-user-primary hover:bg-user-primary-hover disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-sm text-sm"
+                  class="w-full py-4 bg-user-primary hover:bg-user-primary-hover disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black rounded-2xl transition-all shadow-xl shadow-user-primary/20 flex items-center justify-center gap-3 group"
                 >
-                  <i class="pi pi-credit-card mr-2"></i>
-                  THANH TOÁN ({{ selectedCount }})
+                  <i class="pi pi-credit-card group-hover:scale-110 transition-transform"></i>
+                  THANH TOÁN NGAY
                 </button>
-                <a routerLink="/products" class="block text-center text-sm text-user-primary hover:underline mt-3 font-medium">
-                  <i class="pi pi-arrow-left text-xs mr-1"></i> Tiếp tục mua sắm
+                <a routerLink="/products" class="block text-center text-sm text-gray-500 hover:text-user-primary mt-4 font-bold transition-colors">
+                  <i class="pi pi-arrow-left text-[10px] mr-1"></i> TIẾP TỤC MUA SẮM
                 </a>
               </div>
             </div>
 
+            <!-- Promotion box -->
+            <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 flex items-start gap-3">
+               <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                  <i class="pi pi-percentage text-white text-lg"></i>
+               </div>
+               <div>
+                  <h4 class="text-emerald-900 font-black text-sm">Ưu đãi hôm nay</h4>
+                  <p class="text-emerald-700 text-xs mt-1 font-medium">Nhập mã <span class="font-black bg-emerald-200 px-1 rounded">VORA2026</span> giảm thêm 50K cho đơn từ 1 triệu.</p>
+               </div>
+            </div>
+
             <!-- Security note -->
-            <div class="flex items-start gap-3 p-4 bg-white rounded-sm shadow-sm text-xs text-gray-500 leading-relaxed">
-              <i class="pi pi-shield text-user-primary mt-0.5 shrink-0"></i>
-              <span>Giao dịch được bảo mật bởi SSL. Nhận hàng hoặc được hoàn tiền 100%.</span>
+            <div class="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm text-[11px] text-gray-500 font-medium border border-gray-100">
+              <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                <i class="pi pi-shield text-blue-500"></i>
+              </div>
+              <span>Giao dịch an toàn & Tuyệt đối bảo mật thông tin cá nhân.</span>
             </div>
 
           </div>
@@ -233,5 +265,21 @@
       </div>
     </ng-container>
 
+  </div>
+
+  <!-- Mobile Bottom Sticky Bar (Only visible on small screens when items are selected) -->
+  <div *ngIf="selectedCount > 0" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40 animate-slide-up">
+     <div class="flex items-center justify-between mb-4">
+        <div>
+           <span class="text-gray-500 text-xs font-bold uppercase">Tổng thanh toán</span>
+           <span class="block text-xl font-black text-user-primary leading-none mt-1">{{ formatPrice(totalPrice) }}</span>
+        </div>
+        <div class="text-right">
+           <span class="text-[10px] font-black text-gray-400 bg-gray-100 px-2 py-1 rounded">{{ selectedCount }} sản phẩm</span>
+        </div>
+     </div>
+     <button (click)="proceedToCheckout()" class="w-full py-4 bg-user-primary text-white font-black rounded-2xl shadow-lg shadow-user-primary/20 flex items-center justify-center gap-2">
+        THANH TOÁN ({{ selectedCount }})
+     </button>
   </div>
 </div>

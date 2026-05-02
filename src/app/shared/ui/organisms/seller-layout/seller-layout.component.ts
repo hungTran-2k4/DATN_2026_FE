@@ -1,5 +1,5 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
@@ -33,6 +33,7 @@ interface SellerNavItem {
 })
 export class SellerLayoutComponent implements OnInit {
   sidebarCollapsed = false;
+  isMobile = false;
 
   readonly navItems: SellerNavItem[] = [
     { label: 'Tổng quan', icon: 'pi pi-chart-line', route: '/seller/dashboard' },
@@ -58,7 +59,21 @@ export class SellerLayoutComponent implements OnInit {
     public readonly authSession: AuthSessionService,
     private readonly api: ApiBaseService,
     private readonly router: Router,
-  ) {}
+  ) {
+    this.checkScreenSize();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    this.isMobile = window.innerWidth <= 1024;
+    if (this.isMobile) {
+      this.sidebarCollapsed = true;
+    }
+  }
 
   ngOnInit(): void {
     const session = this.authSession.getSession();
@@ -83,6 +98,13 @@ export class SellerLayoutComponent implements OnInit {
         command: () => this.logout(),
       },
     ];
+
+    // Close sidebar on navigation on mobile
+    this.router.events.subscribe(() => {
+      if (this.isMobile) {
+        this.sidebarCollapsed = true;
+      }
+    });
   }
 
   get sellerInitials(): string {

@@ -1,17 +1,23 @@
-<header class="font-inter border-b border-gray-200">
-  <!-- Topbar -->
-  <div class="bg-gray-100 text-gray-500 text-xs sm:text-sm py-1">
+<header
+  class="font-inter border-b border-gray-200 bg-white sticky top-0 z-50 shadow-sm"
+>
+  <!-- Topbar: Hidden on smallest mobile, but kept for sm+ -->
+  <div
+    class="bg-gray-100 text-gray-500 text-[10px] sm:text-xs py-1 hidden sm:block"
+  >
     <div
       class="container mx-auto px-4 max-w-7xl flex justify-between items-center"
     >
       <div class="flex gap-4">
-        <span><i class="pi pi-phone text-xs mr-1"></i> +84 123 456 789</span>
-        <span class="hidden sm:inline"
-          ><i class="pi pi-envelope text-xs mr-1"></i>
+        <span
+          ><i class="pi pi-phone text-[10px] mr-1"></i> +84 123 456 789</span
+        >
+        <span class="hidden md:inline"
+          ><i class="pi pi-envelope text-[10px] mr-1"></i>
           support&#64;datn2026.com</span
         >
       </div>
-      <div class="flex gap-4 font-medium">
+      <div class="flex gap-4 font-medium uppercase tracking-tight">
         <a href="#" class="hover:text-user-primary transition-colors"
           >Store Location</a
         >
@@ -23,134 +29,172 @@
   </div>
 
   <!-- Main Header -->
-  <div
-    class="container mx-auto px-4 max-w-7xl flex items-center justify-between gap-8"
-  >
-    <!-- Logo -->
-    <a
-      routerLink="/"
-      class="flex items-center justify-center shrink-0 pl-2 pr-4 transition-transform hover:scale-105"
-    >
-      <img
-        ngSrc="/images/logo-brand-2.0.png"
-        alt="Vora Logo"
-        width="200"
-        height="150"
-        priority
-        class="h-18 sm:h-28 lg:h-32 w-auto object-contain transform scale-125"
-      />
-    </a>
+  <div class="container mx-auto px-4 max-w-7xl">
+    <div class="flex items-center justify-between py-2 sm:py-4 gap-2 md:gap-8">
+      <!-- Mobile Menu Toggle (Left) -->
+      <div class="lg:hidden flex items-center">
+        <button
+          (click)="isMobileMenuOpen = true"
+          class="p-2 text-gray-600 hover:text-user-primary transition-colors"
+        >
+          <i class="pi pi-bars text-xl md:text-2xl"></i>
+        </button>
+      </div>
 
-    <!-- Search Bar -->
-    <div class="flex-1 max-w-2xl relative hidden lg:block">
-      <input
-        type="text"
-        placeholder="Tìm kiếm sản phẩm, danh mục..."
-        class="w-full bg-gray-50 border border-gray-300 rounded-full py-2.5 px-6 pr-14 focus:outline-none focus:border-user-primary focus:ring-1 focus:ring-user-primary transition-all shadow-sm"
-      />
-      <button
-        class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-user-primary rounded-full hover:bg-opacity-90 flex items-center justify-center text-white transition-colors"
-      >
-        <i class="pi pi-search text-lg"></i>
-      </button>
-    </div>
-
-    <!-- Actions -->
-    <div class="flex items-center gap-5 sm:gap-7 shrink-0">
+      <!-- Logo (Center on mobile, Left on Desktop) -->
       <a
-        routerLink="/products"
-        class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
+        routerLink="/"
+        class="flex items-center justify-center shrink-0 transition-transform hover:scale-105 ml-0 md:ml-0"
       >
-        <div
-          class="relative w-10 h-10 aspect-square shrink-0 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
-        >
-          <i class="pi pi-heart text-xl"></i>
-          <span
-            class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4 border border-white"
-            >0</span
-          >
-        </div>
-        <span class="text-xs font-semibold mt-1 hidden sm:block"
-          >Yêu thích</span
-        >
+        <img
+          src="/images/vora_logo_premium.png"
+          alt="Vora Logo"
+          width="200"
+          height="60"
+          priority
+          class="h-12 sm:h-16 lg:h-20 w-auto object-contain"
+        />
       </a>
 
-      <a
-        routerLink="/cart"
-        class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group"
-      >
-        <div
-          class="relative w-10 h-10 aspect-square shrink-0 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+      <!-- Search Bar (Hidden on Mobile, but visible on tablet LG+) -->
+      <div class="flex-1 max-w-2xl relative hidden lg:block">
+        <input
+          type="text"
+          placeholder="Tìm kiếm sản phẩm, danh mục..."
+          class="w-full bg-gray-50 border border-gray-300 rounded-full py-2.5 px-6 pr-14 focus:outline-none focus:border-user-primary focus:ring-1 focus:ring-user-primary transition-all shadow-sm"
+        />
+        <button
+          class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-user-primary rounded-full hover:bg-opacity-90 flex items-center justify-center text-white transition-colors"
         >
-          <i class="pi pi-shopping-bag text-xl"></i>
-          <span
-            *ngIf="cartService.totalItems() as count"
-            class="absolute top-0 right-0 w-4 h-4 bg-user-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4 border border-white"
-          >{{ count > 99 ? '99+' : count }}</span>
-        </div>
-        <span class="text-xs font-semibold mt-1 hidden sm:block">Giỏ hàng</span>
-      </a>
+          <i class="pi pi-search text-lg"></i>
+        </button>
+      </div>
 
-      <!-- Auth Logic -->
-      <ng-container
-        *ngIf="authSession.currentUser$ | async as user; else loginBtn"
-      >
-        <div
-          (click)="userMenu.toggle($event)"
-          class="flex items-center gap-2.5 pl-4 sm:pl-6 ml-1 sm:ml-3 border-l border-gray-200 cursor-pointer group"
-        >
-          <div
-            class="w-10 h-10 aspect-square shrink-0 rounded-full bg-user-primary/10 flex items-center justify-center text-user-primary font-bold text-lg group-hover:bg-user-primary group-hover:text-white transition-all shadow-sm"
-          >
-            {{ (user.userName || user.userEmail || "U")[0].toUpperCase() }}
-          </div>
-          <div class="hidden md:flex flex-col justify-center">
-            <span
-              class="text-sm font-bold text-gray-800 group-hover:text-user-primary transition-colors truncate max-w-[130px] leading-tight"
-            >
-              {{ user.userName || "Người dùng" }}
-            </span>
-            <span class="text-[11px] text-gray-500 font-medium mt-0.5">{{
-              authSession.isAdmin() ? "Quản trị viên" : "Tài khoản của tôi"
-            }}</span>
-          </div>
-          <i
-            class="pi pi-angle-down text-xs text-gray-400 group-hover:text-user-primary transition-transform group-hover:translate-y-0.5 hidden md:block ml-1"
-          ></i>
-        </div>
-      </ng-container>
-
-      <ng-template #loginBtn>
+      <!-- Actions -->
+      <div class="flex items-center gap-2 sm:gap-5 lg:gap-7 shrink-0">
+        <!-- Wishlist: Hidden on XS, visible on sm+ -->
         <a
-          routerLink="/auth/login"
-          class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors cursor-pointer group pl-4 sm:pl-6 border-l border-gray-200"
+          routerLink="/products"
+          class="hidden sm:flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors group"
         >
           <div
-            class="relative w-10 h-10 aspect-square shrink-0 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+            class="relative w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
           >
-            <i class="pi pi-user text-xl"></i>
+            <i class="pi pi-heart text-lg md:text-xl"></i>
+            <span
+              class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4 border border-white"
+              >0</span
+            >
           </div>
-          <span class="text-xs font-semibold mt-1 hidden sm:block"
-            >Đăng nhập</span
+          <span class="text-[10px] font-bold mt-1 hidden md:block"
+            >Yêu thích</span
           >
         </a>
-      </ng-template>
+
+        <!-- Cart: Always visible -->
+        <a
+          routerLink="/cart"
+          class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors group"
+        >
+          <div
+            class="relative w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+          >
+            <i class="pi pi-shopping-bag text-lg md:text-xl"></i>
+            <span
+              *ngIf="cartService.totalItems() as count"
+              class="absolute top-0 right-0 w-4 h-4 bg-user-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4 border border-white"
+            >
+              {{ count > 99 ? "99+" : count }}
+            </span>
+          </div>
+          <span class="text-[10px] font-bold mt-1 hidden md:block"
+            >Giỏ hàng</span
+          >
+        </a>
+
+        <!-- User Auth Logic -->
+        <ng-container
+          *ngIf="authSession.currentUser$ | async as user; else loginBtn"
+        >
+          <div
+            (click)="userMenu.toggle($event)"
+            class="flex items-center gap-2 pl-3 md:pl-6 border-l border-gray-200 cursor-pointer group"
+          >
+            <div
+              class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-user-primary/10 flex items-center justify-center text-user-primary font-bold text-lg group-hover:bg-user-primary group-hover:text-white transition-all shadow-sm overflow-hidden"
+            >
+              <img
+                *ngIf="user.avatarUrl"
+                [ngSrc]="user.avatarUrl"
+                width="40"
+                height="40"
+                alt="Avatar"
+                class="w-full h-full object-cover"
+              />
+              <span *ngIf="!user.avatarUrl">{{
+                (user.userName || user.userEmail || "U")[0].toUpperCase()
+              }}</span>
+            </div>
+            <div class="hidden md:flex flex-col justify-center">
+              <span
+                class="text-xs font-bold text-gray-800 group-hover:text-user-primary transition-colors truncate max-w-[100px] leading-tight"
+              >
+                {{ user.userName || "Người dùng" }}
+              </span>
+              <span class="text-[10px] text-gray-500 font-medium">{{
+                authSession.isAdmin() ? "Quản trị viên" : "Tài khoản"
+              }}</span>
+            </div>
+            <i
+              class="pi pi-angle-down text-[10px] text-gray-400 md:block hidden ml-1"
+            ></i>
+          </div>
+        </ng-container>
+
+        <ng-template #loginBtn>
+          <a
+            routerLink="/auth/login"
+            class="flex flex-col items-center text-gray-700 hover:text-user-primary transition-colors group pl-3 md:pl-6 border-l border-gray-200"
+          >
+            <div
+              class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-user-primary/10 transition-colors"
+            >
+              <i class="pi pi-user text-lg md:text-xl"></i>
+            </div>
+            <span class="text-[10px] font-bold mt-1 hidden md:block"
+              >Đăng nhập</span
+            >
+          </a>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Mobile Search Row (Only on screen < LG) -->
+    <div class="lg:hidden pb-3">
+      <div class="relative">
+        <input
+          type="text"
+          placeholder="Bạn tìm gì hôm nay?"
+          class="w-full bg-gray-100 border-none rounded-xl py-2 px-4 pr-10 focus:ring-1 focus:ring-user-primary text-sm"
+        />
+        <i
+          class="pi pi-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+        ></i>
+      </div>
     </div>
   </div>
 
-  <!-- Navigation Layer -->
-  <!-- <nav class="border-t border-gray-100 hidden md:block">
+  <!-- Navigation Layer: Desktop only -->
+  <!-- <nav class="border-t border-gray-100 hidden lg:block bg-white">
     <div class="container mx-auto px-4 max-w-7xl flex items-center">
       <button
-        class="bg-user-primary text-white px-6 py-4 font-bold flex items-center gap-3 hover:bg-user-primary-hover transition-colors shrink-0"
+        class="bg-user-primary text-white px-6 py-3.5 font-bold flex items-center gap-3 hover:bg-user-primary-hover transition-colors shrink-0 rounded-t-lg"
       >
         <i class="pi pi-align-left text-lg"></i>
         DANH MỤC SẢN PHẨM
         <i class="pi pi-angle-down ml-4"></i>
       </button>
-      <ul
-        class="flex items-center gap-8 ml-8 font-semibold text-gray-700 w-full"
-      >
+      <ul class="flex items-center gap-8 ml-8 font-bold text-sm text-gray-700">
         <li>
           <a
             routerLink="/"
@@ -160,47 +204,124 @@
         </li>
         <li>
           <a
-            href="#"
-            class="hover:text-user-primary transition-colors py-4 inline-block flex items-center gap-1 group"
-            >Sản phẩm
-            <i
-              class="pi pi-angle-down text-xs group-hover:rotate-180 transition-transform"
-            ></i
+            routerLink="/products"
+            class="hover:text-user-primary transition-colors py-4 inline-block flex items-center gap-1"
+            >Sản phẩm <i class="pi pi-angle-down text-[10px]"></i
           ></a>
         </li>
         <li>
           <a
-            href="#"
+            routerLink="/products"
             class="hover:text-user-primary transition-colors py-4 inline-block flex items-center gap-1"
             >Khuyến mãi
             <span
-              class="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-bold animate-pulse ml-0.5"
+              class="bg-red-500 text-white text-[8px] px-1 rounded uppercase font-bold animate-pulse ml-0.5"
               >Hot</span
             ></a
           >
         </li>
         <li>
           <a
-            href="#"
+            routerLink="/blog"
             class="hover:text-user-primary transition-colors py-4 inline-block"
             >Bài viết</a
           >
         </li>
         <li>
           <a
-            href="#"
+            routerLink="/contact"
             class="hover:text-user-primary transition-colors py-4 inline-block"
             >Liên hệ</a
           >
         </li>
       </ul>
-
-      <div class="shrink-0 text-gray-500 font-medium flex items-center gap-2">
-        <i class="pi pi-bolt text-yellow-500"></i> Spend $50 get Free Shipping
+      <div
+        class="ml-auto text-gray-500 text-xs font-bold flex items-center gap-2"
+      >
+        <i class="pi pi-bolt text-yellow-500"></i> Freeship cho đơn từ 500K
       </div>
     </div>
   </nav> -->
 </header>
+
+<!-- Mobile Sidebar Menu -->
+<p-sidebar
+  [(visible)]="isMobileMenuOpen"
+  [baseZIndex]="10000"
+  position="left"
+  styleClass="w-full max-w-[280px]"
+>
+  <div class="flex flex-col h-full font-inter">
+    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+      <span class="text-xl font-black text-gray-900">DANH MỤC</span>
+      <i
+        (click)="isMobileMenuOpen = false"
+        class="pi pi-times text-gray-400 cursor-pointer"
+      ></i>
+    </div>
+    <div class="flex-1 overflow-y-auto py-4">
+      <ul class="space-y-1">
+        <li>
+          <a
+            routerLink="/"
+            (click)="isMobileMenuOpen = false"
+            class="flex items-center gap-3 p-4 text-gray-800 font-bold hover:bg-gray-50 rounded-xl"
+            ><i class="pi pi-home text-user-primary"></i> Trang chủ</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/products"
+            (click)="isMobileMenuOpen = false"
+            class="flex items-center gap-3 p-4 text-gray-800 font-bold hover:bg-gray-50 rounded-xl"
+            ><i class="pi pi-box text-user-primary"></i> Sản phẩm</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/cart"
+            (click)="isMobileMenuOpen = false"
+            class="flex items-center gap-3 p-4 text-gray-800 font-bold hover:bg-gray-50 rounded-xl"
+            ><i class="pi pi-shopping-bag text-user-primary"></i> Giỏ hàng</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/profile"
+            (click)="isMobileMenuOpen = false"
+            class="flex items-center gap-3 p-4 text-gray-800 font-bold hover:bg-gray-50 rounded-xl"
+            ><i class="pi pi-user text-user-primary"></i> Tài khoản</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/profile"
+            [queryParams]="{ tab: 'purchases' }"
+            (click)="isMobileMenuOpen = false"
+            class="flex items-center gap-3 p-4 text-gray-800 font-bold hover:bg-gray-50 rounded-xl"
+            ><i class="pi pi-shopping-bag text-user-primary"></i> Đơn hàng</a
+          >
+        </li>
+      </ul>
+    </div>
+    <div class="p-6 bg-gray-50 border-t border-gray-100">
+      <div class="flex items-center gap-4 text-gray-600 text-sm font-bold mb-4">
+        <i class="pi pi-phone"></i> 1900 1234
+      </div>
+      <div class="flex gap-4">
+        <a href="#" class="text-gray-400 text-xl"
+          ><i class="pi pi-facebook"></i
+        ></a>
+        <a href="#" class="text-gray-400 text-xl"
+          ><i class="pi pi-instagram"></i
+        ></a>
+        <a href="#" class="text-gray-400 text-xl"
+          ><i class="pi pi-youtube"></i
+        ></a>
+      </div>
+    </div>
+  </div>
+</p-sidebar>
 
 <p-menu
   #userMenu

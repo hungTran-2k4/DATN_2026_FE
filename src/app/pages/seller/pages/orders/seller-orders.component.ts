@@ -159,6 +159,27 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price ?? 0);
   }
 
+  parseAddress(addressJson?: string): any {
+    if (!addressJson) return { fullName: 'N/A', phoneNumber: '', detailedAddress: 'N/A' };
+    try {
+      // Handle potential double encoding or raw string
+      const addr = typeof addressJson === 'string' && addressJson.startsWith('{') 
+        ? JSON.parse(addressJson) 
+        : addressJson;
+      
+      if (typeof addr === 'object') {
+        return {
+          fullName: addr.FullName || addr.fullName || 'N/A',
+          phoneNumber: addr.PhoneNumber || addr.phoneNumber || '',
+          detailedAddress: addr.DetailedAddress || addr.detailedAddress || 'N/A'
+        };
+      }
+      return { fullName: 'N/A', phoneNumber: '', detailedAddress: addressJson };
+    } catch (e) {
+      return { fullName: 'N/A', phoneNumber: '', detailedAddress: addressJson };
+    }
+  }
+
   getNextStatusOptions(currentStatus?: string): { label: string; value: string }[] {
     return this.nextStatusOptions[currentStatus ?? ''] ?? [];
   }

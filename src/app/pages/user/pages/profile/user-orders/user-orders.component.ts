@@ -32,6 +32,11 @@ export class UserOrdersComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   selectedStatus: string | undefined = undefined;
+  
+  // Detail Dialog
+  showDetail = false;
+  selectedOrder: any = null;
+  isLoadingDetail = false;
 
   statusTabs = [
     { label: 'Tất cả', value: undefined },
@@ -82,6 +87,41 @@ export class UserOrdersComponent implements OnInit {
       style: 'currency',
       currency: 'VND',
     }).format(price || 0);
+  }
+
+  parseAddress(addressJson?: string): any {
+    if (!addressJson) return { fullName: 'N/A', phoneNumber: '', detailedAddress: 'N/A' };
+    try {
+      const addr = typeof addressJson === 'string' && addressJson.startsWith('{') 
+        ? JSON.parse(addressJson) 
+        : addressJson;
+      
+      if (typeof addr === 'object') {
+        return {
+          fullName: addr.FullName || addr.fullName || 'N/A',
+          phoneNumber: addr.PhoneNumber || addr.phoneNumber || '',
+          detailedAddress: addr.DetailedAddress || addr.detailedAddress || 'N/A'
+        };
+      }
+      return { fullName: 'N/A', phoneNumber: '', detailedAddress: addressJson };
+    } catch (e) {
+      return { fullName: 'N/A', phoneNumber: '', detailedAddress: addressJson };
+    }
+  }
+
+  openDetail(order: OrderSummaryDto) {
+    this.showDetail = true;
+    this.selectedOrder = null;
+    this.isLoadingDetail = true;
+    this.apiService.orders(order.id!).subscribe({
+      next: (res) => {
+        this.selectedOrder = res.data;
+        this.isLoadingDetail = false;
+      },
+      error: () => {
+        this.isLoadingDetail = false;
+      }
+    });
   }
 
   getStatusLabel(status?: string): string {

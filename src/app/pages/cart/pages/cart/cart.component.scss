@@ -1,21 +1,43 @@
-:host { display: block; }
-
-/* ── Table grid ── */
-.cart-table-header,
-.cart-table-row {
-  display: grid;
-  grid-template-columns: 1fr 120px 140px 120px 60px;
-  gap: 8px;
-  align-items: center;
+:host { 
+  display: block; 
 }
 
-/* ── Checkbox ── */
+.cart-page {
+  /* Fix cho padding bottom khi có sticky bar trên mobile */
+  padding-bottom: 120px;
+  @media (min-width: 1024px) {
+    padding-bottom: 40px;
+  }
+}
+
+/* ── Table grid (Desktop only) ── */
+@media (min-width: 1024px) {
+  .cart-table-header,
+  .cart-table-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 140px 120px 60px;
+    gap: 16px;
+    align-items: center;
+  }
+}
+
+/* ── Checkbox custom style ── */
 .cart-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--user-primary);
+  width: 18px;
+  height: 18px;
+  accent-color: #10b981;
   cursor: pointer;
   flex-shrink: 0;
+  border-radius: 6px;
+  border: 1.5px solid #d1d5db;
+}
+
+/* ── Item Container Hover ── */
+.item-container {
+  transition: background-color 0.2s;
+  &:hover {
+    background-color: #f9fafb;
+  }
 }
 
 /* ── Quantity control ── */
@@ -23,9 +45,15 @@
   display: flex;
   align-items: center;
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   height: 32px;
+  background: white;
+  width: fit-content;
+
+  @media (min-width: 768px) {
+    height: 36px;
+  }
 }
 
 .qty-btn {
@@ -38,32 +66,65 @@
   border: none;
   cursor: pointer;
   color: #374151;
-  transition: background .15s;
+  transition: all 0.2s;
 
-  &:hover:not(:disabled) { background: #F3F4F6; color: var(--user-primary); }
-  &:disabled { opacity: .4; cursor: not-allowed; }
-  &:first-child { border-right: 1px solid #E5E7EB; }
-  &:last-child { border-left: 1px solid #E5E7EB; }
+  @media (min-width: 768px) {
+    width: 36px;
+  }
+
+  &:hover:not(:disabled) { 
+    background: #ecfdf5; 
+    color: #10b981; 
+  }
+  
+  &:disabled { 
+    opacity: .3; 
+    cursor: not-allowed; 
+  }
 }
 
 .qty-input {
-  width: 44px;
+  width: 36px;
   height: 100%;
   text-align: center;
-  font-size: .85rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 800;
   border: none;
   outline: none;
-  color: #1E293B;
+  color: #111827;
   background: white;
 
-  /* Hide number arrows */
+  @media (min-width: 768px) {
+    width: 44px;
+    font-size: 0.9rem;
+  }
+
   &::-webkit-inner-spin-button,
   &::-webkit-outer-spin-button { -webkit-appearance: none; }
   -moz-appearance: textfield;
 }
 
+/* ── Animations ── */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
 /* ── PrimeNG overrides ── */
 :host ::ng-deep {
-  .p-skeleton { border-radius: 8px; }
+  .p-skeleton { 
+    border-radius: 12px; 
+    background-color: #f3f4f6;
+  }
+  
+  .p-toast {
+    .p-toast-message {
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+  }
 }

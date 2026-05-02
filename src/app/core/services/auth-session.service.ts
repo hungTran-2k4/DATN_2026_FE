@@ -6,6 +6,7 @@ interface StoredAuthSession {
   userId?: string;
   userEmail?: string;
   userName?: string;
+  avatarUrl?: string;
   roles?: string[];
 }
 
@@ -30,6 +31,7 @@ export class AuthSessionService {
       userId: auth.user?.id ?? current?.userId,
       userEmail: auth.user?.email ?? current?.userEmail,
       userName: auth.user?.fullName ?? current?.userName,
+      avatarUrl: (auth.user as any)?.avatarUrl ?? current?.avatarUrl,
       roles: normalizedRoles,
     };
 
@@ -49,6 +51,7 @@ export class AuthSessionService {
       ...current,
       userEmail: userData.email ?? current.userEmail,
       userName: userData.fullName ?? userData.username ?? current.userName,
+      avatarUrl: userData.avatarUrl ?? current.avatarUrl,
       roles: Array.isArray(userData.roles) ? userData.roles : current.roles,
     };
 
@@ -74,17 +77,16 @@ export class AuthSessionService {
   }
 
   isAdmin(): boolean {
-    return this.getRoles().includes('Admin');
+    return this.getRoles().some(role => role.toLowerCase() === 'admin');
   }
 
   isSeller(): boolean {
-    return this.getRoles().includes('Seller');
+    return this.getRoles().some(role => role.toLowerCase() === 'seller');
   }
 
   isCustomer(): boolean {
-    const roles = this.getRoles();
-    // Assuming Customer if no admin/seller, or explicitly 'Customer'
-    return roles.includes('Customer') || (!this.isAdmin() && !this.isSeller());
+    const roles = this.getRoles().map(r => r.toLowerCase());
+    return roles.includes('customer') || roles.includes('user') || (!this.isAdmin() && !this.isSeller());
   }
 
   public getSession(): StoredAuthSession | null {

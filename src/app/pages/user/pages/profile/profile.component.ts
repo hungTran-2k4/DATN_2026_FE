@@ -19,6 +19,7 @@ import { Observable } from 'rxjs';
 import { SellerRegistrationState } from '../../../../entities/seller/model/seller.model';
 import { UserOrdersComponent } from './user-orders/user-orders.component';
 
+
 @Component({
   selector: 'app-user-profile',
   standalone: true,
@@ -151,9 +152,28 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  uploadAvatar(): void {
-    const newUrl = prompt('Nhập URL ảnh đại diện của bạn:', this.avatarUrl);
-    if (newUrl !== null) this.profileForm.patchValue({ avatarUrl: newUrl });
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Dung lượng file tối đa là 1MB.' });
+        return;
+      }
+      
+      this.api.avatar({ data: file, fileName: file.name }).subscribe({
+        next: (res) => {
+          if (res.data) {
+            this.profileForm.patchValue({ avatarUrl: res.data.avatarUrl });
+            this.avatarUrl = res.data.avatarUrl || '';
+            this.authSession.updateUserSession(res.data);
+            this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã tải ảnh lên thành công.' });
+          }
+        },
+        error: () => {
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải ảnh lên.' });
+        }
+      });
+    }
   }
 
   setMenu(group: 'account' | 'others', menu: any) {

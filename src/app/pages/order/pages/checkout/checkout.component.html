@@ -1,161 +1,210 @@
-<div class="checkout-page bg-[#f5f5f5] min-h-screen font-inter pb-16">
+<div class="checkout-page bg-gray-50 min-h-screen font-inter pb-20 lg:pb-12">
   <!-- Top Navigation (Simplified for checkout) -->
-  <div class="bg-white border-b border-gray-200">
-    <div class="container mx-auto px-4 max-w-6xl h-20 flex items-center justify-between">
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <div class="container mx-auto px-4 max-w-6xl h-16 md:h-20 flex items-center justify-between">
        <div class="flex items-center gap-4">
-         <h1 class="text-2xl font-black text-user-primary">Thanh Toán</h1>
+         <h1 class="text-xl md:text-2xl font-black text-user-primary uppercase tracking-tighter">Thanh Toán</h1>
        </div>
-       <a routerLink="/cart" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
-         <i class="pi pi-arrow-left text-xs"></i> Quay lại Giỏ hàng
+       <a routerLink="/cart" class="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
+         <i class="pi pi-arrow-left text-[10px]"></i> <span class="hidden sm:inline">Quay lại</span> Giỏ hàng
        </a>
     </div>
   </div>
 
-  <div class="container mx-auto px-4 max-w-6xl pt-8 pb-12">
+  <div class="container mx-auto px-2 sm:px-4 max-w-6xl pt-4 md:pt-8">
     <!-- Split Layout -->
-    <div class="flex flex-col lg:flex-row gap-8 items-start">
+    <div class="flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
        
        <!-- LEFT COLUMN (60%) -->
-       <div class="w-full lg:w-[60%] flex flex-col gap-6">
+       <div class="w-full lg:w-[62%] flex flex-col gap-4 md:gap-6">
           
           <!-- Block 1: Address Card -->
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-             <!-- Top red-blue dashed line like shopee -->
-             <div class="absolute top-0 left-0 right-0 h-1 bg-[repeating-linear-gradient(45deg,#ff6c6c_0,#ff6c6c_33px,transparent_0,transparent_41px,#5a8ee6_0,#5a8ee6_74px,transparent_0,transparent_82px)] opacity-60"></div>
+          <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+             <!-- Top dashed line -->
+             <div class="absolute top-0 left-0 right-0 h-1 bg-[repeating-linear-gradient(45deg,#10b981_0,#10b981_33px,transparent_0,transparent_41px,#3b82f6_0,#3b82f6_74px,transparent_0,transparent_82px)] opacity-40"></div>
              
              <div class="flex items-center justify-between mb-4 mt-2">
-                <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i class="pi pi-map-marker text-user-primary"></i> Địa Chỉ Ngưới Nhận</h2>
-                <button (click)="openAddressModal()" class="text-sm font-semibold text-user-primary hover:underline">Thay Đổi</button>
+                <h2 class="text-base md:text-lg font-black text-gray-900 flex items-center gap-2">
+                   <i class="pi pi-map-marker text-user-primary"></i> 
+                   ĐỊA CHỈ NHẬN HÀNG
+                </h2>
+                <button (click)="openAddressModal()" class="text-xs font-bold text-user-primary hover:underline bg-emerald-50 px-3 py-1.5 rounded-lg">Thay Đổi</button>
              </div>
              
-             <div *ngIf="getSelectedAddress() as addr" class="flex flex-col md:flex-row md:items-center p-4 border border-gray-100 rounded-xl bg-blue-50/30 gap-4 transition-colors hover:border-blue-200">
-                <div class="flex flex-col flex-1 pl-2">
-                   <div class="flex items-center gap-3 mb-1">
-                      <span class="font-bold text-gray-900">{{addr.name}}</span>
-                      <span class="text-gray-400">|</span>
+             <div *ngIf="getSelectedAddress() as addr" class="flex flex-col md:flex-row md:items-center p-4 border border-emerald-100 rounded-xl bg-emerald-50/20 gap-3 transition-all">
+                <div class="flex flex-col flex-1">
+                   <div class="flex items-center gap-2 mb-1 flex-wrap">
+                      <span class="font-black text-gray-900">{{addr.name}}</span>
+                      <span class="text-gray-300 hidden sm:inline">|</span>
                       <span class="font-bold text-gray-600">{{addr.phone}}</span>
+                      <span *ngIf="addr.isDefault" class="text-[9px] font-black uppercase text-emerald-600 bg-white border border-emerald-200 px-1.5 py-0.5 rounded">Mặc Định</span>
                    </div>
-                   <p class="text-gray-500 text-sm leading-relaxed">{{addr.address}}</p>
-                </div>
-                <div *ngIf="addr.isDefault" class="shrink-0 border border-user-primary text-user-primary text-xs font-bold px-2 py-1 rounded max-w-max md:ml-auto">
-                   Mặc Định
+                   <p class="text-gray-500 text-xs md:text-sm leading-relaxed">{{addr.address}}</p>
                 </div>
              </div>
              
-             <div *ngIf="!getSelectedAddress()" class="p-6 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-3 text-center cursor-pointer hover:bg-gray-50" (click)="openAddressModal()">
-                <div class="w-12 h-12 rounded-full bg-blue-50 text-user-primary flex items-center justify-center text-xl"><i class="pi pi-plus"></i></div>
+             <div *ngIf="!getSelectedAddress()" class="p-8 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-3 text-center cursor-pointer hover:bg-gray-50 transition-colors" (click)="openAddressModal()">
+                <div class="w-12 h-12 rounded-full bg-emerald-50 text-user-primary flex items-center justify-center text-xl shadow-inner"><i class="pi pi-plus"></i></div>
                 <div>
                    <h3 class="font-bold text-gray-900">Chưa có địa chỉ</h3>
-                   <p class="text-sm text-gray-500">Thêm một địa chỉ để nhận hàng</p>
+                   <p class="text-xs text-gray-500">Thêm một địa chỉ để tiếp tục thanh toán</p>
+                </div>
+             </div>
+          </div>
+ 
+          <!-- Block 2: Order Items -->
+          <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+             <h2 class="text-base md:text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
+                <i class="pi pi-shopping-bag text-user-primary"></i> 
+                SẢN PHẨM ĐÃ CHỌN
+             </h2>
+             <div class="flex flex-col gap-4">
+                <div *ngFor="let item of cartItems" class="flex gap-4 items-center p-3 border border-gray-50 rounded-xl hover:bg-gray-50/50 transition-colors">
+                    <div class="relative shrink-0">
+                      <div class="w-16 h-16 rounded-xl border border-gray-100 bg-gray-50 overflow-hidden">
+                        <img [src]="item.variantImageUrl || 'https://placehold.co/200'" class="w-full h-full object-cover">
+                      </div>
+                      <span class="absolute -top-2 -right-2 bg-gray-900 text-white w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-black z-10 border-2 border-white shadow-sm">{{item.quantity}}</span>
+                    </div>
+                   <div class="flex-1 flex flex-col justify-center min-w-0">
+                     <h4 class="text-sm font-bold text-gray-800 line-clamp-1 mb-1">{{item.productName}}</h4>
+                     <span class="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded w-max">{{item.variantName}}</span>
+                   </div>
+                   <div class="text-right">
+                     <div class="font-black text-user-primary text-sm">{{formatPrice(item.lineTotal)}}</div>
+                     <div class="text-[10px] text-gray-400 font-bold uppercase">{{formatPrice(item.unitPrice)}} x {{item.quantity}}</div>
+                   </div>
+                </div>
+             </div>
+          </div>
+ 
+          <!-- Mobile Only: Summary & Totals (Visible only on lg:hidden) -->
+          <div class="lg:hidden bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4">
+             <div class="flex gap-2">
+                <div class="relative flex-1">
+                   <i class="pi pi-ticket absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                   <input type="text" pInputText placeholder="Mã giảm giá" class="w-full border-gray-200 rounded-xl h-11 pl-10 text-xs shadow-none">
+                </div>
+                <button class="bg-gray-900 text-white px-4 text-xs font-black rounded-xl">ÁP DỤNG</button>
+             </div>
+             <div class="flex flex-col gap-2 text-xs text-gray-500 pt-2">
+                <div class="flex justify-between">
+                   <span class="font-bold uppercase">Tiền hàng</span>
+                   <span class="font-black text-gray-900">{{formatPrice(merchandiseSubtotal)}}</span>
+                </div>
+                <div class="flex justify-between text-emerald-600">
+                   <span class="font-bold uppercase">Giảm giá</span>
+                   <span class="font-black">-{{formatPrice(discount)}}</span>
+                </div>
+                <div class="flex justify-between border-t border-gray-50 pt-2 mt-1">
+                   <span class="text-sm font-black text-gray-900">TỔM TÍNH</span>
+                   <span class="text-sm font-black text-user-primary">{{formatPrice(totalPayment)}}</span>
                 </div>
              </div>
           </div>
 
           <!-- Block 2: Shipping Options -->
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-truck text-gray-500"></i> Phương Thức Vận Chuyển</h2>
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+             <h2 class="text-base md:text-lg font-black text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-truck text-gray-400"></i> PHƯƠNG THỨC VẬN CHUYỂN</h2>
+             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div *ngFor="let opt of shippingOptions" 
                      (click)="selectedShipping = opt.id; updateTotal()"
-                     class="border-2 rounded-xl p-4 cursor-pointer relative overflow-hidden transition-all"
-                     [ngClass]="selectedShipping === opt.id ? 'border-user-primary bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'">
+                     class="border-2 rounded-xl p-4 cursor-pointer relative overflow-hidden transition-all group"
+                     [ngClass]="selectedShipping === opt.id ? 'border-user-primary bg-emerald-50/10' : 'border-gray-100 hover:border-gray-200'">
                    
                    <div *ngIf="selectedShipping === opt.id" class="absolute top-0 right-0 w-0 h-0 border-[16px] border-transparent border-t-user-primary border-r-user-primary">
-                     <i class="pi pi-check text-white absolute -top-3.5 -right-3 text-[10px] font-bold"></i>
+                     <i class="pi pi-check text-white absolute -top-3.5 -right-3 text-[9px] font-bold"></i>
                    </div>
 
                    <div class="flex justify-between items-start mb-2">
-                      <span class="font-bold text-gray-900 text-sm">{{opt.name}}</span>
-                      <span class="font-bold text-user-primary text-sm">{{formatPrice(opt.price)}}</span>
+                      <span class="font-bold text-gray-900 text-sm group-hover:text-user-primary transition-colors">{{opt.name}}</span>
+                      <span class="font-black text-user-primary text-sm">{{formatPrice(opt.price)}}</span>
                    </div>
-                   <div class="text-xs text-gray-500">{{opt.duration}}</div>
+                   <div class="text-[11px] font-medium text-gray-400 flex items-center gap-1">
+                      <i class="pi pi-clock text-[9px]"></i> {{opt.duration}}
+                   </div>
                 </div>
              </div>
           </div>
 
           <!-- Block 3: Payment Options -->
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-credit-card text-gray-500"></i> Phương Thức Thanh Toán</h2>
+          <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+             <h2 class="text-base md:text-lg font-black text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-credit-card text-gray-400"></i> PHƯƠNG THỨC THANH TOÁN</h2>
              <div class="flex flex-col gap-3">
-                 <div *ngFor="let method of paymentMethods"
-                      (click)="selectedPayment = method.id"
-                      class="flex items-center gap-4 border border-gray-200 rounded-xl p-4 cursor-pointer transition-colors"
-                      [ngClass]="selectedPayment === method.id ? 'border-user-primary bg-blue-50/10' : 'hover:bg-gray-50'">
+                  <div *ngFor="let method of paymentMethods"
+                       (click)="selectedPayment = method.id"
+                       class="flex items-center gap-4 border rounded-xl p-4 cursor-pointer transition-all border-gray-100"
+                       [ngClass]="selectedPayment === method.id ? 'border-user-primary bg-emerald-50/10 ring-1 ring-user-primary/20' : 'hover:bg-gray-50'">
                     
                     <p-radioButton name="paymentGroup" [value]="method.id" [(ngModel)]="selectedPayment" inputId="pay_{{method.id}}"></p-radioButton>
-                    <i class="pi text-xl text-gray-500" [ngClass]="method.icon"></i>
-                    <span class="font-medium text-gray-800 flex-1">{{method.name}}</span>
-                 </div>
+                    <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                       <i class="pi text-lg text-gray-500" [ngClass]="method.icon"></i>
+                    </div>
+                    <span class="font-bold text-gray-800 flex-1 text-sm">{{method.name}}</span>
+                    <i *ngIf="selectedPayment === method.id" class="pi pi-check-circle text-user-primary"></i>
+                  </div>
              </div>
           </div>
 
           <!-- Block 4: Note -->
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-comments text-gray-500"></i> Lời Nhắn (Tùy chọn)</h2>
-             <textarea pTextarea [rows]="3" [(ngModel)]="orderNote" placeholder="Lưu ý cho người bán..." class="w-full bg-gray-50/50 border-gray-200 rounded-xl"></textarea>
+          <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+             <h2 class="text-base md:text-lg font-black text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-comments text-gray-400"></i> LỜI NHẮN (TÙY CHỌN)</h2>
+             <textarea pTextarea [rows]="3" [(ngModel)]="orderNote" placeholder="Nhập lưu ý cho đơn hàng của bạn..." class="w-full bg-gray-50/30 border-gray-200 rounded-xl text-sm focus:border-user-primary shadow-none"></textarea>
           </div>
 
        </div>
 
-       <!-- RIGHT COLUMN (40%) -->
-       <div class="w-full lg:w-[40%]">
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-6">
-             <h2 class="text-xl font-black text-gray-900 mb-6">Tóm Tắt Đơn Hàng</h2>
-
-             <!-- Items Summary -->
-             <div class="flex flex-col gap-4 mb-6 border-b border-gray-100 pb-6 max-h-[300px] overflow-y-auto no-scrollbar">
-                <div *ngFor="let item of cartItems" class="flex gap-4 items-center">
-                    <div class="relative w-16 h-16 rounded-lg border border-gray-200 shrink-0">
-                      <img [ngSrc]="item.variantImageUrl || 'https://placehold.co/200'" width="64" height="64" class="w-full h-full object-cover rounded-lg">
-                      <span class="absolute -top-2 -right-2 bg-gray-600 text-white w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold z-10">{{item.quantity}}</span>
-                    </div>
-                   <div class="flex-1 flex flex-col justify-center min-w-0">
-                     <h4 class="text-sm font-semibold text-gray-800 line-clamp-1 mb-1">{{item.productName}}</h4>
-                     <span class="text-xs text-gray-500 line-clamp-1">{{item.variantName}}</span>
-                   </div>
-                   <div class="font-bold text-gray-900 text-sm whitespace-nowrap">
-                     {{formatPrice(item.lineTotal)}}
-                   </div>
-                </div>
-             </div>
+        <div class="hidden lg:block w-full lg:w-[38%]">
+          <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-5 md:p-6 sticky top-24">
+             <h2 class="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
+                <i class="pi pi-receipt text-user-primary"></i>
+                TÓM TẮT ĐƠN HÀNG
+             </h2>
 
              <!-- Voucher -->
              <div class="flex gap-2 mb-6 border-b border-gray-100 pb-6">
-                <input type="text" pInputText placeholder="Mã giảm giá" class="w-full border-gray-300 rounded-lg h-12 px-4 shadow-none">
-                <button pButton pRipple class="bg-gray-800 hover:bg-black border-none text-white px-6 font-bold rounded-lg whitespace-nowrap">ÁP DỤNG</button>
+                <div class="relative flex-1">
+                   <i class="pi pi-ticket absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                   <input type="text" pInputText placeholder="Mã giảm giá" class="w-full border-gray-200 rounded-xl h-11 pl-10 text-xs shadow-none">
+                </div>
+                <button class="bg-gray-900 hover:bg-black text-white px-4 text-xs font-black rounded-xl whitespace-nowrap transition-colors">ÁP DỤNG</button>
              </div>
 
              <!-- Calculation -->
-             <div class="flex flex-col gap-3 text-sm text-gray-600 mb-6">
-                <div class="flex justify-between">
-                   <span>Tổng tiền hàng</span>
-                   <span class="font-medium text-gray-900">{{formatPrice(merchandiseSubtotal)}}</span>
+             <div class="flex flex-col gap-3 text-xs text-gray-500 mb-6">
+                <div class="flex justify-between items-center">
+                   <span class="font-bold uppercase tracking-tighter">Tổng tiền hàng</span>
+                   <span class="font-black text-gray-900">{{formatPrice(merchandiseSubtotal)}}</span>
                 </div>
-                <div class="flex justify-between">
-                   <span>Phí vận chuyển</span>
-                   <span class="font-medium text-gray-900">{{formatPrice(shippingFee)}}</span>
+                <div class="flex justify-between items-center">
+                   <span class="font-bold uppercase tracking-tighter">Phí vận chuyển</span>
+                   <span class="font-black text-gray-900">{{formatPrice(shippingFee)}}</span>
                 </div>
-                <div class="flex justify-between text-green-600">
-                   <span>Giảm giá</span>
-                   <span class="font-medium">-{{formatPrice(discount)}}</span>
+                <div class="flex justify-between items-center text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">
+                   <span class="font-bold uppercase tracking-tighter">Giảm giá voucher</span>
+                   <span class="font-black">-{{formatPrice(discount)}}</span>
                 </div>
              </div>
 
              <!-- Total -->
-             <div class="flex justify-between items-center pt-6 border-t border-gray-100 mb-8">
-                <span class="text-lg font-bold text-gray-900">Tổng cộng</span>
-                <span class="text-2xl font-black text-user-primary">{{formatPrice(totalPayment)}}</span>
+             <div class="flex justify-between items-center pt-6 border-t-2 border-dashed border-gray-100 mb-8">
+                <span class="text-base font-black text-gray-900">TỔNG CỘNG</span>
+                <div class="text-right">
+                   <span class="text-2xl font-black text-user-primary leading-none">{{formatPrice(totalPayment)}}</span>
+                   <span class="text-[9px] text-gray-400 font-bold uppercase mt-1 block tracking-widest">Đã bao gồm thuế</span>
+                </div>
              </div>
 
-             <!-- Action -->
-             <button (click)="placeOrder()" [disabled]="isPlacingOrder" class="w-full h-14 bg-user-primary hover:bg-user-primary-hover text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all outline-none flex items-center justify-center gap-2">
+             <!-- Desktop Action -->
+             <button (click)="placeOrder()" [disabled]="isPlacingOrder" class="hidden lg:flex w-full h-14 bg-user-primary hover:bg-user-primary-hover text-white font-black text-lg rounded-2xl shadow-xl shadow-user-primary/20 transition-all outline-none items-center justify-center gap-3 group">
                <i class="pi pi-spin pi-spinner" *ngIf="isPlacingOrder"></i>
+               <i class="pi pi-check-circle group-hover:scale-110 transition-transform" *ngIf="!isPlacingOrder"></i>
                {{ isPlacingOrder ? 'ĐANG XỬ LÝ...' : 'ĐẶT HÀNG NGAY' }}
              </button>
 
              <!-- Terms -->
-             <p class="text-xs text-center text-gray-400 mt-4 leading-relaxed">
-               Bằng việc tiến hành Đặt Hàng, bạn đồng ý với<br><a href="#" class="text-user-primary hover:underline">Điều khoản dịch vụ</a>
+             <p class="text-[10px] text-center text-gray-400 mt-4 leading-relaxed font-medium uppercase tracking-tighter">
+               Bằng việc tiến hành Đặt Hàng, bạn đồng ý với<br><a href="#" class="text-user-primary hover:underline">Điều khoản dịch vụ của Vora</a>
              </p>
           </div>
        </div>
@@ -165,79 +214,107 @@
 </div>
 
 <!-- =============================================
-     DIALOG: ADDRESS SELECTOR & NEW FORM
+     DIALOG: ADDRESS SELECTOR (Fully Responsive)
      ============================================= -->
-<p-dialog [(visible)]="showAddressDialog" [modal]="true" [style]="{width: '560px'}" [draggable]="false" [resizable]="false" header="Địa Chỉ Nhận Hàng">
+<p-dialog [(visible)]="showAddressDialog" 
+          [modal]="true" 
+          [style]="{width: '95vw', maxWidth: '560px'}" 
+          [draggable]="false" 
+          [resizable]="false" 
+          [showHeader]="true"
+          styleClass="address-dialog"
+          header="ĐỊA CHỈ NHẬN HÀNG">
     
     <!-- State 1: Select Existing Address -->
-    <div *ngIf="!showNewAddressForm" class="flex flex-col">
-       <button (click)="triggerNewAddressForm()" class="w-full py-3 mb-6 bg-transparent border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:text-user-primary hover:border-user-primary hover:bg-blue-50/30 transition-colors flex items-center justify-center gap-2 font-bold">
-         <i class="pi pi-plus"></i> Thêm Địa Chỉ Mới
+    <div *ngIf="!showNewAddressForm" class="flex flex-col pt-2 font-inter">
+       <button (click)="triggerNewAddressForm()" class="w-full py-3.5 mb-6 bg-transparent border-2 border-dashed border-gray-200 rounded-2xl text-gray-500 hover:text-user-primary hover:border-user-primary hover:bg-emerald-50/30 transition-all flex items-center justify-center gap-2 font-black text-sm">
+         <i class="pi pi-plus-circle"></i> Thêm Địa Chỉ Mới
        </button>
 
-       <div class="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+       <div class="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar pb-2">
           <div *ngFor="let addr of savedAddresses"
                (click)="selectedAddressId = addr.id"
-               class="border rounded-xl p-4 cursor-pointer relative transition-all"
-               [ngClass]="selectedAddressId === addr.id ? 'border-user-primary bg-blue-50/10 ring-1 ring-user-primary' : 'border-gray-200 hover:border-gray-300'">
+               class="border rounded-2xl p-4 cursor-pointer relative transition-all"
+               [ngClass]="selectedAddressId === addr.id ? 'border-user-primary bg-emerald-50/10 ring-1 ring-user-primary/20' : 'border-gray-100 hover:border-gray-200'">
              
              <div class="flex items-start gap-4">
                 <div class="pt-1">
                    <p-radioButton name="addressGroup" [value]="addr.id" [(ngModel)]="selectedAddressId" inputId="addr_{{addr.id}}"></p-radioButton>
                 </div>
                 <div class="flex-1">
-                   <div class="flex items-center gap-2 mb-1">
-                      <span class="font-bold text-gray-900">{{addr.name}}</span>
-                      <span class="text-gray-400 text-sm">|</span>
-                      <span class="font-medium text-gray-600 text-sm">{{addr.phone}}</span>
-                      <span *ngIf="addr.isDefault" class="ml-auto border border-user-primary text-user-primary text-[10px] uppercase px-1.5 py-0.5 rounded font-bold">Mặc định</span>
+                   <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                      <span class="font-black text-gray-900">{{addr.name}}</span>
+                      <span class="hidden sm:inline text-gray-300">|</span>
+                      <span class="font-bold text-gray-500 text-sm">{{addr.phone}}</span>
+                      <span *ngIf="addr.isDefault" class="text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded w-max mt-1 sm:mt-0">Mặc định</span>
                    </div>
-                   <p class="text-sm text-gray-500 leading-relaxed">{{addr.address}}</p>
+                   <p class="text-xs text-gray-500 leading-relaxed font-medium">{{addr.address}}</p>
                 </div>
              </div>
           </div>
        </div>
 
-       <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
-          <button pButton class="p-button-text p-button-secondary font-bold" (click)="showAddressDialog=false">Huỷ</button>
-          <button pButton class="bg-user-primary hover:bg-user-primary-hover border-none font-bold text-white px-6" (click)="confirmSelectAddress()">Xác Nhận</button>
+       <div class="flex justify-end gap-3 mt-6 pt-5 border-t border-gray-100">
+          <button (click)="showAddressDialog=false" class="px-6 py-2.5 text-sm font-black text-gray-400 hover:text-gray-600 transition-colors">HUỶ BỎ</button>
+          <button (click)="confirmSelectAddress()" class="px-8 py-2.5 bg-user-primary hover:bg-user-primary-hover text-white font-black text-sm rounded-xl shadow-lg shadow-user-primary/20 transition-all">XÁC NHẬN</button>
        </div>
     </div>
 
     <!-- State 2: Add New Address Form -->
-    <div *ngIf="showNewAddressForm" class="flex flex-col animate-fade-in">
-       <button (click)="showNewAddressForm = false" class="text-user-primary font-bold text-sm mb-4 inline-flex items-center gap-2 w-max hover:underline"><i class="pi pi-arrow-left"></i> Trở lại danh sách</button>
+    <div *ngIf="showNewAddressForm" class="flex flex-col animate-fade-in pt-2 font-inter">
+       <button (click)="showNewAddressForm = false" class="text-user-primary font-black text-xs mb-6 inline-flex items-center gap-2 w-max hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-all"><i class="pi pi-arrow-left"></i> TRỞ LẠI DANH SÁCH</button>
 
-       <div class="grid grid-cols-2 gap-4 mb-4">
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div class="flex flex-col gap-2">
-             <label class="text-sm font-semibold text-gray-700">Họ và tên</label>
-             <input type="text" pInputText placeholder="Họ và tên" [(ngModel)]="newAddress.name" class="w-full">
+             <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Họ và tên</label>
+             <input type="text" pInputText placeholder="Nhập tên người nhận" [(ngModel)]="newAddress.name" class="w-full rounded-xl border-gray-200 h-11 text-sm shadow-none focus:border-user-primary">
           </div>
           <div class="flex flex-col gap-2">
-             <label class="text-sm font-semibold text-gray-700">Số điện thoại</label>
-             <input type="text" pInputText placeholder="Số điện thoại" [(ngModel)]="newAddress.phone" class="w-full">
+             <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Số điện thoại</label>
+             <input type="text" pInputText placeholder="Nhập số điện thoại" [(ngModel)]="newAddress.phone" class="w-full rounded-xl border-gray-200 h-11 text-sm shadow-none focus:border-user-primary">
           </div>
        </div>
 
-       <!-- Vietnam Open API Pickers -->
        <div class="flex flex-col gap-2 mb-4">
-          <label class="text-sm font-semibold text-gray-700">Tỉnh/Thành phố, Quận/Huyện, Phường/Xã</label>
-          <div class="flex gap-4">
-             <p-dropdown [options]="provinces" [(ngModel)]="newAddress.province" optionLabel="name" placeholder="Tỉnh / Thành phố" (onChange)="onProvinceChange()" styleClass="w-full" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
-          </div>
+          <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Tỉnh / Thành phố</label>
+          <p-dropdown [options]="provinces" [(ngModel)]="newAddress.province" optionLabel="name" placeholder="Chọn Tỉnh / Thành phố" (onChange)="onProvinceChange()" styleClass="w-full rounded-xl border-gray-200 text-sm" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
        </div>
-       <div class="grid grid-cols-2 gap-4 mb-4">
-          <p-dropdown [options]="districts" [(ngModel)]="newAddress.district" optionLabel="name" placeholder="Quận / Huyện" [disabled]="!newAddress.province" (onChange)="onDistrictChange()" styleClass="w-full" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
-          <p-dropdown [options]="wards" [(ngModel)]="newAddress.ward" optionLabel="name" placeholder="Phường / Xã" [disabled]="!newAddress.district" styleClass="w-full" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
+       
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Quận / Huyện</label>
+            <p-dropdown [options]="districts" [(ngModel)]="newAddress.district" optionLabel="name" placeholder="Chọn Quận / Huyện" [disabled]="!newAddress.province" (onChange)="onDistrictChange()" styleClass="w-full rounded-xl border-gray-200 text-sm" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Phường / Xã</label>
+            <p-dropdown [options]="wards" [(ngModel)]="newAddress.ward" optionLabel="name" placeholder="Chọn Phường / Xã" [disabled]="!newAddress.district" styleClass="w-full rounded-xl border-gray-200 text-sm" appendTo="body" [filter]="true" filterBy="name"></p-dropdown>
+          </div>
        </div>
 
        <div class="flex flex-col gap-2 mb-6">
-          <label class="text-sm font-semibold text-gray-700">Địa chỉ cụ thể</label>
-          <textarea pTextarea [rows]="2" [(ngModel)]="newAddress.street" placeholder="Số nhà, Tên đường..." class="w-full"></textarea>
+          <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Địa chỉ cụ thể</label>
+          <textarea pTextarea [rows]="2" [(ngModel)]="newAddress.street" placeholder="Số nhà, tên đường..." class="w-full rounded-xl border-gray-200 text-sm shadow-none focus:border-user-primary"></textarea>
        </div>
 
-       <div class="flex justify-end pt-4 border-t border-gray-100">
-          <button pButton class="bg-user-primary hover:bg-user-primary-hover border-none font-bold text-white w-full flex justify-center py-3" (click)="saveNewAddress()">LƯU ĐỊA CHỈ</button>
+       <div class="flex justify-end pt-5 border-t border-gray-100">
+          <button (click)="saveNewAddress()" class="bg-user-primary hover:bg-user-primary-hover text-white font-black w-full flex justify-center py-4 rounded-2xl shadow-xl shadow-user-primary/20 transition-all text-sm uppercase tracking-widest">LƯU ĐỊA CHỈ & SỬ DỤNG</button>
        </div>
     </div>
 </p-dialog>
+
+<!-- Mobile Bottom Sticky Bar (Always visible on mobile to see total & place order) -->
+<div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40 animate-slide-up">
+   <div class="flex items-center justify-between mb-4">
+      <div>
+         <span class="text-gray-400 text-[10px] font-black uppercase tracking-widest">Tổng cộng thanh toán</span>
+         <span class="block text-xl font-black text-user-primary leading-none mt-1">{{formatPrice(totalPayment)}}</span>
+      </div>
+      <div class="text-right">
+         <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">FREESHIP</span>
+      </div>
+   </div>
+   <button (click)="placeOrder()" [disabled]="isPlacingOrder" class="w-full py-4 bg-user-primary text-white font-black rounded-2xl shadow-lg shadow-user-primary/20 flex items-center justify-center gap-3">
+      <i class="pi pi-spin pi-spinner" *ngIf="isPlacingOrder"></i>
+      {{ isPlacingOrder ? 'ĐANG XỬ LÝ...' : 'ĐẶT HÀNG NGAY' }}
+   </button>
+</div>

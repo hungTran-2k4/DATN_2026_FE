@@ -1,62 +1,149 @@
 <!-- ══════════════════════════════════════
      1. HERO BENTO GRID (BANNER)
      ══════════════════════════════════════ -->
-<section class="container mx-auto px-4 max-w-7xl mb-14 pt-8">
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 h-auto lg:h-[520px]">
+<section class="container mx-auto px-4 max-w-7xl mb-10 md:mb-14 pt-4 md:pt-8">
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 h-auto lg:h-[520px]"
+  >
     <!-- Main Left Banner -->
-    <div class="lg:col-span-2 relative rounded-[2rem] overflow-hidden group shadow-xl bg-gray-900 h-[380px] lg:h-full flex items-center border border-gray-800">
-      <img ngSrc="https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&q=80&w=1200" fill
-        class="absolute inset-0 w-full h-full object-cover mix-blend-overlay group-hover:scale-110 transition-transform duration-1000 opacity-80" alt="Smart TV" priority />
-      <div class="relative z-10 p-10 md:p-14 w-full lg:w-4/5 text-white">
-        <span class="inline-block px-4 py-1.5 bg-emerald-500/20 backdrop-blur-md text-emerald-400 text-[10px] font-black rounded-full mb-5 border border-emerald-500/30 uppercase tracking-widest">Ưu đãi giới hạn</span>
-        <h2 class="text-4xl md:text-5xl font-black leading-[1.1] mb-5 tracking-tighter">
-          Thế Hệ<br /><span class="text-emerald-400">Smart TV 8K</span><br />Mới Nhất
+    <div
+      class="md:col-span-2 lg:col-span-2 relative rounded-3xl overflow-hidden group shadow-xl bg-black h-[280px] sm:h-[350px] lg:h-full flex items-center border border-gray-800"
+    >
+      <img
+        ngSrc="/images/banners/banner-tv.png"
+        fill
+        class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-90"
+        alt="Smart TV"
+        priority
+      />
+      <div class="relative z-10 p-6 sm:p-10 md:p-14 w-full lg:w-4/5 text-white">
+        <span
+          class="inline-block px-3 py-1 bg-emerald-500/20 backdrop-blur-md text-emerald-400 text-[9px] font-black rounded-full mb-3 border border-emerald-500/30 uppercase tracking-widest"
+          >Ưu đãi giới hạn</span
+        >
+        <h2
+          class="text-2xl sm:text-4xl md:text-5xl font-black leading-[1.1] mb-4 tracking-tighter"
+        >
+          Thế Hệ<br /><span class="text-emerald-400">Smart TV 8K</span><br />Mới
+          Nhất
         </h2>
-        <p class="text-white/75 font-medium mb-8 text-base leading-relaxed max-w-md">Trải nghiệm độ phân giải cực đỉnh và màu sắc trung thực chưa từng có.</p>
-        <a routerLink="/products" class="inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-emerald-500 hover:text-white px-8 py-4 rounded-2xl font-black shadow-2xl transition-all transform hover:-translate-y-1">
-          KHÁM PHÁ NGAY <i class="pi pi-arrow-right text-sm"></i>
+        <p
+          class="text-white/75 font-medium mb-6 text-xs sm:text-base leading-relaxed max-w-md hidden sm:block"
+        >
+          Trải nghiệm độ phân giải cực đỉnh và màu sắc trung thực chưa từng có.
+        </p>
+        <a
+          routerLink="/products"
+          class="inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-emerald-500 hover:text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl font-black shadow-2xl transition-all transform hover:-translate-y-1 text-xs sm:text-sm"
+        >
+          KHÁM PHÁ NGAY <i class="pi pi-arrow-right text-xs"></i>
         </a>
       </div>
     </div>
 
     <!-- Middle Stacked -->
-    <div class="lg:col-span-1 flex flex-col gap-5 h-auto lg:h-full">
-      <div class="flex-1 relative rounded-[2rem] overflow-hidden group shadow-lg bg-orange-100 h-[240px] lg:h-auto border border-orange-200/50">
-        <img ngSrc="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=600" fill
-          class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 mix-blend-multiply opacity-90" alt="Audio" />
-        <div class="absolute inset-0 bg-gradient-to-tr from-orange-200/40 to-transparent"></div>
-        <div class="relative z-10 p-7 h-full flex flex-col justify-between">
+    <div
+      class="md:col-span-1 lg:col-span-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-5 h-auto lg:h-full"
+    >
+      <div
+        class="relative rounded-3xl overflow-hidden group shadow-lg bg-[#f5f0e6] h-[180px] sm:h-[220px] lg:h-auto border border-gray-200/30"
+      >
+        <img
+          ngSrc="/images/banners/banner-audio.png"
+          fill
+          class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-100"
+          alt="Audio"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent opacity-70 group-hover:opacity-80 transition-opacity duration-700"
+        ></div>
+        <div
+          class="relative z-10 p-6 sm:p-8 h-full flex flex-col justify-between text-white"
+        >
           <div>
-            <span class="text-[10px] font-black uppercase tracking-widest text-orange-600 bg-orange-200/50 px-2 py-1 rounded">Audio Pro</span>
-            <h3 class="text-xl font-black text-gray-900 mt-3 leading-tight">Âm Thanh<br />Sống Động</h3>
+            <span
+              class="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-orange-400 mb-2"
+              >Audio Pro</span
+            >
+            <h3
+              class="text-xl sm:text-2xl font-black leading-tight drop-shadow-md"
+            >
+              Âm Thanh<br />Sống Động
+            </h3>
           </div>
-          <a routerLink="/products" class="text-gray-900 font-bold text-sm w-fit border-b-2 border-gray-900 pb-1 hover:text-user-primary hover:border-user-primary transition-all">Khám phá</a>
+          <a
+            routerLink="/products"
+            class="text-white font-bold text-xs w-fit border-b-2 border-white/50 pb-0.5 hover:border-white transition-all"
+            >Khám phá ngay</a
+          >
         </div>
       </div>
-      <div class="flex-1 relative rounded-[2rem] overflow-hidden group shadow-lg bg-teal-100 h-[240px] lg:h-auto border border-teal-200/50">
-        <img ngSrc="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&q=80&w=600" fill
-          class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 mix-blend-multiply opacity-90" alt="Camera" />
-        <div class="absolute inset-0 bg-gradient-to-tr from-teal-200/40 to-transparent"></div>
-        <div class="relative z-10 p-7 h-full flex flex-col justify-between">
+      <div
+        class="relative rounded-3xl overflow-hidden group shadow-lg bg-[#eaf4f2] h-[180px] sm:h-[220px] lg:h-auto border border-gray-200/30"
+      >
+        <img
+          ngSrc="/images/banners/banner-camera.png"
+          fill
+          class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-100"
+          alt="Camera"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent opacity-70 group-hover:opacity-80 transition-opacity duration-700"
+        ></div>
+        <div
+          class="relative z-10 p-6 sm:p-8 h-full flex flex-col justify-between text-white"
+        >
           <div>
-            <span class="text-[10px] font-black uppercase tracking-widest text-teal-600 bg-teal-200/50 px-2 py-1 rounded">Visual Art</span>
-            <h3 class="text-xl font-black text-gray-900 mt-3 leading-tight">Bắt Trọn<br />Khoảnh Khắc</h3>
+            <span
+              class="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-teal-400 mb-2"
+              >Visual Art</span
+            >
+            <h3
+              class="text-xl sm:text-2xl font-black leading-tight drop-shadow-md"
+            >
+              Bắt Trọn<br />Khoảnh Khắc
+            </h3>
           </div>
-          <a routerLink="/products" class="text-gray-900 font-bold text-sm w-fit border-b-2 border-gray-900 pb-1 hover:text-user-primary hover:border-user-primary transition-all">Mua ngay</a>
+          <a
+            routerLink="/products"
+            class="text-white font-bold text-xs w-fit border-b-2 border-white/50 pb-0.5 hover:border-white transition-all"
+            >Mua ngay</a
+          >
         </div>
       </div>
     </div>
 
     <!-- Right Tall Banner -->
-    <div class="lg:col-span-1 relative rounded-[2rem] overflow-hidden group shadow-xl bg-gray-950 h-[480px] lg:h-full flex flex-col justify-end border border-gray-800">
-      <img ngSrc="https://images.unsplash.com/photo-1626245367677-fc204859f71c?auto=format&fit=crop&q=80&w=800" fill
-        class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000" alt="iPhone" priority />
-      <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/20 to-transparent"></div>
-      <div class="relative z-10 p-8 text-center text-white">
-        <span class="inline-block px-3 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-full mb-3 uppercase tracking-widest">New Arrival</span>
-        <h2 class="text-3xl font-black mb-3 tracking-tighter">iPhone 15 Pro</h2>
-        <p class="text-gray-300 font-medium mb-8 text-sm leading-relaxed">Sức mạnh vượt đỉnh cao công nghệ di động.</p>
-        <a routerLink="/products" class="block w-full bg-white text-gray-900 hover:bg-emerald-500 hover:text-white py-4 rounded-2xl font-black shadow-2xl transition-all text-center">
+    <div
+      class="md:col-span-1 lg:col-span-1 relative rounded-3xl overflow-hidden group shadow-xl bg-black h-[250px] sm:h-[480px] lg:h-full flex flex-col justify-end border border-gray-800"
+    >
+      <img
+        ngSrc="/images/banners/banner-phone.png"
+        fill
+        class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-1000"
+        alt="iPhone"
+        priority
+      />
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"
+      ></div>
+      <div class="relative z-10 p-6 sm:p-8 text-center text-white">
+        <span
+          class="inline-block px-2 py-0.5 bg-emerald-500 text-white text-[9px] font-black rounded-full mb-2 uppercase tracking-widest"
+          >New Arrival</span
+        >
+        <h2 class="text-xl sm:text-3xl font-black mb-2 tracking-tighter">
+          iPhone 15 Pro
+        </h2>
+        <p
+          class="text-gray-300 font-medium mb-6 text-[10px] sm:text-sm leading-relaxed hidden sm:block"
+        >
+          Sức mạnh vượt đỉnh cao công nghệ di động.
+        </p>
+        <a
+          routerLink="/products"
+          class="block w-full bg-white text-gray-900 hover:bg-emerald-500 hover:text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black shadow-2xl transition-all text-center text-xs sm:text-sm"
+        >
           ĐẶT TRƯỚC
         </a>
       </div>
@@ -70,8 +157,13 @@
 <section class="bg-white border-y border-gray-100 py-10 mb-14">
   <div class="container mx-auto px-4 max-w-7xl">
     <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-black text-gray-900 tracking-tight">Danh Mục Phổ Biến</h2>
-      <a routerLink="/products" class="text-user-primary font-bold text-sm flex items-center gap-1.5 hover:underline">
+      <h2 class="text-2xl font-black text-gray-900 tracking-tight">
+        Danh Mục Phổ Biến
+      </h2>
+      <a
+        routerLink="/products"
+        class="text-user-primary font-bold text-sm flex items-center gap-1.5 hover:underline"
+      >
         Xem tất cả <i class="pi pi-chevron-right text-xs"></i>
       </a>
     </div>
@@ -79,8 +171,15 @@
     <div class="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2">
       <!-- Skeleton -->
       <ng-container *ngIf="isLoadingCategories">
-        <div *ngFor="let s of [1,2,3,4,5,6,7,8]" class="flex flex-col items-center gap-4 shrink-0">
-          <p-skeleton width="80px" height="80px" borderRadius="20px"></p-skeleton>
+        <div
+          *ngFor="let s of [1, 2, 3, 4, 5, 6, 7, 8]"
+          class="flex flex-col items-center gap-4 shrink-0"
+        >
+          <p-skeleton
+            width="80px"
+            height="80px"
+            borderRadius="20px"
+          ></p-skeleton>
           <p-skeleton width="60px" height="12px"></p-skeleton>
         </div>
       </ng-container>
@@ -89,30 +188,48 @@
       <ng-container *ngIf="!isLoadingCategories">
         <!-- API Categories -->
         <ng-container *ngIf="categories.length > 0">
-          <a *ngFor="let cat of categories"
+          <a
+            *ngFor="let cat of categories"
             [routerLink]="['/products']"
             [queryParams]="{ cat: cat.id }"
             class="flex flex-col items-center gap-4 shrink-0 group min-w-[100px] p-2 rounded-2xl cursor-pointer category-chip"
           >
-            <div class="w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-3xl bg-gray-50 group-hover:bg-user-primary/10 transition-all shadow-sm group-hover:shadow-md group-hover:scale-110 overflow-hidden">
-            <img *ngIf="cat.iconUrl" [src]="cat.iconUrl" [alt]="cat.name" class="w-full h-full object-cover">
-            <i *ngIf="!cat.iconUrl" class="pi pi-tag text-user-primary"></i>
-          </div>
-            <span class="text-xs font-black text-gray-700 group-hover:text-user-primary transition-colors text-center uppercase tracking-tight">{{ cat.name }}</span>
+            <div
+              class="w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-3xl bg-gray-50 group-hover:bg-user-primary/10 transition-all shadow-sm group-hover:shadow-md group-hover:scale-110 overflow-hidden"
+            >
+              <img
+                *ngIf="cat.iconUrl"
+                [src]="cat.iconUrl"
+                [alt]="cat.name"
+                class="w-full h-full object-cover"
+              />
+              <i *ngIf="!cat.iconUrl" class="pi pi-tag text-user-primary"></i>
+            </div>
+            <span
+              class="text-xs font-black text-gray-700 group-hover:text-user-primary transition-colors text-center uppercase tracking-tight"
+              >{{ cat.name }}</span
+            >
           </a>
         </ng-container>
 
         <!-- Fallback Static Categories -->
         <ng-container *ngIf="categories.length === 0">
-          <a *ngFor="let cat of heroCategories"
+          <a
+            *ngFor="let cat of heroCategories"
             [routerLink]="['/products']"
             [queryParams]="{ q: cat.name }"
             class="flex flex-col items-center gap-4 shrink-0 group min-w-[100px] p-2 rounded-2xl cursor-pointer category-chip"
           >
-            <div class="w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-3xl transition-all shadow-sm group-hover:shadow-md group-hover:scale-110" [ngClass]="cat.color">
+            <div
+              class="w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-3xl transition-all shadow-sm group-hover:shadow-md group-hover:scale-110"
+              [ngClass]="cat.color"
+            >
               <i [class]="cat.icon + ' animate-float'"></i>
             </div>
-            <span class="text-xs font-black text-gray-700 group-hover:text-user-primary transition-colors text-center uppercase tracking-tight">{{ cat.name }}</span>
+            <span
+              class="text-xs font-black text-gray-700 group-hover:text-user-primary transition-colors text-center uppercase tracking-tight"
+              >{{ cat.name }}</span
+            >
           </a>
         </ng-container>
       </ng-container>
@@ -123,30 +240,52 @@
 <!-- ══════════════════════════════════════
      3. FLASH SALE (WEEKLY DEALS)
      ══════════════════════════════════════ -->
-<section class="container mx-auto px-4 max-w-7xl mb-20">
-  <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-8 pb-4 border-b border-gray-200">
-    <div class="flex items-center gap-4 flex-wrap">
-      <h2 class="text-2xl font-black text-gray-900">Giảm Giá Sốc</h2>
-      <div class="flex items-center gap-2 text-red-500 font-bold bg-red-50 px-3 py-1.5 rounded-xl border border-red-100">
-        <i class="pi pi-stopwatch text-sm"></i>
+<section class="container mx-auto px-4 max-w-7xl mb-12 md:mb-20">
+  <div
+    class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 pb-4 border-b border-gray-200 gap-4"
+  >
+    <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+      <h2 class="text-xl sm:text-2xl font-black text-gray-900">Giảm Giá Sốc</h2>
+      <div
+        class="flex items-center gap-2 text-red-500 font-bold bg-red-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-red-100"
+      >
+        <i class="pi pi-stopwatch text-xs sm:text-sm"></i>
         <div class="flex items-center gap-1 font-mono">
-          <span class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm font-black">{{ countdown.hours }}</span>
+          <span
+            class="bg-red-500 text-white w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-xs sm:text-sm font-black"
+            >{{ countdown.hours }}</span
+          >
           <span class="text-red-400 font-black">:</span>
-          <span class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm font-black">{{ countdown.minutes }}</span>
+          <span
+            class="bg-red-500 text-white w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-xs sm:text-sm font-black"
+            >{{ countdown.minutes }}</span
+          >
           <span class="text-red-400 font-black">:</span>
-          <span class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm font-black">{{ countdown.seconds }}</span>
+          <span
+            class="bg-red-500 text-white w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-xs sm:text-sm font-black"
+            >{{ countdown.seconds }}</span
+          >
         </div>
       </div>
     </div>
-    <a routerLink="/products" class="text-user-primary font-semibold hover:underline mt-3 md:mt-0 text-sm flex items-center gap-1">
+    <a
+      routerLink="/products"
+      class="text-user-primary font-bold hover:underline text-xs sm:text-sm flex items-center gap-1"
+    >
       Xem tất cả <i class="pi pi-angle-right text-xs"></i>
     </a>
   </div>
 
-  <div *ngIf="isLoadingDeals" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-    <div *ngFor="let s of [1,2,3,4]" class="bg-white rounded-2xl overflow-hidden border border-gray-100">
-      <p-skeleton height="200px" borderRadius="0"></p-skeleton>
-      <div class="p-4 space-y-3">
+  <div
+    *ngIf="isLoadingDeals"
+    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6"
+  >
+    <div
+      *ngFor="let s of [1, 2, 3, 4]"
+      class="bg-white rounded-2xl overflow-hidden border border-gray-100"
+    >
+      <p-skeleton height="180px" borderRadius="0"></p-skeleton>
+      <div class="p-3 md:p-4 space-y-3">
         <p-skeleton height="12px" width="60%"></p-skeleton>
         <p-skeleton height="16px"></p-skeleton>
         <p-skeleton height="20px" width="40%"></p-skeleton>
@@ -154,11 +293,17 @@
     </div>
   </div>
 
-  <p-carousel *ngIf="!isLoadingDeals && weeklyDeals.length > 0"
-    [value]="weeklyDeals" [numVisible]="4" [numScroll]="1" [responsiveOptions]="responsiveOptions"
-    [circular]="true" [autoplayInterval]="4000">
+  <p-carousel
+    *ngIf="!isLoadingDeals && weeklyDeals.length > 0"
+    [value]="weeklyDeals"
+    [numVisible]="5"
+    [numScroll]="1"
+    [responsiveOptions]="responsiveOptions"
+    [circular]="true"
+    [autoplayInterval]="4000"
+  >
     <ng-template let-product pTemplate="item">
-      <div class="px-2">
+      <div class="px-1 md:px-2">
         <app-product-card [data]="mapToCard(product)"></app-product-card>
       </div>
     </ng-template>
@@ -171,13 +316,19 @@
 <section class="container mx-auto px-4 max-w-7xl mb-24">
   <div class="flex items-center justify-between mb-10">
     <div>
-      <h2 class="text-3xl font-black text-gray-900 tracking-tight">Tất Cả Sản Phẩm</h2>
-      <p class="text-gray-500 text-sm mt-1">Khám phá hàng ngàn sản phẩm công nghệ đỉnh cao</p>
+      <h2 class="text-3xl font-black text-gray-900 tracking-tight">
+        Sản Phẩm Nổi Bật
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Khám phá hàng ngàn sản phẩm siêu hot
+      </p>
     </div>
   </div>
 
   <!-- Product Grid -->
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+  <div
+    class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
+  >
     <app-product-card
       *ngFor="let prod of allProducts"
       [data]="mapToCard(prod)"
@@ -185,7 +336,10 @@
 
     <!-- Skeletons during Load More -->
     <ng-container *ngIf="isLoadingAll">
-      <div *ngFor="let s of [1,2,3,4,5]" class="bg-white rounded-2xl overflow-hidden border border-gray-100">
+      <div
+        *ngFor="let s of [1, 2, 3, 4, 5]"
+        class="bg-white rounded-2xl overflow-hidden border border-gray-100"
+      >
         <p-skeleton height="180px" borderRadius="0"></p-skeleton>
         <div class="p-4 space-y-3">
           <p-skeleton height="12px" width="60%"></p-skeleton>
@@ -197,15 +351,21 @@
   </div>
 
   <!-- Empty state -->
-  <div *ngIf="!isLoadingAll && allProducts.length === 0" class="py-20 text-center">
+  <div
+    *ngIf="!isLoadingAll && allProducts.length === 0"
+    class="py-20 text-center"
+  >
     <i class="pi pi-inbox text-5xl text-gray-200 mb-4 block"></i>
     <p class="text-gray-400 font-medium">Không tìm thấy sản phẩm nào.</p>
   </div>
 
   <!-- Load More Button -->
   <div *ngIf="hasMoreProducts" class="flex justify-center mt-16">
-    <button (click)="loadMore()" [disabled]="isLoadingAll"
-      class="px-10 py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-emerald-500 transition-all shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0">
+    <button
+      (click)="loadMore()"
+      [disabled]="isLoadingAll"
+      class="px-10 py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-emerald-500 transition-all shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
+    >
       <span *ngIf="!isLoadingAll">XEM THÊM SẢN PHẨM</span>
       <span *ngIf="isLoadingAll" class="flex items-center gap-2">
         <i class="pi pi-spin pi-spinner"></i> ĐANG TẢI...
@@ -218,19 +378,53 @@
      5. VALUE PROPOSITION
      ══════════════════════════════════════ -->
 <section class="border-t border-gray-100 bg-gray-50/50">
-  <div class="container mx-auto px-4 max-w-7xl py-20 grid grid-cols-2 md:grid-cols-4 gap-10">
-    <div *ngFor="let item of [
-      {icon: 'pi-truck', color: 'bg-emerald-50 text-emerald-500 group-hover:bg-emerald-500', title: 'Giao Hàng Miễn Phí', desc: 'Áp dụng cho mọi đơn hàng nội thành'},
-      {icon: 'pi-sync', color: 'bg-blue-50 text-blue-500 group-hover:bg-blue-500', title: 'Hoàn Trả 30 Ngày', desc: 'Đổi trả dễ dàng, bảo vệ người mua'},
-      {icon: 'pi-shield', color: 'bg-orange-50 text-orange-500 group-hover:bg-orange-500', title: 'Bảo Mật Tuyệt Đối', desc: 'Hệ thống thanh toán SSL chuẩn quốc tế'},
-      {icon: 'pi-phone', color: 'bg-purple-50 text-purple-500 group-hover:bg-purple-500', title: 'Hỗ Trợ Tận Tâm', desc: 'Đội ngũ chuyên viên tư vấn 24/7'}
-    ]" class="flex flex-col items-center text-center gap-5 group">
-      <div class="w-20 h-20 rounded-[2rem] flex items-center justify-center text-3xl transition-all duration-500 shadow-sm group-hover:text-white" [ngClass]="item.color">
+  <div
+    class="container mx-auto px-4 max-w-7xl py-20 grid grid-cols-2 md:grid-cols-4 gap-10"
+  >
+    <div
+      *ngFor="
+        let item of [
+          {
+            icon: 'pi-truck',
+            color: 'bg-emerald-50 text-emerald-500 group-hover:bg-emerald-500',
+            title: 'Giao Hàng Miễn Phí',
+            desc: 'Áp dụng cho mọi đơn hàng nội thành',
+          },
+          {
+            icon: 'pi-sync',
+            color: 'bg-blue-50 text-blue-500 group-hover:bg-blue-500',
+            title: 'Hoàn Trả 30 Ngày',
+            desc: 'Đổi trả dễ dàng, bảo vệ người mua',
+          },
+          {
+            icon: 'pi-shield',
+            color: 'bg-orange-50 text-orange-500 group-hover:bg-orange-500',
+            title: 'Bảo Mật Tuyệt Đối',
+            desc: 'Hệ thống thanh toán SSL chuẩn quốc tế',
+          },
+          {
+            icon: 'pi-phone',
+            color: 'bg-purple-50 text-purple-500 group-hover:bg-purple-500',
+            title: 'Hỗ Trợ Tận Tâm',
+            desc: 'Đội ngũ chuyên viên tư vấn 24/7',
+          },
+        ]
+      "
+      class="flex flex-col items-center text-center gap-5 group"
+    >
+      <div
+        class="w-20 h-20 rounded-[2rem] flex items-center justify-center text-3xl transition-all duration-500 shadow-sm group-hover:text-white"
+        [ngClass]="item.color"
+      >
         <i [class]="'pi ' + item.icon + ' animate-float'"></i>
       </div>
       <div>
-        <h4 class="font-black text-gray-900 text-sm uppercase tracking-tight">{{ item.title }}</h4>
-        <p class="text-xs text-gray-500 mt-2 leading-relaxed max-w-[160px]">{{ item.desc }}</p>
+        <h4 class="font-black text-gray-900 text-sm uppercase tracking-tight">
+          {{ item.title }}
+        </h4>
+        <p class="text-xs text-gray-500 mt-2 leading-relaxed max-w-[160px]">
+          {{ item.desc }}
+        </p>
       </div>
     </div>
   </div>
