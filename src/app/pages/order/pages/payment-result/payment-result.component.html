@@ -15,21 +15,29 @@
     ></div>
 
     <div class="p-8 text-center">
-      <!-- Loading State -->
+      <!-- 1. Loading State -->
       <div
-        *ngIf="status === 'loading'"
-        class="flex flex-col items-center animate-fade-in"
+        *ngIf="isProcessing"
+        class="flex flex-col items-center animate-fade-in py-10"
       >
-        <i class="pi pi-spin pi-spinner text-6xl text-blue-500 mb-6"></i>
+        <div class="relative mb-8">
+          <div class="w-20 h-20 border-4 border-blue-100 rounded-full"></div>
+          <div class="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <i class="pi pi-credit-card text-2xl text-blue-500"></i>
+          </div>
+        </div>
         <h2 class="text-2xl font-black text-gray-900 mb-2">
-          Đang xử lý giao dịch
+          Đang xác thực giao dịch
         </h2>
-        <p class="text-gray-500">{{ message }}</p>
+        <p class="text-gray-500 animate-pulse">{{ message }}</p>
+        <p class="text-xs text-gray-400 mt-4 italic">Vui lòng không tắt trình duyệt hoặc tải lại trang</p>
       </div>
 
-      <!-- Success State -->
+      <!-- 2. Success State -->
       <div
-        *ngIf="status === 'success'"
+        *ngIf="!isProcessing && status === 'success'"
+        [style.display]="isProcessing ? 'none' : 'flex'"
         class="flex flex-col items-center animate-fade-in"
       >
         <div
@@ -73,9 +81,10 @@
         </div>
       </div>
 
-      <!-- Failed State -->
+      <!-- 3. Failed State -->
       <div
-        *ngIf="status === 'failed'"
+        *ngIf="!isProcessing && status === 'failed'"
+        [style.display]="isProcessing ? 'none' : 'flex'"
         class="flex flex-col items-center animate-fade-in"
       >
         <div
@@ -84,7 +93,7 @@
           <i class="pi pi-times text-4xl text-red-600"></i>
         </div>
         <h2 class="text-2xl font-black text-gray-900 mb-2">
-          Thanh toán thất bại
+          Thanh toán không thành công (Vui lòng thử lại)
         </h2>
         <p class="text-gray-500 mb-8">{{ message }}</p>
 

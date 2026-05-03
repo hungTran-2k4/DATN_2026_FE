@@ -123,6 +123,7 @@ export class AuthRepository {
               email: profile.email,
               fullName: profile.fullName,
               roles: profile.roles,
+              avatarUrl: profile.avatarUrl,
             },
           } as AuthResponse;
         }),

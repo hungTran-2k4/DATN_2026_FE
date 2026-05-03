@@ -27,6 +27,7 @@ export class UserHeaderComponent implements OnInit {
   public readonly cartService = inject(CartService);
   userMenuItems: MenuItem[] = [];
   isMobileMenuOpen = false;
+  isLoadingProfile = false;
 
   constructor(
     public readonly authSession: AuthSessionService,
@@ -35,9 +36,10 @@ export class UserHeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Load cart nếu đã đăng nhập
+    // Load cart và profile nếu đã đăng nhập
     if (this.authSession.getSession()) {
       this.cartService.loadCart().subscribe();
+      this.loadUserProfile();
     }
 
     this.authSession.currentUser$.subscribe((user) => {
@@ -85,6 +87,21 @@ export class UserHeaderComponent implements OnInit {
       });
 
       this.userMenuItems = menu;
+    });
+  }
+
+  loadUserProfile(): void {
+    this.isLoadingProfile = true;
+    this.api.profileGET().subscribe({
+      next: (res) => {
+        if (res.data) {
+          this.authSession.updateUserSession(res.data);
+        }
+        this.isLoadingProfile = false;
+      },
+      error: () => {
+        this.isLoadingProfile = false;
+      },
     });
   }
 

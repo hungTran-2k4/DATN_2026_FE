@@ -3,7 +3,7 @@ import {
   ApplicationConfig,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
@@ -45,14 +45,10 @@ export const appConfig: ApplicationConfig = {
       multi: true,
     },
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideHttpClient(
-      // [CSRF] Tạm tắt cho môi trường dev local. Bật lại khi deploy production.
-      // withXsrfConfiguration({
-      //   cookieName: 'XSRF-TOKEN',
-      //   headerName: 'X-XSRF-TOKEN',
-      // }),
-      withInterceptors([loadingInterceptor, authInterceptor]),
-    ),
+      provideHttpClient(
+        withFetch(),
+        withInterceptors([loadingInterceptor, authInterceptor]),
+      ),
     provideRouter(routes),
     provideClientHydration(),
     provideAnimationsAsync(),
