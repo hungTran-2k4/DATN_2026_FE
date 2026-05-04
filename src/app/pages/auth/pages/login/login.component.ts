@@ -45,7 +45,7 @@ export class LoginComponent {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       rememberMe: [false],
     });
   }
@@ -82,7 +82,7 @@ export class LoginComponent {
     }
 
     if (control.errors['minlength']) {
-      return 'Mật khẩu cần tối thiểu 6 ký tự.';
+      return 'Mật khẩu cần tối thiểu 8 ký tự.';
     }
 
     return 'Mật khẩu không hợp lệ.';
@@ -116,6 +116,19 @@ export class LoginComponent {
             summary: 'Thành công',
             detail: 'Đăng nhập thành công. Chào mừng bạn!',
           });
+
+          // Cảnh báo nếu dùng mật khẩu mặc định
+          if (password === 'abc@123') {
+            setTimeout(() => {
+              this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo bảo mật',
+                sticky: true,
+                detail: 'Bạn đang sử dụng mật khẩu mặc định. Vui lòng đổi mật khẩu ngay để bảo mật tài khoản!',
+              });
+            }, 1000);
+          }
+
           this.authFacade.navigateAfterLogin();
         },
         error: (error: any) => {

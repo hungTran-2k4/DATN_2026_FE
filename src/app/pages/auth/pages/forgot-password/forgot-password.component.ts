@@ -58,12 +58,12 @@ export class ForgotPasswordComponent {
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (result) => {
-          this.successMessage = result.message;
+          this.successMessage = 'Mật khẩu mới đã được gửi về email của bạn. Vui lòng kiểm tra hòm thư (bao gồm cả thư rác).';
         },
         error: () => {
           // Luôn hiện thông báo thành công dù thất bại (bảo mật)
           this.successMessage =
-            'Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu.';
+            'Nếu email tồn tại, chúng tôi đã gửi mật khẩu mới về hòm thư của bạn.';
         },
       });
   }

@@ -45,7 +45,7 @@ export class RegisterComponent {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       acceptedTerms: [false, [Validators.requiredTrue]],
     });
   }
@@ -101,7 +101,7 @@ export class RegisterComponent {
     }
 
     if (control.errors['minlength']) {
-      return 'Mật khẩu cần tối thiểu 6 ký tự.';
+      return 'Mật khẩu cần tối thiểu 8 ký tự.';
     }
 
     return 'Mật khẩu không hợp lệ.';
