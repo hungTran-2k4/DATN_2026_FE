@@ -7196,6 +7196,346 @@ export class ApiBaseService {
   }
 
   /**
+   * @param body (optional)
+   * @return OK
+   */
+  calculateFee(
+    body: ShippingFeeRequest | undefined,
+  ): Observable<ShippingFeeResultApiResponse> {
+    let url_ = this.baseUrl + '/api/Shipping/calculate-fee';
+    url_ = url_.replace(/[?&]$/, '');
+
+    const content_ = JSON.stringify(body);
+
+    let options_: any = {
+      body: content_,
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('post', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processCalculateFee(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processCalculateFee(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<ShippingFeeResultApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<ShippingFeeResultApiResponse>;
+        }),
+      );
+  }
+
+  protected processCalculateFee(
+    response: HttpResponseBase,
+  ): Observable<ShippingFeeResultApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = ShippingFeeResultApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  createShipment(orderId: string): Observable<CreateShipmentResultApiResponse> {
+    let url_ = this.baseUrl + '/api/Shipping/create-shipment/{orderId}';
+    if (orderId === undefined || orderId === null)
+      throw new globalThis.Error("The parameter 'orderId' must be defined.");
+    url_ = url_.replace('{orderId}', encodeURIComponent('' + orderId));
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('post', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processCreateShipment(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processCreateShipment(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<CreateShipmentResultApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<CreateShipmentResultApiResponse>;
+        }),
+      );
+  }
+
+  protected processCreateShipment(
+    response: HttpResponseBase,
+  ): Observable<CreateShipmentResultApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = CreateShipmentResultApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  ghn(): Observable<void> {
+    let url_ = this.baseUrl + '/api/Shipping/webhook/ghn';
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({}),
+    };
+
+    return this.http
+      .request('post', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processGhn(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processGhn(response_ as any);
+            } catch (e) {
+              return _observableThrow(e) as any as Observable<void>;
+            }
+          } else return _observableThrow(response_) as any as Observable<void>;
+        }),
+      );
+  }
+
+  protected processGhn(response: HttpResponseBase): Observable<void> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return _observableOf(null as any);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  tracking(orderId: string): Observable<ShipmentApiResponse> {
+    let url_ = this.baseUrl + '/api/Shipping/tracking/{orderId}';
+    if (orderId === undefined || orderId === null)
+      throw new globalThis.Error("The parameter 'orderId' must be defined.");
+    url_ = url_.replace('{orderId}', encodeURIComponent('' + orderId));
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processTracking(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processTracking(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<ShipmentApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<ShipmentApiResponse>;
+        }),
+      );
+  }
+
+  protected processTracking(
+    response: HttpResponseBase,
+  ): Observable<ShipmentApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = ShipmentApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+
+
+  /**
    * @param slug (optional)
    * @return OK
    */
@@ -8492,6 +8832,179 @@ export class ApiBaseService {
               ? null
               : JSON.parse(_responseText, this.jsonParseReviver);
           result200 = BooleanApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  admin(): Observable<AdminDashboardStatsDtoApiResponse> {
+    let url_ = this.baseUrl + '/api/statistics/admin';
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processAdmin(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processAdmin(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<AdminDashboardStatsDtoApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<AdminDashboardStatsDtoApiResponse>;
+        }),
+      );
+  }
+
+  protected processAdmin(
+    response: HttpResponseBase,
+  ): Observable<AdminDashboardStatsDtoApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = AdminDashboardStatsDtoApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  seller(shopId: string): Observable<SellerDashboardStatsDtoApiResponse> {
+    let url_ = this.baseUrl + '/api/statistics/seller/{shopId}';
+    if (shopId === undefined || shopId === null)
+      throw new globalThis.Error("The parameter 'shopId' must be defined.");
+    url_ = url_.replace('{shopId}', encodeURIComponent('' + shopId));
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processSeller(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processSeller(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<SellerDashboardStatsDtoApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<SellerDashboardStatsDtoApiResponse>;
+        }),
+      );
+  }
+
+  protected processSeller(
+    response: HttpResponseBase,
+  ): Observable<SellerDashboardStatsDtoApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = SellerDashboardStatsDtoApiResponse.fromJS(resultData200);
           return _observableOf(result200);
         }),
       );
@@ -11624,6 +12137,190 @@ export class ApiBaseService {
   }
 
   /**
+   * @return OK
+   */
+  balance(shopId: string): Observable<ObjectApiResponse> {
+    let url_ = this.baseUrl + '/api/Wallet/{shopId}/balance';
+    if (shopId === undefined || shopId === null)
+      throw new globalThis.Error("The parameter 'shopId' must be defined.");
+    url_ = url_.replace('{shopId}', encodeURIComponent('' + shopId));
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processBalance(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processBalance(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<ObjectApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<ObjectApiResponse>;
+        }),
+      );
+  }
+
+  protected processBalance(
+    response: HttpResponseBase,
+  ): Observable<ObjectApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = ObjectApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @param limit (optional)
+   * @return OK
+   */
+  history(
+    shopId: string,
+    limit: number | undefined,
+  ): Observable<WalletLedgerIEnumerableApiResponse> {
+    let url_ = this.baseUrl + '/api/Wallet/{shopId}/history?';
+    if (shopId === undefined || shopId === null)
+      throw new globalThis.Error("The parameter 'shopId' must be defined.");
+    url_ = url_.replace('{shopId}', encodeURIComponent('' + shopId));
+    if (limit === null)
+      throw new globalThis.Error("The parameter 'limit' cannot be null.");
+    else if (limit !== undefined)
+      url_ += 'limit=' + encodeURIComponent('' + limit) + '&';
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processHistory(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processHistory(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<WalletLedgerIEnumerableApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<WalletLedgerIEnumerableApiResponse>;
+        }),
+      );
+  }
+
+  protected processHistory(
+    response: HttpResponseBase,
+  ): Observable<WalletLedgerIEnumerableApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = WalletLedgerIEnumerableApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
    * @param page (optional)
    * @param pageSize (optional)
    * @return OK
@@ -12111,6 +12808,184 @@ export interface IAddToCartCommand {
   userId?: string;
   variantId?: string;
   quantity?: number;
+}
+
+export class AdminDashboardStatsDto implements IAdminDashboardStatsDto {
+  totalUsers?: number;
+  totalShops?: number;
+  totalProducts?: number;
+  totalRevenue?: number;
+  totalSales?: number;
+  monthlyRevenue?: MonthlyRevenueDto[] | undefined;
+  userGrowth?: UserGrowthDto[] | undefined;
+  orderStatusDistribution?: OrderStatusDistributionDto[] | undefined;
+  topShops?: TopShopDto[] | undefined;
+
+  constructor(data?: IAdminDashboardStatsDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.totalUsers = _data['totalUsers'];
+      this.totalShops = _data['totalShops'];
+      this.totalProducts = _data['totalProducts'];
+      this.totalRevenue = _data['totalRevenue'];
+      this.totalSales = _data['totalSales'];
+      if (Array.isArray(_data['monthlyRevenue'])) {
+        this.monthlyRevenue = [] as any;
+        for (let item of _data['monthlyRevenue'])
+          this.monthlyRevenue!.push(MonthlyRevenueDto.fromJS(item));
+      }
+      if (Array.isArray(_data['userGrowth'])) {
+        this.userGrowth = [] as any;
+        for (let item of _data['userGrowth'])
+          this.userGrowth!.push(UserGrowthDto.fromJS(item));
+      }
+      if (Array.isArray(_data['orderStatusDistribution'])) {
+        this.orderStatusDistribution = [] as any;
+        for (let item of _data['orderStatusDistribution'])
+          this.orderStatusDistribution!.push(
+            OrderStatusDistributionDto.fromJS(item),
+          );
+      }
+      if (Array.isArray(_data['topShops'])) {
+        this.topShops = [] as any;
+        for (let item of _data['topShops'])
+          this.topShops!.push(TopShopDto.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): AdminDashboardStatsDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new AdminDashboardStatsDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['totalUsers'] = this.totalUsers;
+    data['totalShops'] = this.totalShops;
+    data['totalProducts'] = this.totalProducts;
+    data['totalRevenue'] = this.totalRevenue;
+    data['totalSales'] = this.totalSales;
+    if (Array.isArray(this.monthlyRevenue)) {
+      data['monthlyRevenue'] = [];
+      for (let item of this.monthlyRevenue)
+        data['monthlyRevenue'].push(item ? item.toJSON() : (undefined as any));
+    }
+    if (Array.isArray(this.userGrowth)) {
+      data['userGrowth'] = [];
+      for (let item of this.userGrowth)
+        data['userGrowth'].push(item ? item.toJSON() : (undefined as any));
+    }
+    if (Array.isArray(this.orderStatusDistribution)) {
+      data['orderStatusDistribution'] = [];
+      for (let item of this.orderStatusDistribution)
+        data['orderStatusDistribution'].push(
+          item ? item.toJSON() : (undefined as any),
+        );
+    }
+    if (Array.isArray(this.topShops)) {
+      data['topShops'] = [];
+      for (let item of this.topShops)
+        data['topShops'].push(item ? item.toJSON() : (undefined as any));
+    }
+    return data;
+  }
+}
+
+export interface IAdminDashboardStatsDto {
+  totalUsers?: number;
+  totalShops?: number;
+  totalProducts?: number;
+  totalRevenue?: number;
+  totalSales?: number;
+  monthlyRevenue?: MonthlyRevenueDto[] | undefined;
+  userGrowth?: UserGrowthDto[] | undefined;
+  orderStatusDistribution?: OrderStatusDistributionDto[] | undefined;
+  topShops?: TopShopDto[] | undefined;
+}
+
+export class AdminDashboardStatsDtoApiResponse implements IAdminDashboardStatsDtoApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: AdminDashboardStatsDto;
+
+  constructor(data?: IAdminDashboardStatsDtoApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      this.data = _data['data']
+        ? AdminDashboardStatsDto.fromJS(_data['data'])
+        : (undefined as any);
+    }
+  }
+
+  static fromJS(data: any): AdminDashboardStatsDtoApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new AdminDashboardStatsDtoApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    data['data'] = this.data ? this.data.toJSON() : (undefined as any);
+    return data;
+  }
+}
+
+export interface IAdminDashboardStatsDtoApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: AdminDashboardStatsDto;
 }
 
 export class AdminUpdateUserRequest implements IAdminUpdateUserRequest {
@@ -13872,6 +14747,140 @@ export interface ICreateProductCommand {
   baseAttributes?: string | undefined;
 }
 
+export class CreateShipmentResult implements ICreateShipmentResult {
+  success?: boolean;
+  trackingCode?: string | undefined;
+  ghnOrderCode?: string | undefined;
+  expectedDeliveryDate?: Date | undefined;
+  totalFee?: number;
+  message?: string | undefined;
+
+  constructor(data?: ICreateShipmentResult) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.success = _data['success'];
+      this.trackingCode = _data['trackingCode'];
+      this.ghnOrderCode = _data['ghnOrderCode'];
+      this.expectedDeliveryDate = _data['expectedDeliveryDate']
+        ? new Date(_data['expectedDeliveryDate'].toString())
+        : (undefined as any);
+      this.totalFee = _data['totalFee'];
+      this.message = _data['message'];
+    }
+  }
+
+  static fromJS(data: any): CreateShipmentResult {
+    data = typeof data === 'object' ? data : {};
+    let result = new CreateShipmentResult();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['success'] = this.success;
+    data['trackingCode'] = this.trackingCode;
+    data['ghnOrderCode'] = this.ghnOrderCode;
+    data['expectedDeliveryDate'] = this.expectedDeliveryDate
+      ? this.expectedDeliveryDate.toISOString()
+      : (undefined as any);
+    data['totalFee'] = this.totalFee;
+    data['message'] = this.message;
+    return data;
+  }
+}
+
+export interface ICreateShipmentResult {
+  success?: boolean;
+  trackingCode?: string | undefined;
+  ghnOrderCode?: string | undefined;
+  expectedDeliveryDate?: Date | undefined;
+  totalFee?: number;
+  message?: string | undefined;
+}
+
+export class CreateShipmentResultApiResponse implements ICreateShipmentResultApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: CreateShipmentResult;
+
+  constructor(data?: ICreateShipmentResultApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      this.data = _data['data']
+        ? CreateShipmentResult.fromJS(_data['data'])
+        : (undefined as any);
+    }
+  }
+
+  static fromJS(data: any): CreateShipmentResultApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new CreateShipmentResultApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    data['data'] = this.data ? this.data.toJSON() : (undefined as any);
+    return data;
+  }
+}
+
+export interface ICreateShipmentResultApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: CreateShipmentResult;
+}
+
 export class CreateShopCommand implements ICreateShopCommand {
   name?: string | undefined;
   slug?: string | undefined;
@@ -14167,6 +15176,46 @@ export interface ICreateVoucherCommand {
   usageLimit?: number;
   isActive?: boolean;
   shopId?: string | undefined;
+}
+
+export class DailyRevenueDto implements IDailyRevenueDto {
+  date?: string | undefined;
+  revenue?: number;
+
+  constructor(data?: IDailyRevenueDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.date = _data['date'];
+      this.revenue = _data['revenue'];
+    }
+  }
+
+  static fromJS(data: any): DailyRevenueDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new DailyRevenueDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['date'] = this.date;
+    data['revenue'] = this.revenue;
+    return data;
+  }
+}
+
+export interface IDailyRevenueDto {
+  date?: string | undefined;
+  revenue?: number;
 }
 
 export class FilterDescriptor implements IFilterDescriptor {
@@ -14709,6 +15758,118 @@ export interface ILoginWithFirebaseRequest {
   password: string;
 }
 
+export class MonthlyRevenueDto implements IMonthlyRevenueDto {
+  month?: string | undefined;
+  revenue?: number;
+
+  constructor(data?: IMonthlyRevenueDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.month = _data['month'];
+      this.revenue = _data['revenue'];
+    }
+  }
+
+  static fromJS(data: any): MonthlyRevenueDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new MonthlyRevenueDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['month'] = this.month;
+    data['revenue'] = this.revenue;
+    return data;
+  }
+}
+
+export interface IMonthlyRevenueDto {
+  month?: string | undefined;
+  revenue?: number;
+}
+
+export class ObjectApiResponse implements IObjectApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: any | undefined;
+
+  constructor(data?: IObjectApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      this.data = _data['data'];
+    }
+  }
+
+  static fromJS(data: any): ObjectApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new ObjectApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    data['data'] = this.data;
+    return data;
+  }
+}
+
+export interface IObjectApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: any | undefined;
+}
+
 export class OrderDto implements IOrderDto {
   id?: string;
   orderCode?: string | undefined;
@@ -14937,6 +16098,46 @@ export interface IOrderItemDto {
   unitPrice?: number;
   quantity?: number;
   subTotal?: number;
+}
+
+export class OrderStatusDistributionDto implements IOrderStatusDistributionDto {
+  status?: string | undefined;
+  count?: number;
+
+  constructor(data?: IOrderStatusDistributionDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.status = _data['status'];
+      this.count = _data['count'];
+    }
+  }
+
+  static fromJS(data: any): OrderStatusDistributionDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new OrderStatusDistributionDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['status'] = this.status;
+    data['count'] = this.count;
+    return data;
+  }
+}
+
+export interface IOrderStatusDistributionDto {
+  status?: string | undefined;
+  count?: number;
 }
 
 export class OrderSummaryDto implements IOrderSummaryDto {
@@ -16577,6 +17778,528 @@ export interface IRoleDto {
   name?: string | undefined;
 }
 
+export class SellerDashboardStatsDto implements ISellerDashboardStatsDto {
+  totalOrders?: number;
+  pendingOrders?: number;
+  processingOrders?: number;
+  totalRevenue?: number;
+  availableBalance?: number;
+  lockedBalance?: number;
+  totalProducts?: number;
+  averageRating?: number;
+  dailyRevenue?: DailyRevenueDto[] | undefined;
+  orderStatusSummary?: OrderStatusDistributionDto[] | undefined;
+  topProducts?: TopProductDto[] | undefined;
+
+  constructor(data?: ISellerDashboardStatsDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.totalOrders = _data['totalOrders'];
+      this.pendingOrders = _data['pendingOrders'];
+      this.processingOrders = _data['processingOrders'];
+      this.totalRevenue = _data['totalRevenue'];
+      this.availableBalance = _data['availableBalance'];
+      this.lockedBalance = _data['lockedBalance'];
+      this.totalProducts = _data['totalProducts'];
+      this.averageRating = _data['averageRating'];
+      if (Array.isArray(_data['dailyRevenue'])) {
+        this.dailyRevenue = [] as any;
+        for (let item of _data['dailyRevenue'])
+          this.dailyRevenue!.push(DailyRevenueDto.fromJS(item));
+      }
+      if (Array.isArray(_data['orderStatusSummary'])) {
+        this.orderStatusSummary = [] as any;
+        for (let item of _data['orderStatusSummary'])
+          this.orderStatusSummary!.push(
+            OrderStatusDistributionDto.fromJS(item),
+          );
+      }
+      if (Array.isArray(_data['topProducts'])) {
+        this.topProducts = [] as any;
+        for (let item of _data['topProducts'])
+          this.topProducts!.push(TopProductDto.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): SellerDashboardStatsDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new SellerDashboardStatsDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['totalOrders'] = this.totalOrders;
+    data['pendingOrders'] = this.pendingOrders;
+    data['processingOrders'] = this.processingOrders;
+    data['totalRevenue'] = this.totalRevenue;
+    data['availableBalance'] = this.availableBalance;
+    data['lockedBalance'] = this.lockedBalance;
+    data['totalProducts'] = this.totalProducts;
+    data['averageRating'] = this.averageRating;
+    if (Array.isArray(this.dailyRevenue)) {
+      data['dailyRevenue'] = [];
+      for (let item of this.dailyRevenue)
+        data['dailyRevenue'].push(item ? item.toJSON() : (undefined as any));
+    }
+    if (Array.isArray(this.orderStatusSummary)) {
+      data['orderStatusSummary'] = [];
+      for (let item of this.orderStatusSummary)
+        data['orderStatusSummary'].push(
+          item ? item.toJSON() : (undefined as any),
+        );
+    }
+    if (Array.isArray(this.topProducts)) {
+      data['topProducts'] = [];
+      for (let item of this.topProducts)
+        data['topProducts'].push(item ? item.toJSON() : (undefined as any));
+    }
+    return data;
+  }
+}
+
+export interface ISellerDashboardStatsDto {
+  totalOrders?: number;
+  pendingOrders?: number;
+  processingOrders?: number;
+  totalRevenue?: number;
+  availableBalance?: number;
+  lockedBalance?: number;
+  totalProducts?: number;
+  averageRating?: number;
+  dailyRevenue?: DailyRevenueDto[] | undefined;
+  orderStatusSummary?: OrderStatusDistributionDto[] | undefined;
+  topProducts?: TopProductDto[] | undefined;
+}
+
+export class SellerDashboardStatsDtoApiResponse implements ISellerDashboardStatsDtoApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: SellerDashboardStatsDto;
+
+  constructor(data?: ISellerDashboardStatsDtoApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      this.data = _data['data']
+        ? SellerDashboardStatsDto.fromJS(_data['data'])
+        : (undefined as any);
+    }
+  }
+
+  static fromJS(data: any): SellerDashboardStatsDtoApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new SellerDashboardStatsDtoApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    data['data'] = this.data ? this.data.toJSON() : (undefined as any);
+    return data;
+  }
+}
+
+export interface ISellerDashboardStatsDtoApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: SellerDashboardStatsDto;
+}
+
+export class Shipment implements IShipment {
+  id?: string;
+  orderId?: string;
+  provider?: string | undefined;
+  trackingCode?: string | undefined;
+  shippingFee?: number;
+  status?: string | undefined;
+  expectedDeliveryDate?: Date | undefined;
+  ghnOrderCode?: string | undefined;
+  createdAt?: Date;
+  updatedAt?: Date;
+
+  constructor(data?: IShipment) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data['id'];
+      this.orderId = _data['orderId'];
+      this.provider = _data['provider'];
+      this.trackingCode = _data['trackingCode'];
+      this.shippingFee = _data['shippingFee'];
+      this.status = _data['status'];
+      this.expectedDeliveryDate = _data['expectedDeliveryDate']
+        ? new Date(_data['expectedDeliveryDate'].toString())
+        : (undefined as any);
+      this.ghnOrderCode = _data['ghnOrderCode'];
+      this.createdAt = _data['createdAt']
+        ? new Date(_data['createdAt'].toString())
+        : (undefined as any);
+      this.updatedAt = _data['updatedAt']
+        ? new Date(_data['updatedAt'].toString())
+        : (undefined as any);
+    }
+  }
+
+  static fromJS(data: any): Shipment {
+    data = typeof data === 'object' ? data : {};
+    let result = new Shipment();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['id'] = this.id;
+    data['orderId'] = this.orderId;
+    data['provider'] = this.provider;
+    data['trackingCode'] = this.trackingCode;
+    data['shippingFee'] = this.shippingFee;
+    data['status'] = this.status;
+    data['expectedDeliveryDate'] = this.expectedDeliveryDate
+      ? this.expectedDeliveryDate.toISOString()
+      : (undefined as any);
+    data['ghnOrderCode'] = this.ghnOrderCode;
+    data['createdAt'] = this.createdAt
+      ? this.createdAt.toISOString()
+      : (undefined as any);
+    data['updatedAt'] = this.updatedAt
+      ? this.updatedAt.toISOString()
+      : (undefined as any);
+    return data;
+  }
+}
+
+export interface IShipment {
+  id?: string;
+  orderId?: string;
+  provider?: string | undefined;
+  trackingCode?: string | undefined;
+  shippingFee?: number;
+  status?: string | undefined;
+  expectedDeliveryDate?: Date | undefined;
+  ghnOrderCode?: string | undefined;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export class ShipmentApiResponse implements IShipmentApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: Shipment;
+
+  constructor(data?: IShipmentApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      this.data = _data['data']
+        ? Shipment.fromJS(_data['data'])
+        : (undefined as any);
+    }
+  }
+
+  static fromJS(data: any): ShipmentApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new ShipmentApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    data['data'] = this.data ? this.data.toJSON() : (undefined as any);
+    return data;
+  }
+}
+
+export interface IShipmentApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: Shipment;
+}
+
+export class ShippingFeeRequest implements IShippingFeeRequest {
+  fromDistrictId?: number;
+  fromWardCode?: string | undefined;
+  toDistrictId?: number;
+  toWardCode?: string | undefined;
+  weight?: number;
+  insuranceValue?: number;
+  serviceTypeId?: number;
+
+  constructor(data?: IShippingFeeRequest) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.fromDistrictId = _data['fromDistrictId'];
+      this.fromWardCode = _data['fromWardCode'];
+      this.toDistrictId = _data['toDistrictId'];
+      this.toWardCode = _data['toWardCode'];
+      this.weight = _data['weight'];
+      this.insuranceValue = _data['insuranceValue'];
+      this.serviceTypeId = _data['serviceTypeId'];
+    }
+  }
+
+  static fromJS(data: any): ShippingFeeRequest {
+    data = typeof data === 'object' ? data : {};
+    let result = new ShippingFeeRequest();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['fromDistrictId'] = this.fromDistrictId;
+    data['fromWardCode'] = this.fromWardCode;
+    data['toDistrictId'] = this.toDistrictId;
+    data['toWardCode'] = this.toWardCode;
+    data['weight'] = this.weight;
+    data['insuranceValue'] = this.insuranceValue;
+    data['serviceTypeId'] = this.serviceTypeId;
+    return data;
+  }
+}
+
+export interface IShippingFeeRequest {
+  fromDistrictId?: number;
+  fromWardCode?: string | undefined;
+  toDistrictId?: number;
+  toWardCode?: string | undefined;
+  weight?: number;
+  insuranceValue?: number;
+  serviceTypeId?: number;
+}
+
+export class ShippingFeeResult implements IShippingFeeResult {
+  success?: boolean;
+  totalFee?: number;
+  serviceFee?: number;
+  insuranceFee?: number;
+  message?: string | undefined;
+
+  constructor(data?: IShippingFeeResult) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.success = _data['success'];
+      this.totalFee = _data['totalFee'];
+      this.serviceFee = _data['serviceFee'];
+      this.insuranceFee = _data['insuranceFee'];
+      this.message = _data['message'];
+    }
+  }
+
+  static fromJS(data: any): ShippingFeeResult {
+    data = typeof data === 'object' ? data : {};
+    let result = new ShippingFeeResult();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['success'] = this.success;
+    data['totalFee'] = this.totalFee;
+    data['serviceFee'] = this.serviceFee;
+    data['insuranceFee'] = this.insuranceFee;
+    data['message'] = this.message;
+    return data;
+  }
+}
+
+export interface IShippingFeeResult {
+  success?: boolean;
+  totalFee?: number;
+  serviceFee?: number;
+  insuranceFee?: number;
+  message?: string | undefined;
+}
+
+export class ShippingFeeResultApiResponse implements IShippingFeeResultApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: ShippingFeeResult;
+
+  constructor(data?: IShippingFeeResultApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      this.data = _data['data']
+        ? ShippingFeeResult.fromJS(_data['data'])
+        : (undefined as any);
+    }
+  }
+
+  static fromJS(data: any): ShippingFeeResultApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new ShippingFeeResultApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    data['data'] = this.data ? this.data.toJSON() : (undefined as any);
+    return data;
+  }
+}
+
+export interface IShippingFeeResultApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: ShippingFeeResult;
+}
+
 export enum ShopApprovalStatus {
   _1 = 1,
   _2 = 2,
@@ -17457,6 +19180,86 @@ export interface IStringListApiResponse {
   errors?: { [key: string]: string[] } | undefined;
   traceId?: string | undefined;
   data?: string[] | undefined;
+}
+
+export class TopProductDto implements ITopProductDto {
+  productName?: string | undefined;
+  quantitySold?: number;
+
+  constructor(data?: ITopProductDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.productName = _data['productName'];
+      this.quantitySold = _data['quantitySold'];
+    }
+  }
+
+  static fromJS(data: any): TopProductDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new TopProductDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['productName'] = this.productName;
+    data['quantitySold'] = this.quantitySold;
+    return data;
+  }
+}
+
+export interface ITopProductDto {
+  productName?: string | undefined;
+  quantitySold?: number;
+}
+
+export class TopShopDto implements ITopShopDto {
+  shopName?: string | undefined;
+  revenue?: number;
+
+  constructor(data?: ITopShopDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.shopName = _data['shopName'];
+      this.revenue = _data['revenue'];
+    }
+  }
+
+  static fromJS(data: any): TopShopDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new TopShopDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['shopName'] = this.shopName;
+    data['revenue'] = this.revenue;
+    return data;
+  }
+}
+
+export interface ITopShopDto {
+  shopName?: string | undefined;
+  revenue?: number;
 }
 
 export class UpdateAddressCommand implements IUpdateAddressCommand {
@@ -18793,6 +20596,46 @@ export interface IUserDtoIEnumerablePagedResponse {
   totalRecords?: number;
 }
 
+export class UserGrowthDto implements IUserGrowthDto {
+  date?: string | undefined;
+  count?: number;
+
+  constructor(data?: IUserGrowthDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.date = _data['date'];
+      this.count = _data['count'];
+    }
+  }
+
+  static fromJS(data: any): UserGrowthDto {
+    data = typeof data === 'object' ? data : {};
+    let result = new UserGrowthDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['date'] = this.date;
+    data['count'] = this.count;
+    return data;
+  }
+}
+
+export interface IUserGrowthDto {
+  date?: string | undefined;
+  count?: number;
+}
+
 export class UserProfileDto implements IUserProfileDto {
   id?: string;
   username?: string | undefined;
@@ -19424,6 +21267,154 @@ export interface IVoucherDtoIEnumerablePagedResponse {
   pageSize?: number;
   totalPages?: number;
   totalRecords?: number;
+}
+
+export class WalletLedger implements IWalletLedger {
+  id?: string;
+  shopId?: string;
+  transactionId?: string | undefined;
+  amount?: number;
+  balanceBefore?: number;
+  balanceAfter?: number;
+  description?: string | undefined;
+  createdAt?: Date;
+
+  constructor(data?: IWalletLedger) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data['id'];
+      this.shopId = _data['shopId'];
+      this.transactionId = _data['transactionId'];
+      this.amount = _data['amount'];
+      this.balanceBefore = _data['balanceBefore'];
+      this.balanceAfter = _data['balanceAfter'];
+      this.description = _data['description'];
+      this.createdAt = _data['createdAt']
+        ? new Date(_data['createdAt'].toString())
+        : (undefined as any);
+    }
+  }
+
+  static fromJS(data: any): WalletLedger {
+    data = typeof data === 'object' ? data : {};
+    let result = new WalletLedger();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['id'] = this.id;
+    data['shopId'] = this.shopId;
+    data['transactionId'] = this.transactionId;
+    data['amount'] = this.amount;
+    data['balanceBefore'] = this.balanceBefore;
+    data['balanceAfter'] = this.balanceAfter;
+    data['description'] = this.description;
+    data['createdAt'] = this.createdAt
+      ? this.createdAt.toISOString()
+      : (undefined as any);
+    return data;
+  }
+}
+
+export interface IWalletLedger {
+  id?: string;
+  shopId?: string;
+  transactionId?: string | undefined;
+  amount?: number;
+  balanceBefore?: number;
+  balanceAfter?: number;
+  description?: string | undefined;
+  createdAt?: Date;
+}
+
+export class WalletLedgerIEnumerableApiResponse implements IWalletLedgerIEnumerableApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: WalletLedger[] | undefined;
+
+  constructor(data?: IWalletLedgerIEnumerableApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      if (Array.isArray(_data['data'])) {
+        this.data = [] as any;
+        for (let item of _data['data'])
+          this.data!.push(WalletLedger.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): WalletLedgerIEnumerableApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new WalletLedgerIEnumerableApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    if (Array.isArray(this.data)) {
+      data['data'] = [];
+      for (let item of this.data)
+        data['data'].push(item ? item.toJSON() : (undefined as any));
+    }
+    return data;
+  }
+}
+
+export interface IWalletLedgerIEnumerableApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: WalletLedger[] | undefined;
 }
 
 export class WishlistItemDto implements IWishlistItemDto {

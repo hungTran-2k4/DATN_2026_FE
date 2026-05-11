@@ -148,10 +148,10 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     this.form.get('street')?.setValue(shopStreet);
 
     if (shopProvince) {
-      this.loadPickupDistricts(shopProvince.code, () => {
+      this.loadPickupDistricts(shopProvince.ProvinceID, () => {
         this.form.get('district')?.setValue(shopDistrict);
         if (shopDistrict) {
-          this.loadPickupWards(shopDistrict.code, () => {
+          this.loadPickupWards(shopDistrict.DistrictID, () => {
             this.form.get('ward')?.setValue(shopWard);
           });
         }
@@ -159,7 +159,7 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     }
   }
 
-  // ── Shop address API ──
+  // ── Shop address API (GHN Proxy) ──
 
   onShopProvinceChange(): void {
     this.shopDistricts = [];
@@ -173,9 +173,9 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     if (!province) return;
 
     this.isLoadingShopDistricts = true;
-    this.http.get<any>(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`).subscribe({
-      next: (data) => {
-        this.shopDistricts = data.districts ?? [];
+    this.http.get<any>(`/api/Shipping/ghn/districts/${province.ProvinceID}`).subscribe({
+      next: (res) => {
+        this.shopDistricts = res.data ?? [];
         this.form.get('shopDistrict')?.enable();
         this.isLoadingShopDistricts = false;
         if (this.sameAsShopAddress) this.copyShopToPickup();
@@ -193,9 +193,9 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     if (!district) return;
 
     this.isLoadingShopWards = true;
-    this.http.get<any>(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`).subscribe({
-      next: (data) => {
-        this.shopWards = data.wards ?? [];
+    this.http.get<any>(`/api/Shipping/ghn/wards/${district.DistrictID}`).subscribe({
+      next: (res) => {
+        this.shopWards = res.data ?? [];
         this.form.get('shopWard')?.enable();
         this.isLoadingShopWards = false;
         if (this.sameAsShopAddress) this.copyShopToPickup();
@@ -217,7 +217,7 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     const province = this.form.get('province')?.value;
     if (!province) return;
 
-    this.loadPickupDistricts(province.code);
+    this.loadPickupDistricts(province.ProvinceID);
   }
 
   onDistrictChange(): void {
@@ -228,14 +228,14 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     const district = this.form.get('district')?.value;
     if (!district) return;
 
-    this.loadPickupWards(district.code);
+    this.loadPickupWards(district.DistrictID);
   }
 
-  private loadPickupDistricts(provinceCode: number, callback?: () => void): void {
+  private loadPickupDistricts(provinceId: number, callback?: () => void): void {
     this.isLoadingDistricts = true;
-    this.http.get<any>(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`).subscribe({
-      next: (data) => {
-        this.districts = data.districts ?? [];
+    this.http.get<any>(`/api/Shipping/ghn/districts/${provinceId}`).subscribe({
+      next: (res) => {
+        this.districts = res.data ?? [];
         this.form.get('district')?.enable();
         this.isLoadingDistricts = false;
         callback?.();
@@ -244,11 +244,11 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     });
   }
 
-  private loadPickupWards(districtCode: number, callback?: () => void): void {
+  private loadPickupWards(districtId: number, callback?: () => void): void {
     this.isLoadingWards = true;
-    this.http.get<any>(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`).subscribe({
-      next: (data) => {
-        this.wards = data.wards ?? [];
+    this.http.get<any>(`/api/Shipping/ghn/wards/${districtId}`).subscribe({
+      next: (res) => {
+        this.wards = res.data ?? [];
         this.form.get('ward')?.enable();
         this.isLoadingWards = false;
         callback?.();
@@ -259,8 +259,8 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
 
   private loadProvinces(): void {
     this.isLoadingProvinces = true;
-    this.http.get<any[]>('https://provinces.open-api.vn/api/p/').subscribe({
-      next: (data) => { this.provinces = data; this.isLoadingProvinces = false; },
+    this.http.get<any>('/api/Shipping/ghn/provinces').subscribe({
+      next: (res) => { this.provinces = res.data ?? []; this.isLoadingProvinces = false; },
       error: () => { this.isLoadingProvinces = false; },
     });
   }
@@ -296,11 +296,11 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
       name: v.name,
       slug: v.slug,
       description: v.description,
-      // Ghi đúng vào DB: province_id, district_id, ward_id, pickup_address
-      provinceId: v.province?.code ?? undefined,
-      districtId: v.district?.code ?? undefined,
-      wardId: v.ward?.code ?? undefined,
-      pickupAddress: v.street?.trim() || undefined,
+      // Ghi đúng vào DB: provinceId, districtId, wardId, pickupAddress
+      provinceId: v.province?.ProvinceID,
+      districtId: v.district?.DistrictID,
+      wardId: v.ward?.WardCode ? parseInt(v.ward.WardCode, 10) : undefined,
+      pickupAddress: v.street?.trim(),
     };
     this.formSubmit.emit(value);
   }

@@ -31,13 +31,18 @@ export const authInterceptor: HttpInterceptorFn = (
   const sessionService = inject(AuthSessionService);
   const http = inject(HttpClient);
 
+  // Add withCredentials: true to all requests to ensure cookies are sent
+  const clonedReq = req.clone({
+    withCredentials: true
+  });
+
   // Skip URL check
   const skipUrls = ['/api/Auth/refresh-token', '/api/Auth/login', '/api/Auth/register', '/api/Auth/forgot-password', '/api/Auth/reset-password'];
   if (skipUrls.some(url => req.url.includes(url))) {
-    return next(req);
+    return next(clonedReq);
   }
 
-  return next(req).pipe(
+  return next(clonedReq).pipe(
     catchError((error) => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
         return handle401Error(req, next, http, router, sessionService);

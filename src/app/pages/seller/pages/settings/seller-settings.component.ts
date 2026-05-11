@@ -8,6 +8,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
+import { HttpClient } from '@angular/common/http';
+import { DropdownModule } from 'primeng/dropdown';
 import { ApiBaseService, UpdateShopCommand } from '../../../../shared/api/generated/api-service-base.service';
 import { SellerRegistrationService } from '../../../../features/seller-registration/model/seller-registration.service';
 import { SellerShopInfo } from '../../../../entities/seller/model/seller.model';
@@ -18,6 +20,7 @@ import { SellerShopInfo } from '../../../../entities/seller/model/seller.model';
   imports: [
     CommonModule, ReactiveFormsModule,
     ButtonModule, InputTextModule, TextareaModule, ToastModule, SkeletonModule,
+    DropdownModule
   ],
   providers: [MessageService],
   templateUrl: './seller-settings.component.html',
@@ -31,9 +34,15 @@ export class SellerSettingsComponent implements OnInit {
   isSaving = false;
   isLoading = true;
 
+  // Address data
+  provinces: any[] = [];
+  districts: any[] = [];
+  wards: any[] = [];
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly api: ApiBaseService,
+    private readonly http: HttpClient,
     private readonly sellerService: SellerRegistrationService,
     private readonly messageService: MessageService,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
@@ -43,14 +52,29 @@ export class SellerSettingsComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(255)]],
       description: ['', [Validators.maxLength(1000)]],
-      pickupAddress: ['', [Validators.maxLength(500)]],
+      provinceId: [null, [Validators.required]],
+      districtId: [null, [Validators.required]],
+      wardId: [null, [Validators.required]],
+      pickupAddress: ['', [Validators.required, Validators.maxLength(500)]],
     });
 
     if (isPlatformBrowser(this.platformId)) {
+      this.loadProvinces();
       this.sellerService.shopInfo$.pipe(takeUntil(this.destroy$)).subscribe((shop) => {
         if (shop) {
           this.shopInfo = shop;
-          this.form.patchValue({ name: shop.name, description: shop.description ?? '', pickupAddress: shop.pickupAddress ?? '' });
+          this.form.patchValue({ 
+            name: shop.name, 
+            description: shop.description ?? '', 
+            provinceId: shop.provinceId,
+            districtId: shop.districtId,
+            wardId: shop.wardId,
+            pickupAddress: shop.pickupAddress ?? '' 
+          });
+          
+          if (shop.provinceId) this.loadDistricts(shop.provinceId);
+          if (shop.districtId) this.loadWards(shop.districtId);
+          
           this.isLoading = false;
         }
       });
@@ -58,11 +82,50 @@ export class SellerSettingsComponent implements OnInit {
     }
   }
 
+  loadProvinces() {
+    this.http.get<any>('/api/Shipping/ghn/provinces').subscribe(res => {
+      if (res.success) this.provinces = res.data;
+    });
+  }
+
+  onProvinceChange(provinceId: number) {
+    this.districts = [];
+    this.wards = [];
+    this.form.patchValue({ districtId: null, wardId: null });
+    if (provinceId) this.loadDistricts(provinceId);
+  }
+
+  loadDistricts(provinceId: number) {
+    this.http.get<any>(`/api/Shipping/ghn/districts/${provinceId}`).subscribe(res => {
+      if (res.success) this.districts = res.data;
+    });
+  }
+
+  onDistrictChange(districtId: number) {
+    this.wards = [];
+    this.form.patchValue({ wardId: null });
+    if (districtId) this.loadWards(districtId);
+  }
+
+  loadWards(districtId: number) {
+    this.http.get<any>(`/api/Shipping/ghn/wards/${districtId}`).subscribe(res => {
+      if (res.success) this.wards = res.data;
+    });
+  }
+
   save(): void {
     if (this.form.invalid || !this.shopInfo?.id) return;
     this.isSaving = true;
     const v = this.form.value;
-    const cmd = new UpdateShopCommand({ id: this.shopInfo.id, name: v.name, description: v.description, pickupAddress: v.pickupAddress });
+    const cmd = new UpdateShopCommand({ 
+      id: this.shopInfo.id, 
+      name: v.name, 
+      description: v.description,
+      provinceId: v.provinceId,
+      districtId: v.districtId,
+      wardId: v.wardId ? parseInt(v.wardId, 10) : undefined,
+      pickupAddress: v.pickupAddress 
+    });
     this.api.shopsPUT(this.shopInfo.id, cmd).subscribe({
       next: (res: any) => {
         this.isSaving = false;

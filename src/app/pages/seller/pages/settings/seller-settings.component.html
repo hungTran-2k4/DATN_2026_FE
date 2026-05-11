@@ -37,9 +37,31 @@
           <textarea pTextarea formControlName="description" rows="4" placeholder="Giới thiệu về cửa hàng..." class="w-full resize-none"></textarea>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div class="field">
+            <label class="field-label">Tỉnh/Thành <span class="text-red-500">*</span></label>
+            <p-dropdown [options]="provinces" formControlName="provinceId" optionLabel="ProvinceName" optionValue="ProvinceID" 
+                      placeholder="Chọn Tỉnh/Thành" [filter]="true" filterBy="ProvinceName" class="w-full"
+                      (onChange)="onProvinceChange($event.value)"></p-dropdown>
+          </div>
+          <div class="field">
+            <label class="field-label">Quận/Huyện <span class="text-red-500">*</span></label>
+            <p-dropdown [options]="districts" formControlName="districtId" optionLabel="DistrictName" optionValue="DistrictID" 
+                      placeholder="Chọn Quận/Huyện" [filter]="true" filterBy="DistrictName" class="w-full"
+                      (onChange)="onDistrictChange($event.value)" [disabled]="!form.get('provinceId')?.value"></p-dropdown>
+          </div>
+          <div class="field">
+            <label class="field-label">Phường/Xã <span class="text-red-500">*</span></label>
+            <p-dropdown [options]="wards" formControlName="wardId" optionLabel="WardName" optionValue="WardCode" 
+                      placeholder="Chọn Phường/Xã" [filter]="true" filterBy="WardName" class="w-full"
+                      [disabled]="!form.get('districtId')?.value"></p-dropdown>
+          </div>
+        </div>
+
         <div class="field">
-          <label class="field-label">Địa chỉ lấy hàng</label>
-          <input pInputText formControlName="pickupAddress" placeholder="Số nhà, đường, phường, quận..." class="w-full" />
+          <label class="field-label">Địa chỉ chi tiết (Lấy hàng) <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="pickupAddress" placeholder="Số nhà, tên đường..." class="w-full" />
+          <p class="field-error" *ngIf="form.get('pickupAddress')?.invalid && form.get('pickupAddress')?.touched">Vui lòng nhập địa chỉ lấy hàng chi tiết.</p>
         </div>
 
         <div class="form-actions">

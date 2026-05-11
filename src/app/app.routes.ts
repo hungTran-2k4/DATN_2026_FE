@@ -166,6 +166,10 @@ export const routes: Routes = [
         path: 'brands',
         loadComponent: () => import('./pages/admin/pages/brands/brands.component').then(m => m.AdminBrandsPageComponent),
       },
+      {
+        path: 'orders',
+        loadComponent: () => import('./pages/admin/pages/orders/admin-orders.component').then(m => m.AdminOrdersComponent),
+      },
     ],
   },
 

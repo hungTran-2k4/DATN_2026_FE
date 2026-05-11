@@ -145,7 +145,7 @@
         <p-dropdown
           [options]="provinces"
           formControlName="shopProvince"
-          optionLabel="name"
+          optionLabel="ProvinceName"
           placeholder="Tỉnh / Thành phố"
           [filter]="true"
           filterPlaceholder="Tìm tỉnh thành..."
@@ -157,7 +157,7 @@
         <p-dropdown
           [options]="shopDistricts"
           formControlName="shopDistrict"
-          optionLabel="name"
+          optionLabel="DistrictName"
           placeholder="Quận / Huyện"
           [filter]="true"
           filterPlaceholder="Tìm quận huyện..."
@@ -171,7 +171,7 @@
         <p-dropdown
           [options]="shopWards"
           formControlName="shopWard"
-          optionLabel="name"
+          optionLabel="WardName"
           placeholder="Phường / Xã"
           [filter]="true"
           filterPlaceholder="Tìm phường xã..."
@@ -196,9 +196,9 @@
       <i class="pi pi-map-marker text-blue-500 text-sm mt-0.5 shrink-0"></i>
       <p class="text-sm text-gray-700 leading-relaxed">
         <ng-container *ngIf="shopStreetControl?.value">{{ shopStreetControl?.value }}, </ng-container>
-        <ng-container *ngIf="shopWardControl?.value">{{ shopWardControl?.value?.name }}, </ng-container>
-        <ng-container *ngIf="shopDistrictControl?.value">{{ shopDistrictControl?.value?.name }}, </ng-container>
-        <ng-container *ngIf="shopProvinceControl?.value">{{ shopProvinceControl?.value?.name }}</ng-container>
+        <ng-container *ngIf="shopWardControl?.value">{{ shopWardControl?.value?.WardName }}, </ng-container>
+        <ng-container *ngIf="shopDistrictControl?.value">{{ shopDistrictControl?.value?.DistrictName }}, </ng-container>
+        <ng-container *ngIf="shopProvinceControl?.value">{{ shopProvinceControl?.value?.ProvinceName }}</ng-container>
       </p>
     </div>
   </div>
@@ -241,7 +241,7 @@
         <p-dropdown
           [options]="provinces"
           formControlName="province"
-          optionLabel="name"
+          optionLabel="ProvinceName"
           placeholder="Tỉnh / Thành phố"
           [filter]="true"
           filterPlaceholder="Tìm tỉnh thành..."
@@ -253,7 +253,7 @@
         <p-dropdown
           [options]="districts"
           formControlName="district"
-          optionLabel="name"
+          optionLabel="DistrictName"
           placeholder="Quận / Huyện"
           [filter]="true"
           filterPlaceholder="Tìm quận huyện..."
@@ -267,7 +267,7 @@
         <p-dropdown
           [options]="wards"
           formControlName="ward"
-          optionLabel="name"
+          optionLabel="WardName"
           placeholder="Phường / Xã"
           [filter]="true"
           filterPlaceholder="Tìm phường xã..."
@@ -293,9 +293,9 @@
       <i class="pi pi-map-marker text-user-primary text-sm mt-0.5 shrink-0"></i>
       <p class="text-sm text-gray-700 leading-relaxed">
         <ng-container *ngIf="streetControl?.value">{{ streetControl?.value }}, </ng-container>
-        <ng-container *ngIf="wardControl?.value">{{ wardControl?.value?.name }}, </ng-container>
-        <ng-container *ngIf="districtControl?.value">{{ districtControl?.value?.name }}, </ng-container>
-        <ng-container *ngIf="provinceControl?.value">{{ provinceControl?.value?.name }}</ng-container>
+        <ng-container *ngIf="wardControl?.value">{{ wardControl?.value?.WardName }}, </ng-container>
+        <ng-container *ngIf="districtControl?.value">{{ districtControl?.value?.DistrictName }}, </ng-container>
+        <ng-container *ngIf="provinceControl?.value">{{ provinceControl?.value?.ProvinceName }}</ng-container>
       </p>
     </div>
   </div>

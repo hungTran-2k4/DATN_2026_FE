@@ -1,10 +1,10 @@
 <section class="dashboard">
   <header class="dashboard-head admin-panel">
     <div>
-      <h3>Tong quan dieu hanh</h3>
+      <h3>Tổng quan điều hành</h3>
       <p>
-        Toi uu van hanh san da nguoi ban voi bo chi so de quan sat nhanh theo
-        ngay.
+        Tối ưu vận hành sàn đa người bán với bộ chỉ số để quan sát nhanh theo
+        ngày.
       </p>
     </div>
 
@@ -12,13 +12,13 @@
       <p-tag severity="info" [value]="lastUpdatedLabel"></p-tag>
       <p-button
         icon="pi pi-refresh"
-        label="Lam moi"
+        label="Làm mới"
         [outlined]="true"
         (click)="refreshDashboard()"
       ></p-button>
       <p-button
         icon="pi pi-download"
-        label="Xuat bao cao"
+        label="Xuất báo cáo"
         (click)="exportDashboardReport()"
       ></p-button>
     </div>
@@ -29,7 +29,7 @@
       <p-card>
         <div class="kpi-card">
           <div class="icon-wrap" [style.background]="card.iconBg">
-            <i [class]="card.icon"></i>
+            <i [class]="card.icon" [style.color]="card.iconBg === '#ecfdf5' ? '#10b981' : card.iconBg === '#eff6ff' ? '#3b82f6' : card.iconBg === '#fef2f2' ? '#ef4444' : '#f59e0b'"></i>
           </div>
           <div class="content-wrap">
             <h3>{{ card.value }}</h3>
@@ -40,20 +40,24 @@
     }
   </div>
 
-  <div class="insight-grid">
-    @for (insight of quickInsights; track insight.title) {
-      <p-card>
-        <div class="insight-item">
-          <div>
-            <h4>{{ insight.title }}</h4>
-            <p>{{ insight.description }}</p>
-          </div>
-          <div class="insight-value">
-            <span>{{ insight.value }}</span>
-            <p-tag [severity]="insight.severity" value="Can theo doi"></p-tag>
-          </div>
-        </div>
+  <div class="charts-grid mt-6">
+    <!-- Revenue Trend -->
+    <p-card header="Xu hướng doanh thu (6 tháng)">
+      <div class="chart-container" *ngIf="isBrowser">
+        <div echarts [options]="revenueChartOption" class="echart"></div>
+      </div>
+    </p-card>
+
+    <div class="secondary-charts mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Order Status -->
+      <p-card header="Trạng thái đơn hàng">
+        <div echarts [options]="orderStatusChartOption" class="chart-container-small" *ngIf="isBrowser"></div>
       </p-card>
-    }
+
+      <!-- Top Shops -->
+      <p-card header="Top 5 Cửa hàng doanh thu cao">
+        <div echarts [options]="topShopsChartOption" class="chart-container-small" *ngIf="isBrowser"></div>
+      </p-card>
+    </div>
   </div>
 </section>

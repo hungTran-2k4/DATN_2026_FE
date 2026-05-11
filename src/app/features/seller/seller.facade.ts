@@ -15,11 +15,11 @@ import { SellerOrderRepository, OrderPagedResult } from '../../entities/order/mo
 import { SellerRepository } from '../../entities/seller/model/seller.repository';
 import { SellerShopInfo } from '../../entities/seller/model/seller.model';
 
-export interface SellerDashboardStats {
-  totalProducts: number;
-  pendingOrders: number;
-  processingOrders: number;
-  totalRevenue: number;
+import { StatisticsService } from '../../core/services/statistics.service';
+import { WalletService, WalletBalance, WalletLedger } from '../../core/services/wallet.service';
+import { SellerDashboardStats as StatsModel } from '../../core/models/statistics.model';
+
+export interface SellerDashboardStats extends StatsModel {
   recentOrders: OrderSummaryDto[];
 }
 
@@ -29,6 +29,8 @@ export class SellerFacade {
     private readonly productRepo: SellerProductRepository,
     private readonly orderRepo: SellerOrderRepository,
     private readonly sellerRepo: SellerRepository,
+    private readonly statisticsService: StatisticsService,
+    private readonly walletService: WalletService,
   ) {}
 
   // ── Shop ──
@@ -41,20 +43,24 @@ export class SellerFacade {
 
   getDashboardStats(shopId: string): Observable<SellerDashboardStats> {
     return forkJoin({
-      products: this.productRepo.getProducts(shopId, undefined, 1, 1).pipe(catchError(() => of({ items: [], totalRecords: 0, pageNumber: 1, pageSize: 1, totalPages: 0 }))),
-      pendingOrders: this.orderRepo.getShopOrders(shopId, 'PENDING', 1, 1).pipe(catchError(() => of({ items: [], totalRecords: 0, pageNumber: 1, pageSize: 1, totalPages: 0 }))),
-      processingOrders: this.orderRepo.getShopOrders(shopId, 'PROCESSING', 1, 1).pipe(catchError(() => of({ items: [], totalRecords: 0, pageNumber: 1, pageSize: 1, totalPages: 0 }))),
+      stats: this.statisticsService.getSellerStats(shopId),
       recentOrders: this.orderRepo.getShopOrders(shopId, undefined, 1, 5).pipe(catchError(() => of({ items: [], totalRecords: 0, pageNumber: 1, pageSize: 5, totalPages: 0 }))),
     }).pipe(
-      map(({ products, pendingOrders, processingOrders, recentOrders }) => ({
-        totalProducts: products.totalRecords,
-        pendingOrders: pendingOrders.totalRecords,
-        processingOrders: processingOrders.totalRecords,
-        totalRevenue: 0, // Sẽ tính từ orders sau
+      map(({ stats, recentOrders }) => ({
+        ...stats,
         recentOrders: recentOrders.items,
       })),
     );
   }
+
+  getWalletBalance(shopId: string): Observable<WalletBalance> {
+    return this.walletService.getBalance(shopId);
+  }
+
+  getWalletHistory(shopId: string, limit: number = 50): Observable<WalletLedger[]> {
+    return this.walletService.getHistory(shopId, limit);
+  }
+
 
   // ── Products ──
 

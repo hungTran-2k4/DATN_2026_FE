@@ -1,0 +1,78 @@
+<div class="finance-container">
+  <div class="header-section">
+    <h1 class="page-title">Quản lý tài chính</h1>
+    <p class="page-subtitle">Theo dõi số dư, lịch sử giao dịch và rút tiền về tài khoản ngân hàng.</p>
+  </div>
+
+  <!-- Balance Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="balance-card available">
+      <div class="card-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="card-content">
+        <p class="label">Số dư khả dụng</p>
+        <h2 class="amount" *ngIf="!isLoading">{{ formatPrice(balance?.availableBalance || 0) }}</h2>
+        <p-skeleton *ngIf="isLoading" width="150px" height="2rem"></p-skeleton>
+        <p class="hint">Bạn có thể rút số tiền này về ngân hàng bất kỳ lúc nào.</p>
+      </div>
+      <button pButton label="Rút tiền ngay" icon="pi pi-external-link" class="p-button-rounded p-button-white mt-4"></button>
+    </div>
+
+    <div class="balance-card locked">
+      <div class="card-icon">
+        <i class="pi pi-lock"></i>
+      </div>
+      <div class="card-content">
+        <p class="label">Đang tạm giữ (Escrow)</p>
+        <h2 class="amount" *ngIf="!isLoading">{{ formatPrice(balance?.lockedBalance || 0) }}</h2>
+        <p-skeleton *ngIf="isLoading" width="150px" height="2rem"></p-skeleton>
+        <p class="hint">Tiền từ các đơn hàng mới, sẽ khả dụng sau 7 ngày kể từ khi giao hàng thành công.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction History -->
+  <div class="history-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-6 border-b border-gray-50 flex justify-between items-center">
+      <h3 class="text-lg font-bold text-gray-900">Lịch sử biến động số dư</h3>
+      <button pButton icon="pi pi-refresh" class="p-button-text p-button-rounded" (click)="ngOnInit()"></button>
+    </div>
+
+    <p-table [value]="history" [loading]="isLoading" [rows]="10" [paginator]="true" 
+             responsiveLayout="scroll" styleClass="p-datatable-striped">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Thời gian</th>
+          <th>Nội dung</th>
+          <th class="text-right">Biến động</th>
+          <th class="text-right">Số dư sau</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td>{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <div class="flex flex-col">
+              <span class="font-medium">{{ item.description }}</span>
+              <small class="text-gray-400" *ngIf="item.transactionId">Mã GD: {{ item.transactionId }}</small>
+            </div>
+          </td>
+          <td class="text-right">
+            <span [ngClass]="item.amount > 0 ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'">
+              {{ item.amount > 0 ? '+' : '' }}{{ formatPrice(item.amount) }}
+            </span>
+          </td>
+          <td class="text-right font-medium text-gray-700">
+            {{ formatPrice(item.balanceAfter) }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="text-center py-10 text-gray-400">Chưa có lịch sử giao dịch nào.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

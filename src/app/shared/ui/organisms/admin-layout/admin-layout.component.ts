@@ -58,7 +58,7 @@ export class AdminLayoutComponent implements OnInit {
   readonly dialogStyle = { width: 'min(520px, 96vw)' };
 
   readonly navItems: AdminNavItem[] = [
-    { label: 'Dashboard', icon: 'pi pi-chart-line', route: '/admin/dashboard' },
+    { label: 'Bảng điều khiển', icon: 'pi pi-chart-line', route: '/admin/dashboard' },
     { label: 'Đơn hàng', icon: 'pi pi-list-check', route: '/admin/orders' },
     { label: 'Sản phẩm', icon: 'pi pi-box', route: '/admin/products' },
     { label: 'Danh mục', icon: 'pi pi-tags', route: '/admin/catalog' },
@@ -72,7 +72,7 @@ export class AdminLayoutComponent implements OnInit {
     { label: 'Cài đặt chung', icon: 'pi pi-cog', route: '/admin/settings' },
   ];
 
-  adminName = 'Admin';
+  adminName = 'Quản trị viên';
   adminEmail = '';
   adminAvatarUrl = '';
 
@@ -241,7 +241,7 @@ export class AdminLayoutComponent implements OnInit {
     email?: string,
     avatarUrl?: string,
   ): void {
-    this.adminName = (fullName ?? '').trim() || 'Admin';
+    this.adminName = (fullName ?? '').trim() || 'Quản trị viên';
     this.adminEmail = (email ?? '').trim();
     this.adminAvatarUrl = (avatarUrl ?? '').trim();
   }

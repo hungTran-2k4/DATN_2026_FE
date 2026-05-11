@@ -1,0 +1,114 @@
+.finance-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header-section {
+    margin-bottom: 2.5rem;
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 900;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+    .page-subtitle {
+      color: #6b7280;
+    }
+  }
+
+  .balance-card {
+    position: relative;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    &.available {
+      background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+      .card-icon { background: rgba(255, 255, 255, 0.2); }
+    }
+
+    &.locked {
+      background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+      .card-icon { background: rgba(255, 255, 255, 0.15); }
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      items-center: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+
+    .amount {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.75rem;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+
+    ::ng-deep .p-button.p-button-white {
+      background: white;
+      color: #4338ca;
+      border: none;
+      font-weight: 700;
+      &:hover {
+        background: #f9fafb;
+      }
+    }
+  }
+
+  .history-section {
+    ::ng-deep .p-datatable {
+      .p-datatable-header {
+        background: white;
+        border: none;
+      }
+      .p-datatable-thead > tr > th {
+        background: #f9fafb;
+        color: #374151;
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .p-datatable-tbody > tr {
+        background: white;
+        transition: background 0.2s;
+        &:hover {
+          background: #fafafa;
+        }
+        > td {
+          padding: 1.25rem 1.5rem;
+          border-bottom: 1px solid #f9fafb;
+        }
+      }
+    }
+  }
+}

@@ -3,6 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { SkeletonModule } from 'primeng/skeleton';
+import { NgxEchartsDirective } from 'ngx-echarts';
+import { EChartsOption } from 'echarts';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 import { SellerRegistrationService } from '../../../../features/seller-registration/model/seller-registration.service';
 import { SellerFacade, SellerDashboardStats } from '../../../../features/seller/seller.facade';
@@ -12,7 +14,7 @@ import { OrderSummaryDto } from '../../../../shared/api/generated/api-service-ba
 @Component({
   selector: 'app-seller-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SkeletonModule],
+  imports: [CommonModule, RouterLink, SkeletonModule, NgxEchartsDirective],
   templateUrl: './seller-dashboard.component.html',
   styleUrl: './seller-dashboard.component.scss',
 })
@@ -21,13 +23,20 @@ export class SellerDashboardComponent implements OnInit {
   shopInfo$!: Observable<SellerShopInfo | null>;
   stats: SellerDashboardStats | null = null;
   isLoadingStats = true;
+  isBrowser = false;
+
+  revenueChartOption: EChartsOption = {};
+  statusChartOption: EChartsOption = {};
+  topProductsChartOption: EChartsOption = {};
 
   constructor(
     private readonly authSession: AuthSessionService,
     private readonly sellerService: SellerRegistrationService,
     private readonly sellerFacade: SellerFacade,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
-  ) {}
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit(): void {
     const session = this.authSession.getSession();
@@ -51,10 +60,51 @@ export class SellerDashboardComponent implements OnInit {
     this.sellerFacade.getDashboardStats(shopId).subscribe({
       next: (stats) => {
         this.stats = stats;
+        this.initCharts(stats);
         this.isLoadingStats = false;
       },
       error: () => { this.isLoadingStats = false; },
     });
+  }
+
+  private initCharts(data: SellerDashboardStats): void {
+    // 1. Daily Revenue Chart
+    this.revenueChartOption = {
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: data.dailyRevenue.map(d => d.date) },
+      yAxis: { type: 'value' },
+      series: [{
+        name: 'Doanh thu',
+        type: 'line',
+        smooth: true,
+        data: data.dailyRevenue.map(d => d.revenue),
+        itemStyle: { color: '#3b82f6' },
+        areaStyle: { opacity: 0.1 }
+      }]
+    };
+
+    // 2. Order Status Summary
+    this.statusChartOption = {
+      tooltip: { trigger: 'item' },
+      series: [{
+        type: 'pie',
+        radius: ['50%', '70%'],
+        data: data.orderStatusSummary.map(s => ({ name: this.getOrderStatusLabel(s.status), value: s.count })),
+        itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 }
+      }]
+    };
+
+    // 3. Top Products
+    this.topProductsChartOption = {
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'value' },
+      yAxis: { type: 'category', data: data.topProducts.map(p => p.productName.substring(0, 20) + '...') },
+      series: [{
+        type: 'bar',
+        data: data.topProducts.map(p => p.quantitySold),
+        itemStyle: { color: '#8b5cf6', borderRadius: [0, 4, 4, 0] }
+      }]
+    };
   }
 
   formatPrice(price: number): string {

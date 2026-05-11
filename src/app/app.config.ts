@@ -12,6 +12,7 @@ import Aura from '@primeuix/themes/aura';
 
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
+import { provideEcharts } from 'ngx-echarts';
 
 import { environment } from '../environments/environment';
 import { API_BASE_URL } from './shared/api/generated/api-service-base.service';
@@ -52,6 +53,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(),
     provideAnimationsAsync(),
+    provideEcharts(),
     providePrimeNG({
       ripple: true,
       theme: {

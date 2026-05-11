@@ -1,5 +1,4 @@
 <div class="seller-page">
-
   <!-- Welcome banner -->
   <div class="welcome-banner">
     <div class="welcome-content">
@@ -20,7 +19,7 @@
   <div class="kpi-grid">
     <!-- Skeleton -->
     <ng-container *ngIf="isLoadingStats">
-      <div class="kpi-card" *ngFor="let i of [1,2,3,4]">
+      <div class="kpi-card" *ngFor="let i of [1, 2, 3, 4]">
         <p-skeleton height="80px" borderRadius="16px"></p-skeleton>
       </div>
     </ng-container>
@@ -33,7 +32,9 @@
           <p class="kpi-value">{{ stats.totalProducts | number }}</p>
           <p class="kpi-label">Sản phẩm</p>
         </div>
-        <a routerLink="/seller/products" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+        <a routerLink="/seller/products" class="kpi-link"
+          >Xem <i class="pi pi-arrow-right text-xs"></i
+        ></a>
       </div>
 
       <div class="kpi-card kpi-amber">
@@ -42,7 +43,12 @@
           <p class="kpi-value">{{ stats.pendingOrders | number }}</p>
           <p class="kpi-label">Chờ xác nhận</p>
         </div>
-        <a routerLink="/seller/orders" [queryParams]="{status: 'PENDING'}" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+        <a
+          routerLink="/seller/orders"
+          [queryParams]="{ status: 'PENDING' }"
+          class="kpi-link"
+          >Xem <i class="pi pi-arrow-right text-xs"></i
+        ></a>
       </div>
 
       <div class="kpi-card kpi-blue">
@@ -51,7 +57,12 @@
           <p class="kpi-value">{{ stats.processingOrders | number }}</p>
           <p class="kpi-label">Đang xử lý</p>
         </div>
-        <a routerLink="/seller/orders" [queryParams]="{status: 'PROCESSING'}" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+        <a
+          routerLink="/seller/orders"
+          [queryParams]="{ status: 'PROCESSING' }"
+          class="kpi-link"
+          >Xem <i class="pi pi-arrow-right text-xs"></i
+        ></a>
       </div>
 
       <div class="kpi-card kpi-purple">
@@ -60,33 +71,123 @@
           <p class="kpi-value">{{ formatPrice(stats.totalRevenue) }}</p>
           <p class="kpi-label">Doanh thu</p>
         </div>
-        <a routerLink="/seller/finance" class="kpi-link">Xem <i class="pi pi-arrow-right text-xs"></i></a>
+        <a routerLink="/seller/finance" class="kpi-link"
+          >Xem <i class="pi pi-arrow-right text-xs"></i
+        ></a>
+      </div>
+
+      <div class="kpi-card kpi-indigo">
+        <div class="kpi-icon"><i class="pi pi-check-circle"></i></div>
+        <div class="kpi-body">
+          <p class="kpi-value">{{ formatPrice(stats.availableBalance) }}</p>
+          <p class="kpi-label">Số dư khả dụng</p>
+        </div>
+        <a routerLink="/seller/finance" class="kpi-link"
+          >Rút tiền <i class="pi pi-arrow-right text-xs"></i
+        ></a>
+      </div>
+
+      <div class="kpi-card kpi-slate">
+        <div class="kpi-icon"><i class="pi pi-lock"></i></div>
+        <div class="kpi-body">
+          <p class="kpi-value">{{ formatPrice(stats.lockedBalance) }}</p>
+          <p class="kpi-label">Đang tạm giữ</p>
+        </div>
+        <a routerLink="/seller/finance" class="kpi-link"
+          >Xem <i class="pi pi-arrow-right text-xs"></i
+        ></a>
       </div>
     </ng-container>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Revenue Chart -->
+    <div class="section-card lg:col-span-2">
+      <div class="section-header">
+        <h2 class="section-title">Doanh thu theo ngày (30 ngày gần nhất)</h2>
+      </div>
+      <div *ngIf="isBrowser" echarts [options]="revenueChartOption" class="chart-container"></div>
+    </div>
+
+    <!-- Status Pie Chart -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Phân bổ đơn hàng</h2>
+      </div>
+      <div
+        *ngIf="isBrowser"
+        echarts
+        [options]="statusChartOption"
+        class="chart-container-small"
+      ></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Top Products -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Top 5 sản phẩm bán chạy</h2>
+      </div>
+      <div
+        *ngIf="isBrowser"
+        echarts
+        [options]="topProductsChartOption"
+        class="chart-container-small"
+      ></div>
+    </div>
+
+    <!-- Rating Summary (Placeholder for now) -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Đánh giá cửa hàng</h2>
+      </div>
+      <div class="flex flex-col items-center justify-center h-[300px]">
+        <div class="text-5xl font-bold text-yellow-500 mb-2">
+          {{ stats?.averageRating || 0 }}
+        </div>
+        <div class="flex gap-1 text-yellow-500 mb-4">
+          <i
+            class="pi pi-star-fill text-2xl"
+            *ngFor="let i of [1, 2, 3, 4, 5]"
+          ></i>
+        </div>
+        <p class="text-gray-500">Dựa trên các đánh giá của khách hàng</p>
+      </div>
+    </div>
   </div>
 
   <!-- Recent Orders -->
   <div class="section-card">
     <div class="section-header">
       <h2 class="section-title">Đơn hàng gần đây</h2>
-      <a routerLink="/seller/orders" class="section-link">Xem tất cả <i class="pi pi-arrow-right text-xs"></i></a>
+      <a routerLink="/seller/orders" class="section-link"
+        >Xem tất cả <i class="pi pi-arrow-right text-xs"></i
+      ></a>
     </div>
 
     <!-- Skeleton -->
     <ng-container *ngIf="isLoadingStats">
-      <div class="order-row" *ngFor="let i of [1,2,3]">
+      <div class="order-row" *ngFor="let i of [1, 2, 3]">
         <p-skeleton height="48px" borderRadius="8px"></p-skeleton>
       </div>
     </ng-container>
 
     <!-- Empty -->
-    <div class="empty-state" *ngIf="!isLoadingStats && (!stats?.recentOrders?.length)">
+    <div
+      class="empty-state"
+      *ngIf="!isLoadingStats && !stats?.recentOrders?.length"
+    >
       <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
       <p class="text-gray-500 text-sm">Chưa có đơn hàng nào</p>
     </div>
 
     <!-- Orders table -->
-    <div class="orders-table-container" *ngIf="!isLoadingStats && stats?.recentOrders?.length">
+    <div
+      class="orders-table-container"
+      *ngIf="!isLoadingStats && stats?.recentOrders?.length"
+    >
       <div class="orders-table">
         <div class="table-header">
           <span>Mã đơn</span>
@@ -102,13 +203,20 @@
         >
           <span class="order-code">{{ order.orderCode }}</span>
           <span class="order-product">{{ order.firstItemName }}</span>
-          <span class="order-amount">{{ formatPrice(order.totalAmount ?? 0) }}</span>
+          <span class="order-amount">{{
+            formatPrice(order.totalAmount ?? 0)
+          }}</span>
           <span>
-            <span class="badge" [ngClass]="getOrderStatusClass(order.orderStatus)">
+            <span
+              class="badge"
+              [ngClass]="getOrderStatusClass(order.orderStatus)"
+            >
               {{ getOrderStatusLabel(order.orderStatus) }}
             </span>
           </span>
-          <span class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</span>
+          <span class="order-date">{{
+            order.createdAt | date: "dd/MM/yyyy"
+          }}</span>
         </a>
       </div>
     </div>
@@ -118,7 +226,11 @@
   <div class="quick-actions">
     <h2 class="section-title mb-4">Thao tác nhanh</h2>
     <div class="actions-grid">
-      <a routerLink="/seller/products" [queryParams]="{action: 'create'}" class="action-card action-emerald">
+      <a
+        routerLink="/seller/products"
+        [queryParams]="{ action: 'create' }"
+        class="action-card action-emerald"
+      >
         <i class="pi pi-plus-circle text-2xl mb-2"></i>
         <span>Thêm sản phẩm</span>
       </a>
@@ -136,5 +248,4 @@
       </a>
     </div>
   </div>
-
 </div>

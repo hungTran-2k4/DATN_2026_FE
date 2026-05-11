@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { PaginatorModule } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
@@ -48,7 +49,10 @@ export class UserOrdersComponent implements OnInit {
     { label: 'Đã hủy', value: 'CANCELLED' },
   ];
 
-  constructor(private apiService: ApiBaseService) {}
+  // Shipment tracking
+  shipmentInfo: any = null;
+
+  constructor(private apiService: ApiBaseService, private http: HttpClient) {}
 
   ngOnInit() {
     this.loadOrders();
@@ -113,14 +117,26 @@ export class UserOrdersComponent implements OnInit {
     this.showDetail = true;
     this.selectedOrder = null;
     this.isLoadingDetail = true;
+    this.shipmentInfo = null;
     this.apiService.orders(order.id!).subscribe({
       next: (res) => {
         this.selectedOrder = res.data;
         this.isLoadingDetail = false;
+        // Load tracking info nếu đơn đang giao hoặc đã giao
+        const status = res.data?.orderStatus;
+        if (status === 'SHIPPED' || status === 'DELIVERED') {
+          this.loadShipmentTracking(order.id!);
+        }
       },
       error: () => {
         this.isLoadingDetail = false;
       }
+    });
+  }
+
+  loadShipmentTracking(orderId: string) {
+    this.http.get<any>(`/api/Shipping/tracking/${orderId}`).subscribe({
+      next: (res) => { if (res.success) this.shipmentInfo = res.data; },
     });
   }
 

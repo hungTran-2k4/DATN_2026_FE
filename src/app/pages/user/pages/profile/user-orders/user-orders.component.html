@@ -141,6 +141,35 @@
         </div>
       </div>
 
+      <!-- Shipment Tracking (GHN) -->
+      <div *ngIf="shipmentInfo" class="mb-8">
+        <h4 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3">Thông tin vận chuyển</h4>
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+           <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                 <i class="pi pi-truck text-indigo-600"></i>
+              </div>
+              <div>
+                 <p class="text-sm font-bold text-gray-900">{{ shipmentInfo.provider || 'GHN' }}</p>
+                 <p class="text-xs text-gray-500">Mã vận đơn: <span class="font-bold text-indigo-600">{{ shipmentInfo.trackingCode || 'N/A' }}</span></p>
+              </div>
+              <span class="ml-auto px-2.5 py-1 text-[10px] font-bold rounded-full"
+                    [ngClass]="shipmentInfo.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'">
+                {{ shipmentInfo.status === 'DELIVERED' ? 'Đã giao' : 'Đang giao' }}
+              </span>
+           </div>
+           <div class="flex flex-col gap-1 text-xs text-gray-600">
+              <div class="flex justify-between" *ngIf="shipmentInfo.shippingFee">
+                 <span>Phí vận chuyển</span>
+                 <span class="font-bold">{{ formatPrice(shipmentInfo.shippingFee) }}</span>
+              </div>
+              <div class="flex justify-between" *ngIf="shipmentInfo.expectedDeliveryDate">
+                 <span>Dự kiến giao</span>
+                 <span class="font-bold">{{ shipmentInfo.expectedDeliveryDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+           </div>
+        </div>
+      </div>
       <!-- Product List -->
       <div class="mb-8">
         <h4 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">Sản phẩm đã mua</h4>

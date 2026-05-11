@@ -56,28 +56,8 @@
       </a>
     </nav>
 
-    <!-- Footer Area (Fixed to bottom) -->
+    <!-- Footer Area (User Info) -->
     <div class="sidebar-footer">
-      <div class="nav-section-label" *ngIf="!sidebarCollapsed">Cài đặt</div>
-      <nav
-        class="nav-menu nav-menu--bottom"
-        [class.items-center]="sidebarCollapsed"
-      >
-        <a
-          *ngFor="let item of bottomItems"
-          [routerLink]="item.route"
-          routerLinkActive="is-active"
-          class="nav-link"
-          [pTooltip]="sidebarCollapsed ? item.label : ''"
-          tooltipPosition="right"
-        >
-          <i [class]="item.icon"></i>
-          <span class="nav-label" *ngIf="!sidebarCollapsed">{{
-            item.label
-          }}</span>
-        </a>
-      </nav>
-
       <!-- User info -->
       <div class="sidebar-user" [class.justify-center]="sidebarCollapsed">
         <span class="user-avatar" [class.user-avatar--sm]="sidebarCollapsed">{{

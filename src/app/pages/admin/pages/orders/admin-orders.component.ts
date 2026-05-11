@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subject, takeUntil } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -12,27 +11,31 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { TextareaModule } from 'primeng/textarea';
-import { OrderSummaryDto, OrderDto } from '../../../../shared/api/generated/api-service-base.service';
-import { SellerFacade } from '../../../../features/seller/seller.facade';
-import { SellerRegistrationService } from '../../../../features/seller-registration/model/seller-registration.service';
-import { OrderPagedResult } from '../../../../entities/order/model/seller-order.repository';
+import { OrderSummaryDto, OrderDto, ApiBaseService, UpdateStatusRequest } from '../../../../shared/api/generated/api-service-base.service';
+
+export interface OrderPagedResult {
+  items: OrderSummaryDto[];
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  totalRecords: number;
+}
 
 @Component({
-  selector: 'app-seller-orders',
+  selector: 'app-admin-orders',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterLink,
+    CommonModule, FormsModule,
     ButtonModule, SkeletonModule, ToastModule,
     PaginatorModule, DialogModule, DropdownModule, TextareaModule,
   ],
   providers: [MessageService],
-  templateUrl: './seller-orders.component.html',
-  styleUrl: './seller-orders.component.scss',
+  templateUrl: './admin-orders.component.html',
+  styleUrl: './admin-orders.component.scss',
 })
-export class SellerOrdersComponent implements OnInit, OnDestroy {
+export class AdminOrdersComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  shopId = '';
   result: OrderPagedResult = { items: [], pageNumber: 1, pageSize: 20, totalPages: 0, totalRecords: 0 };
   isLoading = true;
   selectedStatus = '';
@@ -52,10 +55,6 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   statusNote = '';
   isUpdating = false;
 
-  // Shipment tracking
-  shipmentInfo: any = null;
-  isCreatingShipment = false;
-
   readonly statusTabs = [
     { label: 'Tất cả', value: '' },
     { label: 'Chờ xác nhận', value: 'PENDING' },
@@ -68,42 +67,47 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
 
   readonly nextStatusOptions: Record<string, { label: string; value: string }[]> = {
     PENDING: [{ label: 'Xác nhận đơn', value: 'PROCESSING' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
-    PROCESSING: [{ label: 'Tạo vận đơn & Gửi hàng (GHN)', value: 'SHIPPED' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
+    PROCESSING: [{ label: 'Đang giao', value: 'SHIPPED' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
     SHIPPED: [{ label: 'Xác nhận đã giao', value: 'DELIVERED' }],
     DELIVERED: [{ label: 'Trả hàng/Hoàn tiền', value: 'RETURNED' }],
   };
 
   constructor(
-    private readonly sellerFacade: SellerFacade,
-    private readonly sellerService: SellerRegistrationService,
     private readonly messageService: MessageService,
-    private readonly route: ActivatedRoute,
     private readonly http: HttpClient,
+    private readonly api: ApiBaseService,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-
-    // Read status from query params
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.selectedStatus = params['status'] ?? '';
-    });
-
-    this.sellerService.shopInfo$.pipe(takeUntil(this.destroy$)).subscribe((shop) => {
-      if (shop?.id) { this.shopId = shop.id; this.loadOrders(); }
-    });
-    this.sellerService.initState();
+    this.loadOrders();
   }
 
-  ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+  ngOnDestroy(): void { 
+    this.destroy$.next(); 
+    this.destroy$.complete(); 
+  }
 
   loadOrders(): void {
-    if (!this.shopId) return;
     this.isLoading = true;
-    this.sellerFacade.getOrders(this.shopId, this.selectedStatus || undefined, this.currentPage, this.pageSize)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({ next: (r) => { this.result = r; this.isLoading = false; }, error: () => { this.isLoading = false; } });
+    let url = `/api/orders/all?page=${this.currentPage}&pageSize=${this.pageSize}`;
+    if (this.selectedStatus) {
+      url += `&status=${this.selectedStatus}`;
+    }
+    this.http.get<any>(url).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.result = {
+          items: res.data ?? [],
+          pageNumber: res.pageNumber ?? 1,
+          pageSize: res.pageSize ?? 20,
+          totalPages: res.totalPages ?? 0,
+          totalRecords: res.totalRecords ?? 0
+        };
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
   }
 
   onTabChange(status: string): void {
@@ -122,8 +126,11 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     this.showDetail = true;
     this.selectedOrder = null;
     this.isLoadingDetail = true;
-    this.sellerFacade.getOrderDetail(order.id!).subscribe({
-      next: (o) => { this.selectedOrder = o ?? null; this.isLoadingDetail = false; },
+    this.api.orders(order.id!).subscribe({
+      next: (res) => { 
+        this.selectedOrder = res.data ?? null; 
+        this.isLoadingDetail = false; 
+      },
       error: () => { this.isLoadingDetail = false; },
     });
   }
@@ -138,56 +145,21 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   updateStatus(): void {
     if (!this.newStatus || !this.updatingOrderId) return;
 
-    // ── Nếu chuyển sang SHIPPED → Gọi GHN tạo vận đơn ──
-    if (this.newStatus === 'SHIPPED') {
-      this.isCreatingShipment = true;
-      this.isUpdating = true;
-      this.http.post<any>(`/api/Shipping/create-shipment/${this.updatingOrderId}`, {}).subscribe({
-        next: (res) => {
-          this.isCreatingShipment = false;
-          this.isUpdating = false;
-          this.showStatusDialog = false;
-          if (res.success) {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Tạo vận đơn thành công',
-              detail: `Mã vận đơn GHN: ${res.data?.trackingCode || 'N/A'}`,
-              life: 5000
-            });
-            this.loadOrders();
-          } else {
-            this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.message || 'Không thể tạo vận đơn GHN.' });
-          }
-        },
-        error: (err) => {
-          this.isCreatingShipment = false;
-          this.isUpdating = false;
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể kết nối GHN. Vui lòng thử lại.' });
-        },
-      });
-      return;
-    }
-
-    // ── Các trạng thái khác: Cập nhật bình thường ──
     this.isUpdating = true;
-    this.sellerFacade.updateOrderStatus(this.updatingOrderId, this.newStatus, this.statusNote || undefined).subscribe({
-      next: (ok) => {
+    const req = new UpdateStatusRequest({ newStatus: this.newStatus, note: this.statusNote || undefined });
+    this.api.statusPATCH(this.updatingOrderId, req).subscribe({
+      next: (res) => {
         this.isUpdating = false;
         this.showStatusDialog = false;
-        if (ok) {
+        if (res.data) {
           this.messageService.add({ severity: 'success', summary: 'Cập nhật thành công', detail: 'Trạng thái đơn hàng đã được cập nhật.' });
           this.loadOrders();
         }
       },
-      error: () => { this.isUpdating = false; this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể cập nhật trạng thái.' }); },
-    });
-  }
-
-  // ── Xem tracking GHN ──
-  loadShipmentInfo(orderId: string): void {
-    this.shipmentInfo = null;
-    this.http.get<any>(`/api/Shipping/tracking/${orderId}`).subscribe({
-      next: (res) => { if (res.success) this.shipmentInfo = res.data; },
+      error: () => { 
+        this.isUpdating = false; 
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể cập nhật trạng thái.' }); 
+      },
     });
   }
 
@@ -208,7 +180,6 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   parseAddress(addressJson?: string): any {
     if (!addressJson) return { fullName: 'N/A', phoneNumber: '', detailedAddress: 'N/A' };
     try {
-      // Handle potential double encoding or raw string
       const addr = typeof addressJson === 'string' && addressJson.startsWith('{') 
         ? JSON.parse(addressJson) 
         : addressJson;

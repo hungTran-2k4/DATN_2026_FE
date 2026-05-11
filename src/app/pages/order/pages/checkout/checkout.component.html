@@ -103,26 +103,28 @@
              </div>
           </div>
 
-          <!-- Block 2: Shipping Options -->
+          <!-- Block 2: Shipping (GHN Dynamic) -->
           <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100">
              <h2 class="text-base md:text-lg font-black text-gray-900 mb-4 flex items-center gap-2"><i class="pi pi-truck text-gray-400"></i> PHƯƠNG THỨC VẬN CHUYỂN</h2>
-             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                <div *ngFor="let opt of shippingOptions" 
-                     (click)="selectedShipping = opt.id; updateTotal()"
-                     class="border-2 rounded-xl p-4 cursor-pointer relative overflow-hidden transition-all group"
-                     [ngClass]="selectedShipping === opt.id ? 'border-user-primary bg-emerald-50/10' : 'border-gray-100 hover:border-gray-200'">
-                   
-                   <div *ngIf="selectedShipping === opt.id" class="absolute top-0 right-0 w-0 h-0 border-[16px] border-transparent border-t-user-primary border-r-user-primary">
-                     <i class="pi pi-check text-white absolute -top-3.5 -right-3 text-[9px] font-bold"></i>
-                   </div>
+             
+             <div class="border-2 rounded-xl p-4 border-user-primary bg-emerald-50/10 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-0 h-0 border-[16px] border-transparent border-t-user-primary border-r-user-primary">
+                  <i class="pi pi-check text-white absolute -top-3.5 -right-3 text-[9px] font-bold"></i>
+                </div>
 
-                   <div class="flex justify-between items-start mb-2">
-                      <span class="font-bold text-gray-900 text-sm group-hover:text-user-primary transition-colors">{{opt.name}}</span>
-                      <span class="font-black text-user-primary text-sm">{{formatPrice(opt.price)}}</span>
+                <div class="flex justify-between items-start mb-2">
+                   <div class="flex items-center gap-2">
+                      <span class="font-bold text-gray-900 text-sm">Giao Hàng Nhanh (GHN)</span>
+                      <span class="text-[9px] font-black uppercase text-white bg-user-primary px-1.5 py-0.5 rounded">Mặc định</span>
                    </div>
-                   <div class="text-[11px] font-medium text-gray-400 flex items-center gap-1">
-                      <i class="pi pi-clock text-[9px]"></i> {{opt.duration}}
+                   <div class="text-right">
+                      <span *ngIf="!shippingFeeLoading" class="font-black text-user-primary text-sm">{{formatPrice(shippingFee)}}</span>
+                      <span *ngIf="shippingFeeLoading" class="text-xs text-gray-400 font-bold"><i class="pi pi-spin pi-spinner mr-1"></i>Đang tính...</span>
                    </div>
+                </div>
+                <div class="text-[11px] font-medium text-gray-400 flex items-center gap-1">
+                   <i class="pi pi-clock text-[9px]"></i> 
+                   {{shippingEstimate || 'Chọn địa chỉ để xem thời gian giao hàng'}}
                 </div>
              </div>
           </div>

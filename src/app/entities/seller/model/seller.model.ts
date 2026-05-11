@@ -16,6 +16,9 @@ export interface SellerShopInfo {
   description?: string;
   logoUrl?: string;
   coverUrl?: string;
+  provinceId?: number;
+  districtId?: number;
+  wardId?: number;
   pickupAddress?: string;
   approvalStatus: number; // 1=Pending, 2=Approved, 3=Rejected, 4=Suspended
   isActive?: boolean;

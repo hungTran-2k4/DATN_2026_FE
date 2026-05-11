@@ -1,5 +1,5 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
@@ -43,11 +43,10 @@ export class SellerLayoutComponent implements OnInit {
     { label: 'Khuyến mãi', icon: 'pi pi-ticket', route: '/seller/promotions' },
     { label: 'Tài chính', icon: 'pi pi-wallet', route: '/seller/finance' },
     { label: 'Đánh giá', icon: 'pi pi-star', route: '/seller/reviews' },
-  ];
-
-  readonly bottomItems: SellerNavItem[] = [
     { label: 'Cài đặt shop', icon: 'pi pi-cog', route: '/seller/settings' },
   ];
+
+  readonly bottomItems: SellerNavItem[] = [];
 
   sellerName = '';
   sellerEmail = '';
@@ -59,13 +58,18 @@ export class SellerLayoutComponent implements OnInit {
     public readonly authSession: AuthSessionService,
     private readonly api: ApiBaseService,
     private readonly router: Router,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {
-    this.checkScreenSize();
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
+    }
   }
 
   @HostListener('window:resize')
   onResize() {
-    this.checkScreenSize();
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
+    }
   }
 
   private checkScreenSize() {

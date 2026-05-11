@@ -40,7 +40,8 @@ import { CartService } from '../../../../features/cart/model/cart.service';
 export class CheckoutComponent implements OnInit {
   cartItems: CartItemDto[] = [];
   merchandiseSubtotal = 0;
-  shippingFee = 35000;
+  shippingFee = 0;
+  shippingFeeLoading = false;
   discount = 0;
   totalPayment = 0;
 
@@ -63,21 +64,9 @@ export class CheckoutComponent implements OnInit {
   districts: any[] = [];
   wards: any[] = [];
 
-  shippingOptions = [
-    {
-      id: 'express',
-      name: 'Giao Hàng Nhanh',
-      duration: 'Nhận hàng sau 2-3 ngày',
-      price: 35000,
-    },
-    {
-      id: 'standard',
-      name: 'Giao Hàng Tiết Kiệm',
-      duration: 'Nhận hàng sau 4-5 ngày',
-      price: 15000,
-    },
-  ];
-  selectedShipping: string = 'express';
+  // Shipping: dùng GHN động thay vì cố định
+  shippingProvider = 'GHN';
+  shippingEstimate = '';
 
   paymentMethods = [
     {
@@ -113,13 +102,17 @@ export class CheckoutComponent implements OnInit {
             name: a.fullName,
             phone: a.phoneNumber,
             address: a.detailedAddress,
-            isDefault: a.isDefault
+            isDefault: a.isDefault,
+            districtId: a.districtId,
+            wardId: a.wardId,
           }));
           const defaultAddr = this.savedAddresses.find(a => a.isDefault);
           if (defaultAddr) {
             this.selectedAddressId = defaultAddr.id;
+            this.calculateShippingFee();
           } else if (this.savedAddresses.length > 0) {
             this.selectedAddressId = this.savedAddresses[0].id;
+            this.calculateShippingFee();
           }
         }
       }
@@ -136,10 +129,17 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
+  // ─── GHN Address API (thay thế provinces.open-api.vn) ────
+
   fetchProvinces() {
-    this.http.get<any[]>('https://provinces.open-api.vn/api/p/').subscribe({
-      next: (data) => (this.provinces = data),
-      error: (err) => console.error('Failed to fetch provinces', err),
+    this.http.get<any>('/api/Shipping/ghn/provinces').subscribe({
+      next: (res) => {
+        this.provinces = (res.data || []).map((p: any) => ({
+          code: p.ProvinceID,
+          name: p.ProvinceName,
+        }));
+      },
+      error: (err) => console.error('Failed to fetch GHN provinces', err),
     });
   }
 
@@ -150,11 +150,14 @@ export class CheckoutComponent implements OnInit {
     this.newAddress.ward = null;
     if (this.newAddress.province) {
       this.http
-        .get<any>(
-          `https://provinces.open-api.vn/api/p/${this.newAddress.province.code}?depth=2`,
-        )
+        .get<any>(`/api/Shipping/ghn/districts/${this.newAddress.province.code}`)
         .subscribe({
-          next: (data) => (this.districts = data.districts || []),
+          next: (res) => {
+            this.districts = (res.data || []).map((d: any) => ({
+              code: d.DistrictID,
+              name: d.DistrictName,
+            }));
+          },
         });
     }
   }
@@ -164,14 +167,59 @@ export class CheckoutComponent implements OnInit {
     this.newAddress.ward = null;
     if (this.newAddress.district) {
       this.http
-        .get<any>(
-          `https://provinces.open-api.vn/api/d/${this.newAddress.district.code}?depth=2`,
-        )
+        .get<any>(`/api/Shipping/ghn/wards/${this.newAddress.district.code}`)
         .subscribe({
-          next: (data) => (this.wards = data.wards || []),
+          next: (res) => {
+            this.wards = (res.data || []).map((w: any) => ({
+              code: w.WardCode,
+              name: w.WardName,
+            }));
+          },
         });
     }
   }
+
+  // ─── Dynamic Shipping Fee (GHN API) ─────────────────────
+
+  calculateShippingFee() {
+    const addr = this.getSelectedAddress();
+    if (!addr || !addr.districtId) {
+      this.shippingFee = 30000; // Fallback
+      this.shippingEstimate = '';
+      this.updateTotal();
+      return;
+    }
+
+    this.shippingFeeLoading = true;
+    this.http.post<any>('/api/Shipping/calculate-fee', {
+      fromDistrictId: 0, // Backend sẽ lấy từ Shop
+      fromWardCode: '',
+      toDistrictId: addr.districtId,
+      toWardCode: addr.wardId?.toString() || '',
+      weight: 500,
+      insuranceValue: Math.min(Math.round(this.merchandiseSubtotal), 5000000),
+    }).subscribe({
+      next: (res) => {
+        this.shippingFeeLoading = false;
+        if (res.success && res.data) {
+          this.shippingFee = res.data.totalFee;
+          this.shippingEstimate = 'Giao hàng dự kiến 2-3 ngày';
+        } else {
+          this.shippingFee = 30000;
+          this.shippingEstimate = '';
+        }
+        this.updateTotal();
+      },
+      error: () => {
+        this.shippingFeeLoading = false;
+        this.shippingFee = 30000; // Fallback
+        this.shippingEstimate = '';
+        this.updateTotal();
+      }
+    });
+  }
+
+  // ─── Address Management ─────────────────────────────────
 
   openAddressModal() {
     this.showAddressDialog = true;
@@ -180,6 +228,7 @@ export class CheckoutComponent implements OnInit {
 
   confirmSelectAddress() {
     this.showAddressDialog = false;
+    this.calculateShippingFee(); // Tính lại phí ship khi đổi địa chỉ
   }
 
   triggerNewAddressForm() {
@@ -200,13 +249,13 @@ export class CheckoutComponent implements OnInit {
     }
     const fullAddress = `${this.newAddress.street}, ${this.newAddress.ward.name}, ${this.newAddress.district.name}, ${this.newAddress.province.name}`;
     
-    // Save to backend
+    // Lưu mã GHN vào backend (thay vì mã open-api)
     this.apiService.addressesPOST(new AddAddressCommand({
        fullName: this.newAddress.name,
        phoneNumber: this.newAddress.phone,
-       provinceId: this.newAddress.province.code,
-       districtId: this.newAddress.district.code,
-       wardId: this.newAddress.ward.code,
+       provinceId: Number(this.newAddress.province.code),
+       districtId: Number(this.newAddress.district.code),
+       wardId: Number(this.newAddress.ward.code),
        detailedAddress: fullAddress,
        isDefault: this.savedAddresses.length === 0,
     })).subscribe({
@@ -228,6 +277,8 @@ export class CheckoutComponent implements OnInit {
     return this.savedAddresses.find((a) => a.id === this.selectedAddressId);
   }
 
+  // ─── Formatting & Totals ─────────────────────────────────
+
   formatPrice(price?: number): string {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -236,13 +287,11 @@ export class CheckoutComponent implements OnInit {
   }
 
   updateTotal() {
-    const shipping = this.shippingOptions.find(
-      (opt) => opt.id === this.selectedShipping,
-    );
-    this.shippingFee = shipping ? shipping.price : 0;
     this.totalPayment =
       this.merchandiseSubtotal + this.shippingFee - this.discount;
   }
+
+  // ─── Place Order ─────────────────────────────────────────
 
   placeOrder() {
     if (this.cartItems.length === 0) {
