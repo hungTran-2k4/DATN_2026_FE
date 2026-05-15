@@ -65,6 +65,7 @@ export class AdminLayoutComponent implements OnInit {
     { label: 'Thương hiệu', icon: 'pi pi-star', route: '/admin/brands' },
     { label: 'Người dùng', icon: 'pi pi-users', route: '/admin/users' },
     { label: 'Shop', icon: 'pi pi-shop', route: '/admin/shops' },
+    { label: 'Dòng tiền', icon: 'pi pi-wallet', route: '/admin/finance' },
     { label: 'Báo cáo', icon: 'pi pi-chart-bar', route: '/admin/reports' },
   ];
 

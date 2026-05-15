@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject, Optional } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+
 import { Subject, takeUntil } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -12,7 +13,7 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { TextareaModule } from 'primeng/textarea';
-import { OrderSummaryDto, OrderDto } from '../../../../shared/api/generated/api-service-base.service';
+import { OrderSummaryDto, OrderDto, ApiBaseService, API_BASE_URL, CreateShipmentPayload } from '../../../../shared/api/generated/api-service-base.service';
 import { SellerFacade } from '../../../../features/seller/seller.facade';
 import { SellerRegistrationService } from '../../../../features/seller-registration/model/seller-registration.service';
 import { OrderPagedResult } from '../../../../entities/order/model/seller-order.repository';
@@ -62,14 +63,15 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     { label: 'Chờ lấy hàng', value: 'PROCESSING' },
     { label: 'Đang giao', value: 'SHIPPED' },
     { label: 'Đã giao', value: 'DELIVERED' },
+    { label: 'Hoàn thành', value: 'COMPLETED' },
     { label: 'Trả hàng', value: 'RETURNED' },
     { label: 'Đã hủy', value: 'CANCELLED' },
   ];
 
   readonly nextStatusOptions: Record<string, { label: string; value: string }[]> = {
-    PENDING: [{ label: 'Xác nhận đơn', value: 'PROCESSING' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
-    PROCESSING: [{ label: 'Tạo vận đơn & Gửi hàng (GHN)', value: 'SHIPPED' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
-    SHIPPED: [{ label: 'Xác nhận đã giao', value: 'DELIVERED' }],
+    PENDING: [{ label: 'Xác nhận đơn & Chuẩn bị hàng', value: 'PROCESSING' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
+    PROCESSING: [{ label: 'Bàn giao cho đơn vị vận chuyển', value: 'SHIPPED' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
+    SHIPPED: [{ label: 'Xác nhận đã giao (Mô phỏng)', value: 'DELIVERED' }],
     DELIVERED: [{ label: 'Trả hàng/Hoàn tiền', value: 'RETURNED' }],
   };
 
@@ -78,7 +80,9 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     private readonly sellerService: SellerRegistrationService,
     private readonly messageService: MessageService,
     private readonly route: ActivatedRoute,
+    private readonly api: ApiBaseService,
     private readonly http: HttpClient,
+    @Optional() @Inject(API_BASE_URL) private readonly baseUrl: string,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
 
@@ -91,9 +95,17 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     });
 
     this.sellerService.shopInfo$.pipe(takeUntil(this.destroy$)).subscribe((shop) => {
-      if (shop?.id) { this.shopId = shop.id; this.loadOrders(); }
+      if (shop?.id) { 
+        this.shopId = shop.id; 
+        this.loadOrders(); 
+      }
     });
     this.sellerService.initState();
+
+    // Fallback: Nếu sau 3s vẫn không có shopId thì ẩn loading để tránh kẹt skeletons
+    setTimeout(() => {
+      if (!this.shopId) this.isLoading = false;
+    }, 3000);
   }
 
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -142,7 +154,11 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     if (this.newStatus === 'SHIPPED') {
       this.isCreatingShipment = true;
       this.isUpdating = true;
-      this.http.post<any>(`/api/Shipping/create-shipment/${this.updatingOrderId}`, {}).subscribe({
+      const payload = new CreateShipmentPayload({ 
+        note: this.statusNote ? this.statusNote : undefined,
+        weight: 500 // Mặc định 500g
+      });
+      this.api.createShipment(this.updatingOrderId, payload).subscribe({
         next: (res) => {
           this.isCreatingShipment = false;
           this.isUpdating = false;
@@ -183,16 +199,51 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ── MÔ PHỎNG GHN WEBHOOK ──
+  simulateGhnDelivery(order: OrderSummaryDto): void {
+    const payload = {
+      ClientOrderCode: order.orderCode,
+      Status: 'delivered',
+      Type: 'switch_status'
+    };
+
+    this.isLoading = true;
+    const url = `${this.baseUrl}/api/Shipping/webhook/ghn`;
+    
+    this.http.post(url, payload).subscribe({
+      next: () => {
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: 'Mô phỏng thành công', 
+          detail: 'Đã gửi tín hiệu Delivered giả lập cho đơn ' + order.orderCode 
+        });
+        this.loadOrders();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Simulate error:', err);
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể gửi tín hiệu giả lập. Kiểm tra console.' });
+      }
+    });
+  }
+
   // ── Xem tracking GHN ──
   loadShipmentInfo(orderId: string): void {
     this.shipmentInfo = null;
-    this.http.get<any>(`/api/Shipping/tracking/${orderId}`).subscribe({
+    this.api.tracking(orderId).subscribe({
       next: (res) => { if (res.success) this.shipmentInfo = res.data; },
     });
   }
 
   getStatusLabel(status?: string): string {
-    const map: Record<string, string> = { PENDING: 'Chờ xác nhận', PROCESSING: 'Chờ lấy hàng', SHIPPED: 'Đang giao', DELIVERED: 'Đã giao', RETURNED: 'Trả hàng', CANCELLED: 'Đã hủy' };
+    const map: Record<string, string> = { 
+      PENDING: 'Chờ xác nhận', 
+      PROCESSING: 'Chờ Shipper lấy hàng', 
+      SHIPPED: 'Đang giao hàng', 
+      DELIVERED: 'Đã giao hàng', 
+      RETURNED: 'Trả hàng', 
+      CANCELLED: 'Đã hủy' 
+    };
     return map[status ?? ''] ?? status ?? '';
   }
 
@@ -235,7 +286,7 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   }
 
   canUpdateStatus(status?: string): boolean {
-    return ['PENDING', 'PROCESSING', 'SHIPPED'].includes(status ?? '');
+    return ['PENDING', 'PROCESSING'].includes(status ?? '');
   }
 
   getPaymentStatusLabel(status?: string): string {

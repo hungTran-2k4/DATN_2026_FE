@@ -167,7 +167,6 @@
 
         <button
           (click)="goToSellerCenter()"
-          *ngIf="authSession.isSeller()"
           class="flex items-center gap-2 py-2 text-left transition-colors mt-4 pt-4 border-t border-gray-200 w-full group"
           [ngClass]="
             authSession.isSeller()
@@ -176,9 +175,9 @@
           "
         >
           <div class="w-5 flex justify-center">
-            <i class="pi pi-shop text-green-500"></i>
+            <i class="pi pi-shop" [ngClass]="authSession.isSeller() ? 'text-green-500' : 'text-gray-400'"></i>
           </div>
-          <span>Kênh người bán</span>
+          <span>{{ authSession.isSeller() ? 'Kênh Người Bán' : 'Trở thành Người bán' }}</span>
           <!-- Badge trạng thái -->
           <ng-container *ngIf="sellerState$ | async as state">
             <span
@@ -194,10 +193,7 @@
           </ng-container>
           <i
             class="pi pi-external-link text-[10px] ml-auto text-gray-400 group-hover:text-user-primary"
-            *ngIf="
-              (sellerState$ | async) !== 'pending' &&
-              (sellerState$ | async) !== 'approved'
-            "
+            *ngIf="!authSession.isSeller() && (sellerState$ | async) !== 'pending'"
           ></i>
         </button>
       </nav>
@@ -424,9 +420,17 @@
         <app-user-orders></app-user-orders>
       </div>
 
+      <!-- Addresses -->
+      <div
+        *ngIf="activeMenu === 'address'"
+        class="bg-white rounded-sm shadow-sm border border-gray-100 p-6 md:p-8 animate-fade-in min-h-[500px]"
+      >
+        <app-user-addresses></app-user-addresses>
+      </div>
+
       <!-- Placeholder for other menus -->
       <div
-        *ngIf="activeMenu !== 'profile' && activeMenu !== 'purchases'"
+        *ngIf="activeMenu !== 'profile' && activeMenu !== 'purchases' && activeMenu !== 'address'"
         class="bg-white rounded-sm shadow-sm border border-gray-100 p-8 animate-fade-in flex flex-col items-center justify-center min-h-[500px]"
       >
         <i class="pi pi-cog text-5xl text-gray-300 mb-4"></i>

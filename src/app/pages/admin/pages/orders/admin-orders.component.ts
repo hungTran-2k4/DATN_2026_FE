@@ -11,15 +11,9 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { TextareaModule } from 'primeng/textarea';
-import { OrderSummaryDto, OrderDto, ApiBaseService, UpdateStatusRequest } from '../../../../shared/api/generated/api-service-base.service';
+import { OrderSummaryDto, OrderDto, ApiBaseService, UpdateStatusRequest, OrderSummaryDtoIEnumerablePagedResponse } from '../../../../shared/api/generated/api-service-base.service';
 
-export interface OrderPagedResult {
-  items: OrderSummaryDto[];
-  pageNumber: number;
-  pageSize: number;
-  totalPages: number;
-  totalRecords: number;
-}
+export type OrderPagedResult = OrderSummaryDtoIEnumerablePagedResponse;
 
 @Component({
   selector: 'app-admin-orders',
@@ -36,7 +30,7 @@ export interface OrderPagedResult {
 export class AdminOrdersComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  result: OrderPagedResult = { items: [], pageNumber: 1, pageSize: 20, totalPages: 0, totalRecords: 0 };
+  result: OrderPagedResult = new OrderSummaryDtoIEnumerablePagedResponse({ data: [], pageNumber: 1, pageSize: 20, totalPages: 0, totalRecords: 0 });
   isLoading = true;
   selectedStatus = '';
   currentPage = 1;
@@ -61,20 +55,23 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     { label: 'Chờ lấy hàng', value: 'PROCESSING' },
     { label: 'Đang giao', value: 'SHIPPED' },
     { label: 'Đã giao', value: 'DELIVERED' },
+    { label: 'Hoàn thành', value: 'COMPLETED' },
     { label: 'Trả hàng', value: 'RETURNED' },
     { label: 'Đã hủy', value: 'CANCELLED' },
   ];
 
   readonly nextStatusOptions: Record<string, { label: string; value: string }[]> = {
-    PENDING: [{ label: 'Xác nhận đơn', value: 'PROCESSING' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
-    PROCESSING: [{ label: 'Đang giao', value: 'SHIPPED' }, { label: 'Hủy đơn', value: 'CANCELLED' }],
-    SHIPPED: [{ label: 'Xác nhận đã giao', value: 'DELIVERED' }],
-    DELIVERED: [{ label: 'Trả hàng/Hoàn tiền', value: 'RETURNED' }],
+    PENDING: [{ label: 'Hủy đơn hàng (Admin)', value: 'CANCELLED' }],
+    PROCESSING: [
+      { label: 'Shipper đã lấy hàng (Simulate Webhook)', value: 'SHIPPED' }, 
+      { label: 'Hủy đơn hàng (Admin)', value: 'CANCELLED' }
+    ],
+    SHIPPED: [{ label: 'Giao hàng thành công (Simulate Webhook)', value: 'DELIVERED' }],
+    DELIVERED: [{ label: 'Yêu cầu Trả hàng/Hoàn tiền', value: 'RETURNED' }],
   };
 
   constructor(
     private readonly messageService: MessageService,
-    private readonly http: HttpClient,
     private readonly api: ApiBaseService,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
@@ -91,23 +88,15 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
 
   loadOrders(): void {
     this.isLoading = true;
-    let url = `/api/orders/all?page=${this.currentPage}&pageSize=${this.pageSize}`;
-    if (this.selectedStatus) {
-      url += `&status=${this.selectedStatus}`;
-    }
-    this.http.get<any>(url).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (res) => {
-        this.result = {
-          items: res.data ?? [],
-          pageNumber: res.pageNumber ?? 1,
-          pageSize: res.pageSize ?? 20,
-          totalPages: res.totalPages ?? 0,
-          totalRecords: res.totalRecords ?? 0
-        };
-        this.isLoading = false;
-      },
-      error: () => { this.isLoading = false; }
-    });
+    this.api.all(this.selectedStatus || undefined, this.currentPage, this.pageSize)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: OrderSummaryDtoIEnumerablePagedResponse) => {
+          this.result = res;
+          this.isLoading = false;
+        },
+        error: () => { this.isLoading = false; }
+      });
   }
 
   onTabChange(status: string): void {
@@ -164,12 +153,20 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status?: string): string {
-    const map: Record<string, string> = { PENDING: 'Chờ xác nhận', PROCESSING: 'Chờ lấy hàng', SHIPPED: 'Đang giao', DELIVERED: 'Đã giao', RETURNED: 'Trả hàng', CANCELLED: 'Đã hủy' };
+    const map: Record<string, string> = { 
+      PENDING: 'Chờ xác nhận', 
+      PROCESSING: 'Chờ Shipper lấy hàng', 
+      SHIPPED: 'Đang giao hàng', 
+      DELIVERED: 'Đã giao hàng', 
+      COMPLETED: 'Hoàn thành', 
+      RETURNED: 'Trả hàng', 
+      CANCELLED: 'Đã hủy' 
+    };
     return map[status ?? ''] ?? status ?? '';
   }
 
   getStatusClass(status?: string): string {
-    const map: Record<string, string> = { PENDING: 'badge-warning', PROCESSING: 'badge-info', SHIPPED: 'badge-primary', DELIVERED: 'badge-success', RETURNED: 'badge-warning', CANCELLED: 'badge-danger' };
+    const map: Record<string, string> = { PENDING: 'badge-warning', PROCESSING: 'badge-info', SHIPPED: 'badge-primary', DELIVERED: 'badge-success', COMPLETED: 'badge-success', RETURNED: 'badge-warning', CANCELLED: 'badge-danger' };
     return map[status ?? ''] ?? 'badge-default';
   }
 
@@ -202,7 +199,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   }
 
   getOrderCurrentStatus(orderId: string): string {
-    return this.result.items.find((o: OrderSummaryDto) => o.id === orderId)?.orderStatus ?? '';
+    return this.result.data?.find((o: OrderSummaryDto) => o.id === orderId)?.orderStatus ?? '';
   }
 
   canUpdateStatus(status?: string): boolean {

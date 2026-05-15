@@ -1,7 +1,6 @@
 <p-toast position="top-right"></p-toast>
 
 <div class="seller-page">
-
   <!-- Header -->
   <div class="page-header">
     <div>
@@ -20,7 +19,9 @@
       (click)="onTabChange(tab.value)"
       class="tab-btn"
       [class.active]="selectedStatus === tab.value"
-    >{{ tab.label }}</button>
+    >
+      {{ tab.label }}
+    </button>
   </div>
 
   <!-- Skeleton -->
@@ -34,7 +35,13 @@
   <div class="empty-state" *ngIf="!isLoading && result.items.length === 0">
     <div class="empty-icon"><i class="pi pi-inbox"></i></div>
     <h3>Không có đơn hàng nào</h3>
-    <p>{{ selectedStatus ? 'Không có đơn hàng với trạng thái này' : 'Chưa có đơn hàng nào' }}</p>
+    <p>
+      {{
+        selectedStatus
+          ? "Không có đơn hàng với trạng thái này"
+          : "Chưa có đơn hàng nào"
+      }}
+    </p>
   </div>
 
   <!-- Orders list -->
@@ -45,12 +52,32 @@
           <div class="order-code">{{ order.orderCode }}</div>
           <div class="order-product">{{ order.firstItemName }}</div>
           <div class="order-meta">
-            <span><i class="pi pi-shopping-bag text-xs"></i> {{ order.totalItems }} sản phẩm</span>
-            <span><i class="pi pi-calendar text-xs"></i> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-            <span class="badge" [ngClass]="order.paymentMethod === 'VNPAY' ? 'badge-primary' : 'badge-default'" style="margin-left: 8px;">
-               <i class="pi pi-credit-card text-xs mr-1" *ngIf="order.paymentMethod === 'VNPAY'"></i>
-               <i class="pi pi-money-bill text-xs mr-1" *ngIf="order.paymentMethod !== 'VNPAY'"></i>
-               {{ order.paymentMethod === 'VNPAY' ? 'VNPay' : 'COD' }}
+            <span
+              ><i class="pi pi-shopping-bag text-xs"></i>
+              {{ order.totalItems }} sản phẩm</span
+            >
+            <span
+              ><i class="pi pi-calendar text-xs"></i>
+              {{ order.createdAt | date: "dd/MM/yyyy HH:mm" }}</span
+            >
+            <span
+              class="badge"
+              [ngClass]="
+                order.paymentMethod === 'VNPAY'
+                  ? 'badge-primary'
+                  : 'badge-default'
+              "
+              style="margin-left: 8px"
+            >
+              <i
+                class="pi pi-credit-card text-xs mr-1"
+                *ngIf="order.paymentMethod === 'VNPAY'"
+              ></i>
+              <i
+                class="pi pi-money-bill text-xs mr-1"
+                *ngIf="order.paymentMethod !== 'VNPAY'"
+              ></i>
+              {{ order.paymentMethod === "VNPAY" ? "VNPay" : "COD" }}
             </span>
           </div>
         </div>
@@ -60,17 +87,38 @@
             {{ getStatusLabel(order.orderStatus) }}
           </span>
           <div class="order-actions">
-            <button (click)="openDetail(order)" class="action-btn-sm action-view">
+            <button
+              (click)="openDetail(order)"
+              class="action-btn-sm action-view"
+            >
               <i class="pi pi-eye"></i> Chi tiết
             </button>
             <button
               *ngIf="canUpdateStatus(order.orderStatus)"
               (click)="openStatusUpdate(order)"
               class="action-btn-sm action-update"
-              [disabled]="order.paymentMethod === 'VNPAY' && order.orderStatus === 'PENDING' && order.paymentStatus !== 'PAID'"
-              [title]="order.paymentMethod === 'VNPAY' && order.orderStatus === 'PENDING' && order.paymentStatus !== 'PAID' ? 'Không thể cập nhật đơn VNPay chưa thanh toán' : ''"
+              [disabled]="
+                order.paymentMethod === 'VNPAY' &&
+                order.orderStatus === 'PENDING' &&
+                order.paymentStatus !== 'PAID'
+              "
+              [title]="
+                order.paymentMethod === 'VNPAY' &&
+                order.orderStatus === 'PENDING' &&
+                order.paymentStatus !== 'PAID'
+                  ? 'Không thể cập nhật đơn VNPay chưa thanh toán'
+                  : ''
+              "
             >
               <i class="pi pi-check-circle"></i> Cập nhật
+            </button>
+            <button
+              *ngIf="order.orderStatus === 'SHIPPED'"
+              (click)="simulateGhnDelivery(order)"
+              class="action-btn-sm action-simulate"
+              title="Mô phỏng shipper giao hàng thành công (GHN Webhook)"
+            >
+              <i class="pi pi-bolt"></i> Giao xong (Giả lập)
             </button>
           </div>
         </div>
@@ -79,7 +127,10 @@
   </div>
 
   <!-- Pagination -->
-  <div class="pagination-wrap" *ngIf="!isLoading && result.totalRecords > pageSize">
+  <div
+    class="pagination-wrap"
+    *ngIf="!isLoading && result.totalRecords > pageSize"
+  >
     <p-paginator
       [rows]="pageSize"
       [totalRecords]="result.totalRecords"
@@ -89,7 +140,6 @@
       styleClass="seller-paginator"
     ></p-paginator>
   </div>
-
 </div>
 
 <!-- ── Order Detail Dialog ── -->
@@ -97,7 +147,7 @@
   header="Chi tiết đơn hàng"
   [(visible)]="showDetail"
   [modal]="true"
-  [style]="{width: 'min(600px, 96vw)'}"
+  [style]="{ width: 'min(600px, 96vw)' }"
   [draggable]="false"
 >
   <div *ngIf="isLoadingDetail" class="p-6">
@@ -109,20 +159,28 @@
       <div>
         <p class="detail-code">#{{ selectedOrder.orderCode }}</p>
         <div class="flex gap-2 flex-wrap mt-1">
-          <span class="badge" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
+          <span
+            class="badge"
+            [ngClass]="getStatusClass(selectedOrder.orderStatus)"
+          >
             {{ getStatusLabel(selectedOrder.orderStatus) }}
           </span>
-          <span class="badge" [ngClass]="getPaymentStatusClass(selectedOrder.paymentStatus)">
+          <span
+            class="badge"
+            [ngClass]="getPaymentStatusClass(selectedOrder.paymentStatus)"
+          >
             <i class="pi pi-credit-card text-[10px] mr-1"></i>
             {{ getPaymentStatusLabel(selectedOrder.paymentStatus) }}
           </span>
           <span class="badge badge-default">
             <i class="pi pi-calendar text-[10px] mr-1"></i>
-            {{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            {{ selectedOrder.createdAt | date: "dd/MM/yyyy HH:mm" }}
           </span>
         </div>
       </div>
-      <div class="detail-amount">{{ formatPrice(selectedOrder.totalAmount) }}</div>
+      <div class="detail-amount">
+        {{ formatPrice(selectedOrder.totalAmount) }}
+      </div>
     </div>
 
     <div class="detail-section">
@@ -130,9 +188,13 @@
       <div class="address-box">
         <div class="addr-user">
           <i class="pi pi-user text-xs"></i>
-          <span>{{ parseAddress(selectedOrder.shippingAddress).fullName }}</span>
+          <span>{{
+            parseAddress(selectedOrder.shippingAddress).fullName
+          }}</span>
           <span class="text-gray-400 mx-1">|</span>
-          <span>{{ parseAddress(selectedOrder.shippingAddress).phoneNumber }}</span>
+          <span>{{
+            parseAddress(selectedOrder.shippingAddress).phoneNumber
+          }}</span>
         </div>
         <div class="addr-text">
           <i class="pi pi-map-marker text-xs mr-1"></i>
@@ -147,13 +209,23 @@
         <div class="detail-item" *ngFor="let item of selectedOrder.items">
           <div class="item-info">
             <div class="item-thumb">
-               <img *ngIf="item.variantImageUrl" [src]="item.variantImageUrl" [alt]="item.productNameSnapshot" class="w-full h-full object-cover rounded-md">
-               <i *ngIf="!item.variantImageUrl" class="pi pi-image text-gray-300"></i>
+              <img
+                *ngIf="item.variantImageUrl"
+                [src]="item.variantImageUrl"
+                [alt]="item.productNameSnapshot"
+                class="w-full h-full object-cover rounded-md"
+              />
+              <i
+                *ngIf="!item.variantImageUrl"
+                class="pi pi-image text-gray-300"
+              ></i>
             </div>
             <div class="item-text">
               <div class="item-name">{{ item.productNameSnapshot }}</div>
               <div class="item-variant" *ngIf="item.variantName">
-                 <span class="text-xs text-gray-500">Biến thể: {{ item.variantName }}</span>
+                <span class="text-xs text-gray-500"
+                  >Biến thể: {{ item.variantName }}</span
+                >
               </div>
             </div>
           </div>
@@ -167,7 +239,9 @@
           </div>
           <div class="item-qty-row">
             <span class="md:hidden font-bold">Thành tiền:</span>
-            <div class="item-subtotal">{{ formatPrice(item.subTotal) }}</div>
+            <div class="item-price">
+              {{ formatPrice((item.unitPrice || 0) * (item.quantity || 0)) }}
+            </div>
           </div>
         </div>
       </div>
@@ -196,19 +270,27 @@
   header="Cập nhật trạng thái đơn hàng"
   [(visible)]="showStatusDialog"
   [modal]="true"
-  [style]="{width: 'min(440px, 96vw)'}"
+  [style]="{ width: 'min(440px, 96vw)' }"
   [draggable]="false"
 >
   <div class="status-form">
     <div class="field">
-      <label class="field-label">Trạng thái mới <span class="text-red-500">*</span></label>
+      <label class="field-label"
+        >Trạng thái mới <span class="text-red-500">*</span></label
+      >
       <div class="status-options">
         <button
-          *ngFor="let opt of getNextStatusOptions(getOrderCurrentStatus(updatingOrderId))"
+          *ngFor="
+            let opt of getNextStatusOptions(
+              getOrderCurrentStatus(updatingOrderId)
+            )
+          "
           (click)="newStatus = opt.value"
           class="status-option"
           [class.selected]="newStatus === opt.value"
-        >{{ opt.label }}</button>
+        >
+          {{ opt.label }}
+        </button>
       </div>
     </div>
     <div class="field">
@@ -222,8 +304,14 @@
       ></textarea>
     </div>
     <div class="dialog-actions">
-      <button class="btn-outline" (click)="showStatusDialog = false">Hủy</button>
-      <button class="btn-primary" [disabled]="!newStatus || isUpdating" (click)="updateStatus()">
+      <button class="btn-outline" (click)="showStatusDialog = false">
+        Hủy
+      </button>
+      <button
+        class="btn-primary"
+        [disabled]="!newStatus || isUpdating"
+        (click)="updateStatus()"
+      >
         <i class="pi pi-spin pi-spinner" *ngIf="isUpdating"></i>
         <i class="pi pi-check" *ngIf="!isUpdating"></i>
         Xác nhận

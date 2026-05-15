@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { ButtonModule } from 'primeng/button';
@@ -24,10 +25,12 @@ export class PaymentResultComponent implements OnInit {
   message: string = 'Đang xử lý kết quả thanh toán...';
   amount: string = '';
   orderId: string = '';
+  orderCodes: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+
     private http: HttpClient,
     private apiService: ApiBaseService,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -73,6 +76,7 @@ export class PaymentResultComponent implements OnInit {
               if (res.isSuccess) {
                 this.status = 'success';
                 this.message = 'Thanh toán thành công!';
+                this.orderCodes = res.orderCodes || [];
               } else {
                 this.status = 'failed';
                 this.message = res.message || 'Thanh toán không thành công.';

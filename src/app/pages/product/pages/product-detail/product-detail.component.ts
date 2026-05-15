@@ -67,7 +67,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const id = params['id'];
-      if (id) this.loadProduct(id);
+      if (id && isPlatformBrowser(this.platformId)) {
+        this.loadProduct(id);
+      }
     });
   }
 

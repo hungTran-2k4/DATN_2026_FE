@@ -75,6 +75,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
   result: PagedResult<ProductDto> = { items: [], pageNumber: 1, pageSize: 10, totalPages: 0, totalRecords: 0 };
   isLoading = true;
   searchKeyword = '';
+  selectedStatus = '';
   currentPage = 1;
   pageSize = 10;
   skeletons = Array(6).fill(null);
@@ -130,7 +131,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
     this.initForm();
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Tối ưu hóa việc gọi API: Kết hợp shopId và các trigger (paging, search)
+    // Tối ưu hóa việc gọi API: Kết hợp shopId và các trigger (paging, search, status)
     combineLatest({
       shop: this.sellerService.shopInfo$.pipe(
         filter(s => !!s?.id),
@@ -141,16 +142,17 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
         distinctUntilChanged(),
         startWith(this.searchKeyword)
       ),
+      status: of(this.selectedStatus).pipe(startWith(this.selectedStatus)),
       page: this.pageSubject.pipe(
         startWith({ page: this.currentPage, rows: this.pageSize })
       )
     }).pipe(
       takeUntil(this.destroy$),
       tap(() => this.isLoading = true),
-      switchMap(({ shop, trigger, page }) => {
+      switchMap(({ shop, trigger, status, page }) => {
         this.shopId = shop!.id!;
         this.searchKeyword = trigger;
-        return this.sellerFacade.getProducts(this.shopId, trigger || undefined, page.page, page.rows);
+        return this.sellerFacade.getProducts(this.shopId, trigger || undefined, page.page, page.rows, status || undefined);
       })
     ).subscribe({
       next: (res) => {
@@ -161,8 +163,10 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
       error: () => { this.isLoading = false; }
     });
 
-    this.sellerService.initState();
-    this.loadMeta();
+    if (isPlatformBrowser(this.platformId)) {
+      this.sellerService.initState();
+      this.loadMeta();
+    }
   }
 
   ngOnDestroy(): void {
@@ -180,7 +184,6 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
       slug: [product?.slug ?? '', [Validators.maxLength(255)]],
       summary: [product?.summary ?? '', [Validators.maxLength(500)]],
       description: [product?.description ?? ''],
-      status: [product?.status ?? 'Draft'],
       categoryId: [product?.categoryId ?? null],
       brandId: [product?.brandId ?? null],
     });
@@ -316,7 +319,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
         id: this.activeProductId,
         name: v.name, sku: v.sku || undefined, slug: v.slug || undefined,
         summary: v.summary || undefined, description: v.description || undefined,
-        status: v.status, categoryId: v.categoryId || undefined,
+        categoryId: v.categoryId || undefined,
         brandId: v.brandId || undefined, shopId: this.shopId,
         baseAttributes: baseAttrsJson
       });
@@ -334,7 +337,7 @@ export class SellerProductsComponent implements OnInit, OnDestroy {
       const cmd = new CreateProductCommand({
         name: v.name, sku: v.sku || undefined, slug: v.slug || undefined,
         summary: v.summary || undefined, description: v.description || undefined,
-        status: v.status, categoryId: v.categoryId || undefined,
+        categoryId: v.categoryId || undefined,
         brandId: v.brandId || undefined, shopId: this.shopId,
         baseAttributes: baseAttrsJson
       });

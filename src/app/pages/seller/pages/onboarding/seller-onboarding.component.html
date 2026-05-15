@@ -98,26 +98,108 @@
 
     <!-- ── STATE: PENDING ── -->
     <ng-container *ngIf="(state$ | async) === 'pending'">
-      <div class="max-w-lg mx-auto text-center py-16">
-        <div class="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <i class="pi pi-clock text-4xl text-amber-500"></i>
+      <div class="max-w-2xl mx-auto py-12 animate-fade-in">
+        <!-- Status Header -->
+        <div class="text-center mb-10">
+          <div class="relative inline-block">
+            <div class="w-24 h-24 bg-amber-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 transform hover:rotate-0 transition-transform duration-500">
+              <i class="pi pi-clock text-4xl text-amber-500"></i>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <i class="pi pi-spin pi-spinner text-amber-500 text-xs"></i>
+            </div>
+          </div>
+          <h2 class="text-3xl font-black text-gray-900 mb-3">Đơn đăng ký đang chờ duyệt</h2>
+          <p class="text-gray-500 max-w-md mx-auto text-sm leading-relaxed">
+            Hệ thống đang kiểm tra thông tin cửa hàng của bạn. Chúng tôi sẽ phản hồi sớm nhất, thường là trong vòng <strong>24h làm việc</strong>.
+          </p>
         </div>
-        <h2 class="text-2xl font-black text-gray-900 mb-3">Đơn đăng ký đang chờ duyệt</h2>
-        <p class="text-gray-500 text-sm leading-relaxed mb-6">
-          Chúng tôi đã nhận được đơn đăng ký của bạn. Admin sẽ xem xét và phản hồi trong vòng <strong>1-3 ngày làm việc</strong>.
-        </p>
+
+        <!-- Info Card -->
         <ng-container *ngIf="shopInfo$ | async as shop">
-          <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-left mb-6">
-            <p class="text-xs font-bold text-amber-700 uppercase tracking-wider mb-3">Thông tin đã gửi</p>
-            <div class="space-y-1.5">
-              <p class="text-sm text-gray-700"><span class="font-semibold">Tên shop:</span> {{ shop.name }}</p>
-              <p class="text-sm text-gray-700 font-mono"><span class="font-semibold font-sans">Slug:</span> {{ shop.slug }}</p>
+          <div class="bg-white rounded-3xl shadow-xl shadow-amber-500/5 border border-amber-100 overflow-hidden mb-8">
+            <div class="bg-amber-50/50 px-8 py-4 border-b border-amber-100 flex items-center justify-between">
+              <span class="text-xs font-black text-amber-700 uppercase tracking-widest">Thông tin đăng ký</span>
+              <span class="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">ĐANG XỬ LÝ</span>
+            </div>
+            
+            <div class="p-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Tên shop -->
+                <div class="space-y-1.5">
+                  <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tên cửa hàng</label>
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                      <i class="pi pi-shop text-gray-400 text-sm"></i>
+                    </div>
+                    <p class="text-base font-bold text-gray-800">{{ shop.name }}</p>
+                  </div>
+                </div>
+
+                <!-- Email (Lấy từ session) -->
+                <div class="space-y-1.5">
+                  <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Email liên hệ</label>
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                      <i class="pi pi-envelope text-gray-400 text-sm"></i>
+                    </div>
+                    <p class="text-base font-medium text-gray-600">{{ (authSession.currentUser$ | async)?.userEmail }}</p>
+                  </div>
+                </div>
+
+                <!-- Địa chỉ -->
+                <div class="md:col-span-2 space-y-1.5">
+                  <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Địa chỉ lấy hàng</label>
+                  <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <i class="pi pi-map-marker text-user-primary mt-1"></i>
+                    <div>
+                      <p class="text-sm font-semibold text-gray-800">{{ shop.pickupAddress || 'Chưa cập nhật chi tiết' }}</p>
+                      <p class="text-[11px] text-gray-500 mt-0.5">Đây là địa chỉ đơn vị vận chuyển sẽ đến lấy hàng của bạn.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Mô tả -->
+                <div class="md:col-span-2 space-y-1.5" *ngIf="shop.description">
+                  <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Mô tả kinh doanh</label>
+                  <p class="text-sm text-gray-600 leading-relaxed italic bg-gray-50/50 p-4 rounded-2xl border border-dashed border-gray-200">
+                    "{{ shop.description }}"
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="px-8 py-6 bg-gray-50/50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <i class="pi pi-info-circle text-amber-500"></i>
+                <span>Bạn muốn thay đổi thông tin? Vui lòng liên hệ <a href="mailto:support@datn.com" class="text-user-primary font-bold">Hotline</a></span>
+              </div>
+              <a routerLink="/home" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-6 py-2.5 rounded-xl text-sm font-bold border border-gray-200 hover:bg-gray-100 transition-all shadow-sm">
+                <i class="pi pi-home"></i> Về trang chủ
+              </a>
             </div>
           </div>
         </ng-container>
-        <a routerLink="/home" class="inline-flex items-center gap-2 text-user-primary font-semibold hover:underline text-sm">
-          <i class="pi pi-home text-xs"></i> Về trang chủ
-        </a>
+
+        <!-- Help Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/30 text-center">
+            <i class="pi pi-shield text-user-primary mb-2"></i>
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">An toàn</p>
+            <p class="text-xs text-gray-600">Bảo mật thông tin</p>
+          </div>
+          <div class="p-4 rounded-2xl border border-blue-100 bg-blue-50/30 text-center">
+            <i class="pi pi-bolt text-blue-500 mb-2"></i>
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Tốc độ</p>
+            <p class="text-xs text-gray-600">Duyệt nhanh 24h</p>
+          </div>
+          <div class="p-4 rounded-2xl border border-purple-100 bg-purple-50/30 text-center">
+            <i class="pi pi-question-circle text-purple-500 mb-2"></i>
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Hỗ trợ</p>
+            <p class="text-xs text-gray-600">24/7 Hotline</p>
+          </div>
+        </div>
       </div>
     </ng-container>
 

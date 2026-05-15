@@ -252,6 +252,9 @@
                    </div>
                    <p class="text-xs text-gray-500 leading-relaxed font-medium">{{addr.address}}</p>
                 </div>
+                <button (click)="deleteAddress(addr.id, $event)" *ngIf="!addr.isDefault" class="w-8 h-8 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center ml-2 flex-shrink-0" title="Xóa địa chỉ này">
+                   <i class="pi pi-trash"></i>
+                </button>
              </div>
           </div>
        </div>

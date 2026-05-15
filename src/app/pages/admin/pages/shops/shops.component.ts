@@ -1,5 +1,5 @@
-import { AsyncPipe, CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component } from '@angular/core';
+import { AsyncPipe, CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { map, Observable } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -38,7 +38,7 @@ import { AdminShopsFacade } from '../../services/admin-shops.facade';
   templateUrl: './shops.component.html',
   styleUrl: './shops.component.scss',
 })
-export class AdminShopsPageComponent {
+export class AdminShopsPageComponent implements OnInit {
   keyword = '';
 
   shops: ShopDto[] = [];
@@ -70,9 +70,14 @@ export class AdminShopsPageComponent {
     private readonly exportService: AdminExportService,
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
-  ) {
-    this.rebindStats();
-    this.loadShops();
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
+
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.rebindStats();
+      this.loadShops();
+    }
   }
 
   loadShops(event?: TableLazyLoadEvent): void {

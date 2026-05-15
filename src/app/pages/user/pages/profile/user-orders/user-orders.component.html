@@ -67,10 +67,18 @@
 
       <!-- Order Actions -->
       <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end gap-3">
+        <!-- Nút Xác nhận đã nhận hàng nếu đang ở trạng thái DELIVERED -->
+        <button pButton 
+                *ngIf="order.orderStatus === 'DELIVERED'"
+                (click)="confirmReceived(order); $event.stopPropagation()"
+                class="bg-emerald-600 text-white border-0 hover:bg-emerald-700 px-4 py-2 text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2">
+          <i class="pi pi-check-circle"></i> Đã nhận được hàng
+        </button>
+
         <!-- Nút Thanh toán ngay nếu là VNPAY và đang pending -->
         <button pButton 
-                *ngIf="order.paymentMethod === 'VNPAY' && order.paymentStatus !== 'PAID' && order.orderStatus !== 'CANCELLED'"
-                (click)="payNow(order)"
+                *ngIf="order.paymentMethod === 'VNPAY' && order.paymentStatus !== 'PAID' && order.orderStatus !== 'CANCELLED' && order.orderStatus !== 'COMPLETED'"
+                (click)="payNow(order); $event.stopPropagation()"
                 class="bg-user-primary text-white border-0 hover:bg-user-primary-hover px-4 py-2 text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2">
           <i class="pi pi-credit-card"></i> Thanh toán ngay
         </button>

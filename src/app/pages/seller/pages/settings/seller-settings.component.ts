@@ -8,7 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
-import { HttpClient } from '@angular/common/http';
+
 import { DropdownModule } from 'primeng/dropdown';
 import { ApiBaseService, UpdateShopCommand } from '../../../../shared/api/generated/api-service-base.service';
 import { SellerRegistrationService } from '../../../../features/seller-registration/model/seller-registration.service';
@@ -42,7 +42,6 @@ export class SellerSettingsComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly api: ApiBaseService,
-    private readonly http: HttpClient,
     private readonly sellerService: SellerRegistrationService,
     private readonly messageService: MessageService,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
@@ -68,23 +67,22 @@ export class SellerSettingsComponent implements OnInit {
             description: shop.description ?? '', 
             provinceId: shop.provinceId,
             districtId: shop.districtId,
-            wardId: shop.wardId,
+            wardId: shop.wardId?.toString(), // Convert to string to match dropdown optionValue type (wardCode)
             pickupAddress: shop.pickupAddress ?? '' 
           });
           
           if (shop.provinceId) this.loadDistricts(shop.provinceId);
           if (shop.districtId) this.loadWards(shop.districtId);
-          
-          this.isLoading = false;
         }
+        this.isLoading = false;
       });
       this.sellerService.initState();
     }
   }
 
   loadProvinces() {
-    this.http.get<any>('/api/Shipping/ghn/provinces').subscribe(res => {
-      if (res.success) this.provinces = res.data;
+    this.api.provinces().subscribe(res => {
+      if (res.success) this.provinces = res.data || [];
     });
   }
 
@@ -96,8 +94,8 @@ export class SellerSettingsComponent implements OnInit {
   }
 
   loadDistricts(provinceId: number) {
-    this.http.get<any>(`/api/Shipping/ghn/districts/${provinceId}`).subscribe(res => {
-      if (res.success) this.districts = res.data;
+    this.api.districts(provinceId).subscribe(res => {
+      if (res.success) this.districts = res.data || [];
     });
   }
 
@@ -108,8 +106,8 @@ export class SellerSettingsComponent implements OnInit {
   }
 
   loadWards(districtId: number) {
-    this.http.get<any>(`/api/Shipping/ghn/wards/${districtId}`).subscribe(res => {
-      if (res.success) this.wards = res.data;
+    this.api.wards(districtId).subscribe(res => {
+      if (res.success) this.wards = res.data || [];
     });
   }
 
@@ -123,7 +121,7 @@ export class SellerSettingsComponent implements OnInit {
       description: v.description,
       provinceId: v.provinceId,
       districtId: v.districtId,
-      wardId: v.wardId ? parseInt(v.wardId, 10) : undefined,
+      wardId: v.wardId,
       pickupAddress: v.pickupAddress 
     });
     this.api.shopsPUT(this.shopInfo.id, cmd).subscribe({

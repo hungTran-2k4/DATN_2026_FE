@@ -1,7 +1,15 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
 import {
-  FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators,
+  CommonModule,
+  NgOptimizedImage,
+  isPlatformBrowser,
+} from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  FormsModule,
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -18,15 +26,23 @@ import { SellerRegistrationService } from '../../../../features/seller-registrat
 import { Observable } from 'rxjs';
 import { SellerRegistrationState } from '../../../../entities/seller/model/seller.model';
 import { UserOrdersComponent } from './user-orders/user-orders.component';
-
+import { UserAddressesComponent } from './user-addresses/user-addresses.component';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, FormsModule,
-    RouterLink, ButtonModule, InputTextModule, RadioButtonModule, ToastModule, NgOptimizedImage,
-    UserOrdersComponent
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterLink,
+    ButtonModule,
+    InputTextModule,
+    RadioButtonModule,
+    ToastModule,
+    NgOptimizedImage,
+    UserOrdersComponent,
+    UserAddressesComponent,
   ],
   providers: [MessageService],
   templateUrl: './profile.component.html',
@@ -34,8 +50,15 @@ import { UserOrdersComponent } from './user-orders/user-orders.component';
 })
 export class ProfileComponent implements OnInit {
   activeMenu:
-    | 'profile' | 'bank' | 'address' | 'password'
-    | 'settings' | 'privacy' | 'purchases' | 'vouchers' | 'coins' = 'profile';
+    | 'profile'
+    | 'bank'
+    | 'address'
+    | 'password'
+    | 'settings'
+    | 'privacy'
+    | 'purchases'
+    | 'vouchers'
+    | 'coins' = 'profile';
   activeGroup: 'account' | 'others' = 'account';
 
   profileForm!: FormGroup;
@@ -58,19 +81,20 @@ export class ProfileComponent implements OnInit {
     private readonly sellerService: SellerRegistrationService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
 
   ngOnInit(): void {
     // Read tab from query params
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       const tab = params['tab'];
       if (tab) {
         this.activeMenu = tab.toLowerCase() as any;
         // If tab is under 'others' group
         if (['purchases', 'vouchers', 'coins'].includes(tab)) {
-           this.activeGroup = 'others';
+          this.activeGroup = 'others';
         } else {
-           this.activeGroup = 'account';
+          this.activeGroup = 'account';
         }
       }
     });
@@ -80,7 +104,9 @@ export class ProfileComponent implements OnInit {
       this.sessionUserName = session.userName || '';
       this.userName = session.userName || 'Tài khoản';
       this.userEmail = session.userEmail || '';
-      this.avatarInitials = (this.userName || this.userEmail || 'U')[0].toUpperCase();
+      this.avatarInitials = (this.userName ||
+        this.userEmail ||
+        'U')[0].toUpperCase();
     }
 
     this.profileForm = this.fb.group({
@@ -93,11 +119,13 @@ export class ProfileComponent implements OnInit {
       this.avatarUrl = val;
     });
 
-    this.loadProfile();
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadProfile();
+      this.sellerService.initState();
+    }
 
     // Chỉ cần state để hiển thị badge trên menu item
     this.sellerState$ = this.sellerService.state$;
-    this.sellerService.initState();
   }
 
   loadProfile(): void {
@@ -106,10 +134,16 @@ export class ProfileComponent implements OnInit {
         if (res.data) {
           this.userName = res.data.fullName || 'Tài khoản';
           this.userEmail = res.data.email || '';
-          this.avatarInitials = (this.userName || this.userEmail || 'U')[0].toUpperCase();
+          this.avatarInitials = (this.userName ||
+            this.userEmail ||
+            'U')[0].toUpperCase();
           this.avatarUrl = res.data.avatarUrl || '';
           this.authSession.updateUserSession(res.data);
-          this.profileForm.patchValue({ fullName: res.data.fullName, avatarUrl: res.data.avatarUrl, gender: 'Nam' });
+          this.profileForm.patchValue({
+            fullName: res.data.fullName,
+            avatarUrl: res.data.avatarUrl,
+            gender: 'Nam',
+          });
         }
       },
     });
@@ -126,21 +160,42 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
-    if (this.profileForm.invalid) { this.profileForm.markAllAsTouched(); return; }
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
     this.isSavingProfile = true;
     const formValue = this.profileForm.value;
-    this.api.profilePUT(new UpdateProfileRequest({ fullName: formValue.fullName, avatarUrl: formValue.avatarUrl || undefined })).subscribe({
-      next: (res: any) => {
-        this.isSavingProfile = false;
-        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã cập nhật thông tin cá nhân.' });
-        if (res.data) { this.authSession.updateUserSession(res.data); this.sessionUserName = res.data.fullName; }
-        this.loadProfile();
-      },
-      error: () => {
-        this.isSavingProfile = false;
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể cập nhật hồ sơ.' });
-      },
-    });
+    this.api
+      .profilePUT(
+        new UpdateProfileRequest({
+          fullName: formValue.fullName,
+          avatarUrl: formValue.avatarUrl || undefined,
+        }),
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.isSavingProfile = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Thành công',
+            detail: 'Đã cập nhật thông tin cá nhân.',
+          });
+          if (res.data) {
+            this.authSession.updateUserSession(res.data);
+            this.sessionUserName = res.data.fullName;
+          }
+          this.loadProfile();
+        },
+        error: () => {
+          this.isSavingProfile = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Lỗi',
+            detail: 'Không thể cập nhật hồ sơ.',
+          });
+        },
+      });
   }
 
   /** Điều hướng đến Seller Center — tự động chọn đúng trang theo trạng thái */
@@ -156,22 +211,34 @@ export class ProfileComponent implements OnInit {
     const file: File = event.target.files[0];
     if (file) {
       if (file.size > 1024 * 1024) {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Dung lượng file tối đa là 1MB.' });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Dung lượng file tối đa là 1MB.',
+        });
         return;
       }
-      
+
       this.api.avatar({ data: file, fileName: file.name }).subscribe({
         next: (res) => {
           if (res.data) {
             this.profileForm.patchValue({ avatarUrl: res.data.avatarUrl });
             this.avatarUrl = res.data.avatarUrl || '';
             this.authSession.updateUserSession(res.data);
-            this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã tải ảnh lên thành công.' });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Thành công',
+              detail: 'Đã tải ảnh lên thành công.',
+            });
           }
         },
         error: () => {
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải ảnh lên.' });
-        }
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Lỗi',
+            detail: 'Không thể tải ảnh lên.',
+          });
+        },
       });
     }
   }

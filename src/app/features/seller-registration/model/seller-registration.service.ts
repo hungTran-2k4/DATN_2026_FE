@@ -38,27 +38,19 @@ export class SellerRegistrationService {
   initState(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Nếu đã có role Seller trong session → approved
-    if (this.authSession.isSeller()) {
-      this.stateSubject.next('approved');
-      this.loadShopInfo();
-      return;
-    }
-
-    // Nếu là Admin → không hiển thị section
-    if (this.authSession.isAdmin()) {
-      this.stateSubject.next('idle');
-      return;
-    }
-
-    // Kiểm tra xem có shop pending/rejected không
+    // 1) Kiểm tra xem có shop pending/approved/rejected không (Ưu tiên Database)
     this.sellerRepo.getMyShop().subscribe({
       next: (shop) => {
+        this.shopInfoSubject.next(shop);
         if (!shop) {
-          this.stateSubject.next('idle');
+          // Nếu không có shop trong DB -> Kiểm tra role session (để an tâm)
+          if (this.authSession.isSeller()) {
+             this.stateSubject.next('approved');
+          } else {
+             this.stateSubject.next('idle');
+          }
           return;
         }
-        this.shopInfoSubject.next(shop);
         switch (shop.approvalStatus) {
           case ShopApprovalStatus.Pending:
             this.stateSubject.next('pending');
@@ -74,10 +66,19 @@ export class SellerRegistrationService {
         }
       },
       error: () => {
-        // 404 = chưa có shop → idle
-        this.stateSubject.next('idle');
+        // 404 = chưa có shop -> Kiểm tra role session
+        if (this.authSession.isSeller()) {
+           this.stateSubject.next('approved');
+        } else {
+           this.stateSubject.next('idle');
+        }
       },
     });
+
+    // Admin cũng có thể có shop (để test hoặc quản lý song song)
+    if (this.authSession.isAdmin() && !this.authSession.isSeller()) {
+       this.loadShopInfo(); // Đã bao gồm trong subscribe trên, nhưng giữ lại cho an toàn
+    }
   }
 
   /**
@@ -183,7 +184,7 @@ export class SellerRegistrationService {
   private loadShopInfo(): void {
     this.sellerRepo.getMyShop().subscribe({
       next: (shop) => {
-        if (shop) this.shopInfoSubject.next(shop);
+        this.shopInfoSubject.next(shop);
       },
       error: () => {},
     });

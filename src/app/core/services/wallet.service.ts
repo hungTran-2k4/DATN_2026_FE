@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiBaseService } from '../../shared/api/generated/api-service-base.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -17,24 +17,24 @@ export interface WalletLedger {
   balanceBefore: number;
   balanceAfter: number;
   description: string;
-  createdAt: string;
+   createdAt: string | Date;
 }
 
 @Injectable({ providedIn: 'root' })
 export class WalletService {
-  private readonly apiUrl = `${environment.apiUrl}/api/Wallet`;
 
-  constructor(private readonly http: HttpClient) {}
+
+  constructor(private readonly api: ApiBaseService) {}
 
   getBalance(shopId: string): Observable<WalletBalance> {
-    return this.http.get<any>(`${this.apiUrl}/${shopId}/balance`).pipe(
-      map(res => res.data)
+    return this.api.balance(shopId).pipe(
+      map(res => res.data as WalletBalance)
     );
   }
 
   getHistory(shopId: string, limit: number = 50): Observable<WalletLedger[]> {
-    return this.http.get<any>(`${this.apiUrl}/${shopId}/history?limit=${limit}`).pipe(
-      map(res => res.data)
+    return this.api.history(shopId, limit).pipe(
+      map(res => res.data as WalletLedger[])
     );
   }
 }

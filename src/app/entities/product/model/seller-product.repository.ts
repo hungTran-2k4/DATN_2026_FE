@@ -13,8 +13,8 @@ import { PagedResult, unwrapPaged } from '../../../shared/api/admin-response.uti
 export class SellerProductRepository {
   constructor(private readonly api: ApiBaseService) {}
 
-  getProducts(shopId: string, search?: string, page = 1, pageSize = 10): Observable<PagedResult<ProductDto>> {
-    const query = new GetProductsQuery({ shopId, search, page, pageSize });
+  getProducts(shopId: string, search?: string, page = 1, pageSize = 10, status?: any): Observable<PagedResult<ProductDto>> {
+    const query = new GetProductsQuery({ shopId, search, page, pageSize, status, includeInactive: true } as any);
     return this.api.paging(query).pipe(map((res) => unwrapPaged(res)));
   }
 

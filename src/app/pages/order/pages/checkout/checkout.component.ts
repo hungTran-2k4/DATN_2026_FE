@@ -1,7 +1,7 @@
-import { Component, OnInit, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, effect, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
@@ -16,6 +16,7 @@ import {
   CreatePaymentUrlRequest,
   CartItemDto,
   AddAddressCommand,
+  ShippingFeeRequest,
 } from '../../../../shared/api/generated/api-service-base.service';
 import { CartService } from '../../../../features/cart/model/cart.service';
 
@@ -81,16 +82,18 @@ export class CheckoutComponent implements OnInit {
   isPlacingOrder = false;
 
   constructor(
-    private http: HttpClient,
     private apiService: ApiBaseService,
     private cartService: CartService,
     private router: Router,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
 
   ngOnInit() {
-    this.fetchProvinces();
-    this.loadCartData();
-    this.loadAddresses();
+    if (isPlatformBrowser(this.platformId)) {
+      this.fetchProvinces();
+      this.loadCartData();
+      this.loadAddresses();
+    }
   }
 
   loadAddresses() {
@@ -132,11 +135,11 @@ export class CheckoutComponent implements OnInit {
   // ─── GHN Address API (thay thế provinces.open-api.vn) ────
 
   fetchProvinces() {
-    this.http.get<any>('/api/Shipping/ghn/provinces').subscribe({
+    this.apiService.provinces().subscribe({
       next: (res) => {
         this.provinces = (res.data || []).map((p: any) => ({
-          code: p.ProvinceID,
-          name: p.ProvinceName,
+          code: p.provinceID,
+          name: p.provinceName,
         }));
       },
       error: (err) => console.error('Failed to fetch GHN provinces', err),
@@ -149,13 +152,13 @@ export class CheckoutComponent implements OnInit {
     this.newAddress.district = null;
     this.newAddress.ward = null;
     if (this.newAddress.province) {
-      this.http
-        .get<any>(`/api/Shipping/ghn/districts/${this.newAddress.province.code}`)
+      this.apiService
+        .districts(this.newAddress.province.code)
         .subscribe({
           next: (res) => {
             this.districts = (res.data || []).map((d: any) => ({
-              code: d.DistrictID,
-              name: d.DistrictName,
+              code: d.districtID,
+              name: d.districtName,
             }));
           },
         });
@@ -166,13 +169,13 @@ export class CheckoutComponent implements OnInit {
     this.wards = [];
     this.newAddress.ward = null;
     if (this.newAddress.district) {
-      this.http
-        .get<any>(`/api/Shipping/ghn/wards/${this.newAddress.district.code}`)
+      this.apiService
+        .wards(this.newAddress.district.code)
         .subscribe({
           next: (res) => {
             this.wards = (res.data || []).map((w: any) => ({
-              code: w.WardCode,
-              name: w.WardName,
+              code: w.wardCode,
+              name: w.wardName,
             }));
           },
         });
@@ -191,18 +194,25 @@ export class CheckoutComponent implements OnInit {
     }
 
     this.shippingFeeLoading = true;
-    this.http.post<any>('/api/Shipping/calculate-fee', {
-      fromDistrictId: 0, // Backend sẽ lấy từ Shop
+    
+    // Dùng shopId của item đầu tiên trong giỏ hàng để lấy địa chỉ lấy hàng
+    const firstShopId = this.cartItems.length > 0 ? this.cartItems[0].shopId : null;
+
+    const req = new ShippingFeeRequest({
+      shopId: firstShopId || undefined,
+      fromDistrictId: 0,
       fromWardCode: '',
       toDistrictId: addr.districtId,
       toWardCode: addr.wardId?.toString() || '',
       weight: 500,
       insuranceValue: Math.min(Math.round(this.merchandiseSubtotal), 5000000),
-    }).subscribe({
+    });
+
+    this.apiService.calculateFee(req).subscribe({
       next: (res) => {
         this.shippingFeeLoading = false;
         if (res.success && res.data) {
-          this.shippingFee = res.data.totalFee;
+          this.shippingFee = res.data.totalFee || 0;
           this.shippingEstimate = 'Giao hàng dự kiến 2-3 ngày';
         } else {
           this.shippingFee = 30000;
@@ -255,7 +265,7 @@ export class CheckoutComponent implements OnInit {
        phoneNumber: this.newAddress.phone,
        provinceId: Number(this.newAddress.province.code),
        districtId: Number(this.newAddress.district.code),
-       wardId: Number(this.newAddress.ward.code),
+       wardId: this.newAddress.ward.code,
        detailedAddress: fullAddress,
        isDefault: this.savedAddresses.length === 0,
     })).subscribe({
@@ -275,6 +285,27 @@ export class CheckoutComponent implements OnInit {
 
   getSelectedAddress() {
     return this.savedAddresses.find((a) => a.id === this.selectedAddressId);
+  }
+
+  deleteAddress(id: string, event: Event) {
+    event.stopPropagation();
+    if (!confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return;
+    
+    this.apiService.addressesDELETE(id).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.savedAddresses = this.savedAddresses.filter((a) => a.id !== id);
+          if (this.selectedAddressId === id) {
+             const defaultAddr = this.savedAddresses.find(a => a.isDefault);
+             this.selectedAddressId = defaultAddr ? defaultAddr.id : (this.savedAddresses.length > 0 ? this.savedAddresses[0].id : null);
+             this.calculateShippingFee();
+          }
+        } else {
+          alert('Lỗi xóa địa chỉ: ' + res.message);
+        }
+      },
+      error: () => alert('Lỗi hệ thống khi xóa địa chỉ')
+    });
   }
 
   // ─── Formatting & Totals ─────────────────────────────────
@@ -316,15 +347,20 @@ export class CheckoutComponent implements OnInit {
 
     this.apiService.checkout(command).subscribe({
       next: (res) => {
-        const orderId = res.data?.[0]?.id;
-        if (!orderId) {
+        const orders = res.data || [];
+        if (orders.length === 0) {
           alert('Không thể tạo đơn hàng.');
           this.isPlacingOrder = false;
           return;
         }
 
         if (this.selectedPayment === 'vnpay') {
-          const payReq = new CreatePaymentUrlRequest({ orderId });
+          // Gửi TẤT CẢ orderIds để gộp thanh toán 1 lần VNPay
+          const allOrderIds = orders.map((o: any) => o.id).filter(Boolean);
+          const payReq = new CreatePaymentUrlRequest({ 
+            orderId: allOrderIds[0], 
+            orderIds: allOrderIds 
+          });
           this.apiService.createPaymentUrl(payReq).subscribe({
             next: (payRes) => {
               if (payRes.success && payRes.paymentUrl) {

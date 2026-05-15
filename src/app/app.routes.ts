@@ -168,7 +168,13 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
+        data: { prerender: false },
         loadComponent: () => import('./pages/admin/pages/orders/admin-orders.component').then(m => m.AdminOrdersComponent),
+      },
+      {
+        path: 'finance',
+        data: { prerender: false },
+        loadComponent: () => import('./pages/admin/pages/finance/admin-finance.component').then(m => m.AdminFinanceComponent),
       },
     ],
   },

@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+
 import { Observable, map } from 'rxjs';
 import {
   AuthResponse,
   ApiBaseService,
   LoginRequest,
   RegisterRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
 } from '../../../shared/api/generated/api-service-base.service';
 import { environment } from '../../../../environments/environment';
 import { AuthSessionService } from '../../../core/services/auth-session.service';
@@ -14,7 +16,6 @@ import { AuthSessionService } from '../../../core/services/auth-session.service'
 export class AuthRepository {
   constructor(
     private readonly api: ApiBaseService,
-    private readonly http: HttpClient,
     private readonly sessionService: AuthSessionService,
   ) {}
 
@@ -56,21 +57,12 @@ export class AuthRepository {
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
-    return this.http
-      .post<{
-        success: boolean;
-        data: string;
-        message: string;
-      }>(
-        `${environment.apiUrl}/api/Auth/forgot-password`,
-        { email },
-        { withCredentials: true },
-      )
-      .pipe(
-        map((res) => ({
-          message: res.data ?? res.message ?? 'Email đã được gửi.',
-        })),
-      );
+    const payload = new ForgotPasswordRequest({ email });
+    return this.api.forgotPassword(payload).pipe(
+      map((res) => ({
+        message: res.data ?? res.message ?? 'Email đã được gửi.',
+      })),
+    );
   }
 
   resetPassword(
@@ -78,55 +70,38 @@ export class AuthRepository {
     token: string,
     newPassword: string,
   ): Observable<{ message: string }> {
-    return this.http
-      .post<{
-        success: boolean;
-        data: string;
-        message: string;
-        errorCode?: string;
-      }>(
-        `${environment.apiUrl}/api/Auth/reset-password`,
-        { email, token, newPassword },
-        { withCredentials: true },
-      )
-      .pipe(
-        map((res) => {
-          if (res.success === false) {
-            throw new Error(res.message ?? 'Đặt lại mật khẩu thất bại.');
-          }
-          return {
-            message: res.data ?? res.message ?? 'Đổi mật khẩu thành công!',
-          };
-        }),
-      );
+    const payload = new ResetPasswordRequest({ email, token, newPassword });
+    return this.api.resetPassword(payload).pipe(
+      map((res) => {
+        if (res.success === false) {
+          throw new Error(res.message ?? 'Đặt lại mật khẩu thất bại.');
+        }
+        return {
+          message: res.data ?? res.message ?? 'Đổi mật khẩu thành công!',
+        };
+      }),
+    );
   }
   getProfile(): Observable<AuthResponse> {
-    return this.http
-      .get<{
-        success: boolean;
-        data: any;
-        message: string;
-      }>(`${environment.apiUrl}/api/me/profile`, { withCredentials: true })
-      .pipe(
-        map((res) => {
-          if (res.success === false || !res.data) {
-            throw new Error(
-              res.message ?? 'Không thể lấy thông tin người dùng.',
-            );
-          }
+    return this.api.profileGET().pipe(
+      map((res) => {
+        if (res.success === false || !res.data) {
+          throw new Error(
+            res.message ?? 'Không thể lấy thông tin người dùng.',
+          );
+        }
 
-          // Map to AuthResponse structure expected by sessionService.saveSession
-          const profile = res.data;
-          return {
-            user: {
-              id: profile.userId || profile.id,
-              email: profile.email,
-              fullName: profile.fullName,
-              roles: profile.roles,
-              avatarUrl: profile.avatarUrl,
-            },
-          } as AuthResponse;
-        }),
-      );
+        const profile = res.data;
+        return {
+          user: {
+            id: profile.id!,
+            email: profile.email,
+            fullName: profile.fullName,
+            roles: profile.roles,
+            avatarUrl: profile.avatarUrl,
+          },
+        } as AuthResponse;
+      }),
+    );
   }
 }

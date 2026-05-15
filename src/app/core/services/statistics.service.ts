@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiBaseService } from '../../shared/api/generated/api-service-base.service';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AdminDashboardStats, SellerDashboardStats } from '../models/statistics.model';
@@ -9,19 +9,19 @@ import { ApiResponse } from '../models/api.model';
   providedIn: 'root'
 })
 export class StatisticsService {
-  private apiUrl = `${environment.apiUrl}/api/statistics`;
 
-  constructor(private http: HttpClient) {}
+
+  constructor(private api: ApiBaseService) {}
 
   getAdminStats(): Observable<AdminDashboardStats> {
-    return this.http.get<ApiResponse<AdminDashboardStats>>(`${this.apiUrl}/admin`).pipe(
-      map(res => res.data)
+    return this.api.admin().pipe(
+      map(res => res.data as AdminDashboardStats)
     );
   }
 
   getSellerStats(shopId: string): Observable<SellerDashboardStats> {
-    return this.http.get<ApiResponse<SellerDashboardStats>>(`${this.apiUrl}/seller/${shopId}`).pipe(
-      map(res => res.data)
+    return this.api.seller(shopId).pipe(
+      map(res => res.data as SellerDashboardStats)
     );
   }
 }

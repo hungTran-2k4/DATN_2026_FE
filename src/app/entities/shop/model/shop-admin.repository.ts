@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+
 import { map, Observable } from 'rxjs';
 import {
   API_BASE_URL,
@@ -17,7 +17,7 @@ export class ShopAdminRepository {
 
   constructor(
     private readonly apiBase: ApiBaseService,
-    private readonly http: HttpClient,
+
     @Optional() @Inject(API_BASE_URL) baseUrl?: string
   ) {
     this.baseUrl = baseUrl ?? '';
@@ -29,12 +29,7 @@ export class ShopAdminRepository {
   }
 
   changeStatus(id: string, status: number): Observable<any> {
-    const url = `${this.baseUrl}/api/Shops/${id}/status`;
-    // Backend mong đợi body là enum ShopApprovalStatus (int)
-    return this.http.put(url, status, { 
-      withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return this.apiBase.statusPUT(id, status);
   }
 
   /**

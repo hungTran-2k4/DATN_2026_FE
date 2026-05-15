@@ -1,0 +1,62 @@
+<div class="card p-4 border-round-xl shadow-1">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="text-2xl font-bold text-color m-0">Quản lý dòng tiền</h2>
+      <p class="text-color-secondary mt-1 mb-0">Lịch sử giao dịch toàn hệ thống</p>
+    </div>
+    <div class="p-inputgroup w-20rem">
+      <input type="text" pInputText placeholder="Mã GD, Provider..." [(ngModel)]="keyword" (keyup.enter)="onSearch()" />
+      <button type="button" pButton icon="pi pi-search" (click)="onSearch()"></button>
+    </div>
+  </div>
+
+  <p-table [value]="transactions" [lazy]="true" (onLazyLoad)="loadTransactions($event)" dataKey="id"
+    [tableStyle]="{'min-width': '75rem'}" [paginator]="true" [rows]="20" [totalRecords]="totalRecords" [loading]="loading">
+    
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 15%">Mã giao dịch</th>
+        <th style="width: 15%">Mã đơn hàng</th>
+        <th style="width: 15%">Cổng thanh toán</th>
+        <th style="width: 15%">Loại giao dịch</th>
+        <th style="width: 15%">Số tiền</th>
+        <th style="width: 10%">Trạng thái</th>
+        <th style="width: 15%">Ngày tạo</th>
+      </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="body" let-tx>
+      <tr>
+        <td>
+          <span class="font-medium">{{ tx.externalTransactionNo || 'N/A' }}</span>
+        </td>
+        <td>
+          <span class="text-500 text-sm">{{ tx.orderId }}</span>
+        </td>
+        <td>
+          <span class="font-semibold">{{ tx.provider }}</span>
+        </td>
+        <td>
+          <p-tag [value]="tx.transactionType" severity="info"></p-tag>
+        </td>
+        <td>
+          <span class="font-bold" [ngClass]="{'text-green-500': tx.transactionType === 'PAYMENT_IN', 'text-orange-500': tx.transactionType !== 'PAYMENT_IN'}">
+            {{ tx.transactionType === 'PAYMENT_IN' ? '+' : '-' }} {{ formatPrice(tx.amount) }}
+          </span>
+        </td>
+        <td>
+          <p-tag [value]="tx.status" [severity]="getSeverity(tx.status)"></p-tag>
+        </td>
+        <td>
+          {{ tx.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </td>
+      </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center p-4">Không có giao dịch nào.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

@@ -4698,6 +4698,235 @@ export class ApiBaseService {
   }
 
   /**
+   * @param status (optional)
+   * @param page (optional)
+   * @param pageSize (optional)
+   * @return OK
+   */
+  all(
+    status: string | undefined,
+    page: number | undefined,
+    pageSize: number | undefined,
+  ): Observable<OrderSummaryDtoIEnumerablePagedResponse> {
+    let url_ = this.baseUrl + '/api/orders/all?';
+    if (status === null)
+      throw new globalThis.Error("The parameter 'status' cannot be null.");
+    else if (status !== undefined)
+      url_ += 'status=' + encodeURIComponent('' + status) + '&';
+    if (page === null)
+      throw new globalThis.Error("The parameter 'page' cannot be null.");
+    else if (page !== undefined)
+      url_ += 'page=' + encodeURIComponent('' + page) + '&';
+    if (pageSize === null)
+      throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+    else if (pageSize !== undefined)
+      url_ += 'pageSize=' + encodeURIComponent('' + pageSize) + '&';
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processAll(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processAll(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<OrderSummaryDtoIEnumerablePagedResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<OrderSummaryDtoIEnumerablePagedResponse>;
+        }),
+      );
+  }
+
+  protected processAll(
+    response: HttpResponseBase,
+  ): Observable<OrderSummaryDtoIEnumerablePagedResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 =
+            OrderSummaryDtoIEnumerablePagedResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  confirmReceived(id: string): Observable<BooleanApiResponse> {
+    let url_ = this.baseUrl + '/api/orders/{id}/confirm-received';
+    if (id === undefined || id === null)
+      throw new globalThis.Error("The parameter 'id' must be defined.");
+    url_ = url_.replace('{id}', encodeURIComponent('' + id));
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('post', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processConfirmReceived(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processConfirmReceived(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<BooleanApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<BooleanApiResponse>;
+        }),
+      );
+  }
+
+  protected processConfirmReceived(
+    response: HttpResponseBase,
+  ): Observable<BooleanApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = BooleanApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status === 400) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result400: any = null;
+          let resultData400 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result400 = BooleanApiResponse.fromJS(resultData400);
+          return throwException(
+            'Bad Request',
+            status,
+            _responseText,
+            _headers,
+            result400,
+          );
+        }),
+      );
+    } else if (status === 403) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result403: any = null;
+          let resultData403 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result403 = BooleanApiResponse.fromJS(resultData403);
+          return throwException(
+            'Forbidden',
+            status,
+            _responseText,
+            _headers,
+            result403,
+          );
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
    * @param body (optional)
    * @return OK
    */
@@ -7288,20 +7517,28 @@ export class ApiBaseService {
   }
 
   /**
+   * @param body (optional)
    * @return OK
    */
-  createShipment(orderId: string): Observable<CreateShipmentResultApiResponse> {
+  createShipment(
+    orderId: string,
+    body: CreateShipmentPayload | undefined,
+  ): Observable<CreateShipmentResultApiResponse> {
     let url_ = this.baseUrl + '/api/Shipping/create-shipment/{orderId}';
     if (orderId === undefined || orderId === null)
       throw new globalThis.Error("The parameter 'orderId' must be defined.");
     url_ = url_.replace('{orderId}', encodeURIComponent('' + orderId));
     url_ = url_.replace(/[?&]$/, '');
 
+    const content_ = JSON.stringify(body);
+
     let options_: any = {
+      body: content_,
       observe: 'response',
       responseType: 'blob',
       withCredentials: true,
       headers: new HttpHeaders({
+        'Content-Type': 'application/json',
         Accept: 'application/json',
       }),
     };
@@ -7533,7 +7770,266 @@ export class ApiBaseService {
     return _observableOf(null as any);
   }
 
+  /**
+   * @return OK
+   */
+  provinces(): Observable<GhnProvinceListApiResponse> {
+    let url_ = this.baseUrl + '/api/Shipping/ghn/provinces';
+    url_ = url_.replace(/[?&]$/, '');
 
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processProvinces(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processProvinces(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<GhnProvinceListApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<GhnProvinceListApiResponse>;
+        }),
+      );
+  }
+
+  protected processProvinces(
+    response: HttpResponseBase,
+  ): Observable<GhnProvinceListApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = GhnProvinceListApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  districts(provinceId: number): Observable<GhnDistrictListApiResponse> {
+    let url_ = this.baseUrl + '/api/Shipping/ghn/districts/{provinceId}';
+    if (provinceId === undefined || provinceId === null)
+      throw new globalThis.Error("The parameter 'provinceId' must be defined.");
+    url_ = url_.replace('{provinceId}', encodeURIComponent('' + provinceId));
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processDistricts(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processDistricts(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<GhnDistrictListApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<GhnDistrictListApiResponse>;
+        }),
+      );
+  }
+
+  protected processDistricts(
+    response: HttpResponseBase,
+  ): Observable<GhnDistrictListApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = GhnDistrictListApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @return OK
+   */
+  wards(districtId: number): Observable<GhnWardListApiResponse> {
+    let url_ = this.baseUrl + '/api/Shipping/ghn/wards/{districtId}';
+    if (districtId === undefined || districtId === null)
+      throw new globalThis.Error("The parameter 'districtId' must be defined.");
+    url_ = url_.replace('{districtId}', encodeURIComponent('' + districtId));
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processWards(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processWards(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<GhnWardListApiResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<GhnWardListApiResponse>;
+        }),
+      );
+  }
+
+  protected processWards(
+    response: HttpResponseBase,
+  ): Observable<GhnWardListApiResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = GhnWardListApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
 
   /**
    * @param slug (optional)
@@ -9569,6 +10065,110 @@ export class ApiBaseService {
               ? null
               : JSON.parse(_responseText, this.jsonParseReviver);
           result200 = BooleanApiResponse.fromJS(resultData200);
+          return _observableOf(result200);
+        }),
+      );
+    } else if (status !== 200 && status !== 204) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          return throwException(
+            'An unexpected server error occurred.',
+            status,
+            _responseText,
+            _headers,
+          );
+        }),
+      );
+    }
+    return _observableOf(null as any);
+  }
+
+  /**
+   * @param keyword (optional)
+   * @param page (optional)
+   * @param pageSize (optional)
+   * @return OK
+   */
+  transactions(
+    keyword: string | undefined,
+    page: number | undefined,
+    pageSize: number | undefined,
+  ): Observable<TransactionIEnumerablePagedResponse> {
+    let url_ = this.baseUrl + '/api/Transactions?';
+    if (keyword === null)
+      throw new globalThis.Error("The parameter 'keyword' cannot be null.");
+    else if (keyword !== undefined)
+      url_ += 'keyword=' + encodeURIComponent('' + keyword) + '&';
+    if (page === null)
+      throw new globalThis.Error("The parameter 'page' cannot be null.");
+    else if (page !== undefined)
+      url_ += 'page=' + encodeURIComponent('' + page) + '&';
+    if (pageSize === null)
+      throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+    else if (pageSize !== undefined)
+      url_ += 'pageSize=' + encodeURIComponent('' + pageSize) + '&';
+    url_ = url_.replace(/[?&]$/, '');
+
+    let options_: any = {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+      }),
+    };
+
+    return this.http
+      .request('get', url_, options_)
+      .pipe(
+        _observableMergeMap((response_: any) => {
+          return this.processTransactions(response_);
+        }),
+      )
+      .pipe(
+        _observableCatch((response_: any) => {
+          if (response_ instanceof HttpResponseBase) {
+            try {
+              return this.processTransactions(response_ as any);
+            } catch (e) {
+              return _observableThrow(
+                e,
+              ) as any as Observable<TransactionIEnumerablePagedResponse>;
+            }
+          } else
+            return _observableThrow(
+              response_,
+            ) as any as Observable<TransactionIEnumerablePagedResponse>;
+        }),
+      );
+  }
+
+  protected processTransactions(
+    response: HttpResponseBase,
+  ): Observable<TransactionIEnumerablePagedResponse> {
+    const status = response.status;
+    const responseBlob =
+      response instanceof HttpResponse
+        ? response.body
+        : (response as any).error instanceof Blob
+          ? (response as any).error
+          : undefined;
+
+    let _headers: any = {};
+    if (response.headers) {
+      for (let key of response.headers.keys()) {
+        _headers[key] = response.headers.get(key);
+      }
+    }
+    if (status === 200) {
+      return blobToText(responseBlob).pipe(
+        _observableMergeMap((_responseText: string) => {
+          let result200: any = null;
+          let resultData200 =
+            _responseText === ''
+              ? null
+              : JSON.parse(_responseText, this.jsonParseReviver);
+          result200 = TransactionIEnumerablePagedResponse.fromJS(resultData200);
           return _observableOf(result200);
         }),
       );
@@ -14601,6 +15201,7 @@ export interface ICreateCategoryCommand {
 
 export class CreatePaymentUrlRequest implements ICreatePaymentUrlRequest {
   orderId?: string;
+  orderIds?: string[] | undefined;
 
   constructor(data?: ICreatePaymentUrlRequest) {
     if (data) {
@@ -14614,6 +15215,11 @@ export class CreatePaymentUrlRequest implements ICreatePaymentUrlRequest {
   init(_data?: any) {
     if (_data) {
       this.orderId = _data['orderId'];
+      if (Array.isArray(_data['orderIds'])) {
+        this.orderIds = [] as any;
+        for (let item of _data['orderIds'])
+          this.orderIds!.push(item);
+      }
     }
   }
 
@@ -14627,12 +15233,18 @@ export class CreatePaymentUrlRequest implements ICreatePaymentUrlRequest {
   toJSON(data?: any) {
     data = typeof data === 'object' ? data : {};
     data['orderId'] = this.orderId;
+    if (Array.isArray(this.orderIds)) {
+      data['orderIds'] = [];
+      for (let item of this.orderIds)
+        data['orderIds'].push(item);
+    }
     return data;
   }
 }
 
 export interface ICreatePaymentUrlRequest {
   orderId?: string;
+  orderIds?: string[] | undefined;
 }
 
 export class CreatePaymentUrlResponse implements ICreatePaymentUrlResponse {
@@ -14681,7 +15293,6 @@ export class CreateProductCommand implements ICreateProductCommand {
   slug?: string | undefined;
   description?: string | undefined;
   summary?: string | undefined;
-  status?: string | undefined;
   brandId?: string | undefined;
   categoryId?: string | undefined;
   shopId?: string | undefined;
@@ -14703,7 +15314,6 @@ export class CreateProductCommand implements ICreateProductCommand {
       this.slug = _data['slug'];
       this.description = _data['description'];
       this.summary = _data['summary'];
-      this.status = _data['status'];
       this.brandId = _data['brandId'];
       this.categoryId = _data['categoryId'];
       this.shopId = _data['shopId'];
@@ -14725,7 +15335,6 @@ export class CreateProductCommand implements ICreateProductCommand {
     data['slug'] = this.slug;
     data['description'] = this.description;
     data['summary'] = this.summary;
-    data['status'] = this.status;
     data['brandId'] = this.brandId;
     data['categoryId'] = this.categoryId;
     data['shopId'] = this.shopId;
@@ -14740,11 +15349,50 @@ export interface ICreateProductCommand {
   slug?: string | undefined;
   description?: string | undefined;
   summary?: string | undefined;
-  status?: string | undefined;
   brandId?: string | undefined;
   categoryId?: string | undefined;
   shopId?: string | undefined;
   baseAttributes?: string | undefined;
+}
+
+export class CreateShipmentPayload implements ICreateShipmentPayload {
+  note?: string | undefined;
+  weight?: number | undefined;
+
+  constructor(data?: ICreateShipmentPayload) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.note = _data['note'];
+      this.weight = _data['weight'];
+    }
+  }
+
+  static fromJS(data: any): CreateShipmentPayload {
+    data = typeof data === 'object' ? data : {};
+    let result = new CreateShipmentPayload();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['note'] = this.note;
+    data['weight'] = this.weight;
+    return data;
+  }
+}
+
+export interface ICreateShipmentPayload {
+  note?: string | undefined;
+  weight?: number | undefined;
 }
 
 export class CreateShipmentResult implements ICreateShipmentResult {
@@ -15320,6 +15968,8 @@ export class GetProductsQuery implements IGetProductsQuery {
   page?: number;
   pageSize?: number;
   shopId?: string | undefined;
+  status?: ProductStatus;
+  includeInactive?: boolean | undefined;
 
   constructor(data?: IGetProductsQuery) {
     if (data) {
@@ -15339,6 +15989,8 @@ export class GetProductsQuery implements IGetProductsQuery {
       this.page = _data['page'];
       this.pageSize = _data['pageSize'];
       this.shopId = _data['shopId'];
+      this.status = _data['status'];
+      this.includeInactive = _data['includeInactive'];
     }
   }
 
@@ -15356,6 +16008,8 @@ export class GetProductsQuery implements IGetProductsQuery {
     data['page'] = this.page;
     data['pageSize'] = this.pageSize;
     data['shopId'] = this.shopId;
+    data['status'] = this.status;
+    data['includeInactive'] = this.includeInactive;
     return data;
   }
 }
@@ -15366,6 +16020,8 @@ export interface IGetProductsQuery {
   page?: number;
   pageSize?: number;
   shopId?: string | undefined;
+  status?: ProductStatus;
+  includeInactive?: boolean | undefined;
 }
 
 export class GetUsersQuery implements IGetUsersQuery {
@@ -15416,6 +16072,373 @@ export interface IGetUsersQuery {
   filter?: FilterDescriptor;
   page?: number;
   pageSize?: number;
+}
+
+export class GhnDistrict implements IGhnDistrict {
+  districtID?: number;
+  districtName?: string | undefined;
+  provinceID?: number;
+
+  constructor(data?: IGhnDistrict) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.districtID = _data['DistrictID'];
+      this.districtName = _data['DistrictName'];
+      this.provinceID = _data['ProvinceID'];
+    }
+  }
+
+  static fromJS(data: any): GhnDistrict {
+    data = typeof data === 'object' ? data : {};
+    let result = new GhnDistrict();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['DistrictID'] = this.districtID;
+    data['DistrictName'] = this.districtName;
+    data['ProvinceID'] = this.provinceID;
+    return data;
+  }
+}
+
+export interface IGhnDistrict {
+  districtID?: number;
+  districtName?: string | undefined;
+  provinceID?: number;
+}
+
+export class GhnDistrictListApiResponse implements IGhnDistrictListApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: GhnDistrict[] | undefined;
+
+  constructor(data?: IGhnDistrictListApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      if (Array.isArray(_data['data'])) {
+        this.data = [] as any;
+        for (let item of _data['data'])
+          this.data!.push(GhnDistrict.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): GhnDistrictListApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new GhnDistrictListApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    if (Array.isArray(this.data)) {
+      data['data'] = [];
+      for (let item of this.data)
+        data['data'].push(item ? item.toJSON() : (undefined as any));
+    }
+    return data;
+  }
+}
+
+export interface IGhnDistrictListApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: GhnDistrict[] | undefined;
+}
+
+export class GhnProvince implements IGhnProvince {
+  provinceID?: number;
+  provinceName?: string | undefined;
+
+  constructor(data?: IGhnProvince) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.provinceID = _data['ProvinceID'];
+      this.provinceName = _data['ProvinceName'];
+    }
+  }
+
+  static fromJS(data: any): GhnProvince {
+    data = typeof data === 'object' ? data : {};
+    let result = new GhnProvince();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['ProvinceID'] = this.provinceID;
+    data['ProvinceName'] = this.provinceName;
+    return data;
+  }
+}
+
+export interface IGhnProvince {
+  provinceID?: number;
+  provinceName?: string | undefined;
+}
+
+export class GhnProvinceListApiResponse implements IGhnProvinceListApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: GhnProvince[] | undefined;
+
+  constructor(data?: IGhnProvinceListApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      if (Array.isArray(_data['data'])) {
+        this.data = [] as any;
+        for (let item of _data['data'])
+          this.data!.push(GhnProvince.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): GhnProvinceListApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new GhnProvinceListApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    if (Array.isArray(this.data)) {
+      data['data'] = [];
+      for (let item of this.data)
+        data['data'].push(item ? item.toJSON() : (undefined as any));
+    }
+    return data;
+  }
+}
+
+export interface IGhnProvinceListApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: GhnProvince[] | undefined;
+}
+
+export class GhnWard implements IGhnWard {
+  wardCode?: string | undefined;
+  wardName?: string | undefined;
+  districtID?: number;
+
+  constructor(data?: IGhnWard) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.wardCode = _data['WardCode'];
+      this.wardName = _data['WardName'];
+      this.districtID = _data['DistrictID'];
+    }
+  }
+
+  static fromJS(data: any): GhnWard {
+    data = typeof data === 'object' ? data : {};
+    let result = new GhnWard();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['WardCode'] = this.wardCode;
+    data['WardName'] = this.wardName;
+    data['DistrictID'] = this.districtID;
+    return data;
+  }
+}
+
+export interface IGhnWard {
+  wardCode?: string | undefined;
+  wardName?: string | undefined;
+  districtID?: number;
+}
+
+export class GhnWardListApiResponse implements IGhnWardListApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: GhnWard[] | undefined;
+
+  constructor(data?: IGhnWardListApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      if (Array.isArray(_data['data'])) {
+        this.data = [] as any;
+        for (let item of _data['data']) this.data!.push(GhnWard.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): GhnWardListApiResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new GhnWardListApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    if (Array.isArray(this.data)) {
+      data['data'] = [];
+      for (let item of this.data)
+        data['data'].push(item ? item.toJSON() : (undefined as any));
+    }
+    return data;
+  }
+}
+
+export interface IGhnWardListApiResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: GhnWard[] | undefined;
 }
 
 export class GuidApiResponse implements IGuidApiResponse {
@@ -16149,6 +17172,8 @@ export class OrderSummaryDto implements IOrderSummaryDto {
   totalAmount?: number;
   totalItems?: number;
   firstItemName?: string | undefined;
+  shopId?: string | undefined;
+  shopName?: string | undefined;
   createdAt?: Date | undefined;
 
   constructor(data?: IOrderSummaryDto) {
@@ -16170,6 +17195,8 @@ export class OrderSummaryDto implements IOrderSummaryDto {
       this.totalAmount = _data['totalAmount'];
       this.totalItems = _data['totalItems'];
       this.firstItemName = _data['firstItemName'];
+      this.shopId = _data['shopId'];
+      this.shopName = _data['shopName'];
       this.createdAt = _data['createdAt']
         ? new Date(_data['createdAt'].toString())
         : (undefined as any);
@@ -16193,6 +17220,8 @@ export class OrderSummaryDto implements IOrderSummaryDto {
     data['totalAmount'] = this.totalAmount;
     data['totalItems'] = this.totalItems;
     data['firstItemName'] = this.firstItemName;
+    data['shopId'] = this.shopId;
+    data['shopName'] = this.shopName;
     data['createdAt'] = this.createdAt
       ? this.createdAt.toISOString()
       : (undefined as any);
@@ -16209,6 +17238,8 @@ export interface IOrderSummaryDto {
   totalAmount?: number;
   totalItems?: number;
   firstItemName?: string | undefined;
+  shopId?: string | undefined;
+  shopName?: string | undefined;
   createdAt?: Date | undefined;
 }
 
@@ -17032,6 +18063,14 @@ export interface IProductRatingDtoApiResponse {
   errors?: { [key: string]: string[] } | undefined;
   traceId?: string | undefined;
   data?: ProductRatingDto;
+}
+
+export enum ProductStatus {
+  _0 = 0,
+  _1 = 1,
+  _2 = 2,
+  _3 = 3,
+  _4 = 4,
 }
 
 export class ProductVariantDto implements IProductVariantDto {
@@ -18115,6 +19154,7 @@ export interface IShipmentApiResponse {
 }
 
 export class ShippingFeeRequest implements IShippingFeeRequest {
+  shopId?: string | undefined;
   fromDistrictId?: number;
   fromWardCode?: string | undefined;
   toDistrictId?: number;
@@ -18134,6 +19174,7 @@ export class ShippingFeeRequest implements IShippingFeeRequest {
 
   init(_data?: any) {
     if (_data) {
+      this.shopId = _data['shopId'];
       this.fromDistrictId = _data['fromDistrictId'];
       this.fromWardCode = _data['fromWardCode'];
       this.toDistrictId = _data['toDistrictId'];
@@ -18153,6 +19194,7 @@ export class ShippingFeeRequest implements IShippingFeeRequest {
 
   toJSON(data?: any) {
     data = typeof data === 'object' ? data : {};
+    data['shopId'] = this.shopId;
     data['fromDistrictId'] = this.fromDistrictId;
     data['fromWardCode'] = this.fromWardCode;
     data['toDistrictId'] = this.toDistrictId;
@@ -18165,6 +19207,7 @@ export class ShippingFeeRequest implements IShippingFeeRequest {
 }
 
 export interface IShippingFeeRequest {
+  shopId?: string | undefined;
   fromDistrictId?: number;
   fromWardCode?: string | undefined;
   toDistrictId?: number;
@@ -19262,6 +20305,178 @@ export interface ITopShopDto {
   revenue?: number;
 }
 
+export class Transaction implements ITransaction {
+  id?: string;
+  orderId?: string;
+  externalTransactionNo?: string | undefined;
+  amount?: number;
+  provider?: string | undefined;
+  status?: string | undefined;
+  rawResponse?: string | undefined;
+  createdAt?: Date;
+  transactionType?: string | undefined;
+  referenceId?: string | undefined;
+
+  constructor(data?: ITransaction) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data['id'];
+      this.orderId = _data['orderId'];
+      this.externalTransactionNo = _data['externalTransactionNo'];
+      this.amount = _data['amount'];
+      this.provider = _data['provider'];
+      this.status = _data['status'];
+      this.rawResponse = _data['rawResponse'];
+      this.createdAt = _data['createdAt']
+        ? new Date(_data['createdAt'].toString())
+        : (undefined as any);
+      this.transactionType = _data['transactionType'];
+      this.referenceId = _data['referenceId'];
+    }
+  }
+
+  static fromJS(data: any): Transaction {
+    data = typeof data === 'object' ? data : {};
+    let result = new Transaction();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['id'] = this.id;
+    data['orderId'] = this.orderId;
+    data['externalTransactionNo'] = this.externalTransactionNo;
+    data['amount'] = this.amount;
+    data['provider'] = this.provider;
+    data['status'] = this.status;
+    data['rawResponse'] = this.rawResponse;
+    data['createdAt'] = this.createdAt
+      ? this.createdAt.toISOString()
+      : (undefined as any);
+    data['transactionType'] = this.transactionType;
+    data['referenceId'] = this.referenceId;
+    return data;
+  }
+}
+
+export interface ITransaction {
+  id?: string;
+  orderId?: string;
+  externalTransactionNo?: string | undefined;
+  amount?: number;
+  provider?: string | undefined;
+  status?: string | undefined;
+  rawResponse?: string | undefined;
+  createdAt?: Date;
+  transactionType?: string | undefined;
+  referenceId?: string | undefined;
+}
+
+export class TransactionIEnumerablePagedResponse implements ITransactionIEnumerablePagedResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: Transaction[] | undefined;
+  pageNumber?: number;
+  pageSize?: number;
+  totalPages?: number;
+  totalRecords?: number;
+
+  constructor(data?: ITransactionIEnumerablePagedResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (this as any)[property] = (data as any)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.statusCode = _data['statusCode'];
+      this.success = _data['success'];
+      this.message = _data['message'];
+      this.errorCode = _data['errorCode'];
+      if (_data['errors']) {
+        this.errors = {} as any;
+        for (let key in _data['errors']) {
+          if (_data['errors'].hasOwnProperty(key))
+            (this.errors as any)![key] = _data['errors'][key];
+        }
+      }
+      this.traceId = _data['traceId'];
+      if (Array.isArray(_data['data'])) {
+        this.data = [] as any;
+        for (let item of _data['data'])
+          this.data!.push(Transaction.fromJS(item));
+      }
+      this.pageNumber = _data['pageNumber'];
+      this.pageSize = _data['pageSize'];
+      this.totalPages = _data['totalPages'];
+      this.totalRecords = _data['totalRecords'];
+    }
+  }
+
+  static fromJS(data: any): TransactionIEnumerablePagedResponse {
+    data = typeof data === 'object' ? data : {};
+    let result = new TransactionIEnumerablePagedResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === 'object' ? data : {};
+    data['statusCode'] = this.statusCode;
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['errorCode'] = this.errorCode;
+    if (this.errors) {
+      data['errors'] = {};
+      for (let key in this.errors) {
+        if (this.errors.hasOwnProperty(key))
+          (data['errors'] as any)[key] = (this.errors as any)[key];
+      }
+    }
+    data['traceId'] = this.traceId;
+    if (Array.isArray(this.data)) {
+      data['data'] = [];
+      for (let item of this.data)
+        data['data'].push(item ? item.toJSON() : (undefined as any));
+    }
+    data['pageNumber'] = this.pageNumber;
+    data['pageSize'] = this.pageSize;
+    data['totalPages'] = this.totalPages;
+    data['totalRecords'] = this.totalRecords;
+    return data;
+  }
+}
+
+export interface ITransactionIEnumerablePagedResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string | undefined;
+  errorCode?: string | undefined;
+  errors?: { [key: string]: string[] } | undefined;
+  traceId?: string | undefined;
+  data?: Transaction[] | undefined;
+  pageNumber?: number;
+  pageSize?: number;
+  totalPages?: number;
+  totalRecords?: number;
+}
+
 export class UpdateAddressCommand implements IUpdateAddressCommand {
   id?: string;
   userId?: string;
@@ -19604,7 +20819,7 @@ export class UpdateShopCommand implements IUpdateShopCommand {
   ownerId?: string | undefined;
   provinceId?: number | undefined;
   districtId?: number | undefined;
-  wardId?: number | undefined;
+  wardId?: string | undefined;
   pickupAddress?: string | undefined;
   isActive?: boolean | undefined;
 
@@ -19669,7 +20884,7 @@ export interface IUpdateShopCommand {
   ownerId?: string | undefined;
   provinceId?: number | undefined;
   districtId?: number | undefined;
-  wardId?: number | undefined;
+  wardId?: string | undefined;
   pickupAddress?: string | undefined;
   isActive?: boolean | undefined;
 }

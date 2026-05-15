@@ -1,13 +1,13 @@
 import {
   Component, Input, Output, EventEmitter,
-  OnInit, OnChanges, SimpleChanges,
+  OnInit, OnChanges, SimpleChanges, PLATFORM_ID, Inject
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   FormBuilder, FormGroup, ReactiveFormsModule,
   Validators, AbstractControl, ValidationErrors, AsyncValidatorFn,
 } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { ApiBaseService } from '../../../../shared/api/generated/api-service-base.service';
 import { switchMap, map, first } from 'rxjs/operators';
 import { Observable, of, timer } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
@@ -74,7 +74,8 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly http: HttpClient,
+    private readonly api: ApiBaseService,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
 
   ngOnInit(): void {
@@ -102,7 +103,10 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     });
 
     if (this.state === 'loading') this.form.disable();
-    this.loadProvinces();
+    
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadProvinces();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -148,10 +152,10 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     this.form.get('street')?.setValue(shopStreet);
 
     if (shopProvince) {
-      this.loadPickupDistricts(shopProvince.ProvinceID, () => {
+      this.loadPickupDistricts(shopProvince.provinceID, () => {
         this.form.get('district')?.setValue(shopDistrict);
         if (shopDistrict) {
-          this.loadPickupWards(shopDistrict.DistrictID, () => {
+          this.loadPickupWards(shopDistrict.districtID, () => {
             this.form.get('ward')?.setValue(shopWard);
           });
         }
@@ -173,7 +177,7 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     if (!province) return;
 
     this.isLoadingShopDistricts = true;
-    this.http.get<any>(`/api/Shipping/ghn/districts/${province.ProvinceID}`).subscribe({
+    this.api.districts(province.provinceID).subscribe({
       next: (res) => {
         this.shopDistricts = res.data ?? [];
         this.form.get('shopDistrict')?.enable();
@@ -193,7 +197,7 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     if (!district) return;
 
     this.isLoadingShopWards = true;
-    this.http.get<any>(`/api/Shipping/ghn/wards/${district.DistrictID}`).subscribe({
+    this.api.wards(district.districtID).subscribe({
       next: (res) => {
         this.shopWards = res.data ?? [];
         this.form.get('shopWard')?.enable();
@@ -217,7 +221,7 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     const province = this.form.get('province')?.value;
     if (!province) return;
 
-    this.loadPickupDistricts(province.ProvinceID);
+    this.loadPickupDistricts(province.provinceID);
   }
 
   onDistrictChange(): void {
@@ -228,12 +232,12 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
     const district = this.form.get('district')?.value;
     if (!district) return;
 
-    this.loadPickupWards(district.DistrictID);
+    this.loadPickupWards(district.districtID);
   }
 
   private loadPickupDistricts(provinceId: number, callback?: () => void): void {
     this.isLoadingDistricts = true;
-    this.http.get<any>(`/api/Shipping/ghn/districts/${provinceId}`).subscribe({
+    this.api.districts(provinceId).subscribe({
       next: (res) => {
         this.districts = res.data ?? [];
         this.form.get('district')?.enable();
@@ -246,7 +250,7 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
 
   private loadPickupWards(districtId: number, callback?: () => void): void {
     this.isLoadingWards = true;
-    this.http.get<any>(`/api/Shipping/ghn/wards/${districtId}`).subscribe({
+    this.api.wards(districtId).subscribe({
       next: (res) => {
         this.wards = res.data ?? [];
         this.form.get('ward')?.enable();
@@ -259,7 +263,7 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
 
   private loadProvinces(): void {
     this.isLoadingProvinces = true;
-    this.http.get<any>('/api/Shipping/ghn/provinces').subscribe({
+    this.api.provinces().subscribe({
       next: (res) => { this.provinces = res.data ?? []; this.isLoadingProvinces = false; },
       error: () => { this.isLoadingProvinces = false; },
     });
@@ -297,9 +301,9 @@ export class SellerRegistrationFormComponent implements OnInit, OnChanges {
       slug: v.slug,
       description: v.description,
       // Ghi đúng vào DB: provinceId, districtId, wardId, pickupAddress
-      provinceId: v.province?.ProvinceID,
-      districtId: v.district?.DistrictID,
-      wardId: v.ward?.WardCode ? parseInt(v.ward.WardCode, 10) : undefined,
+      provinceId: v.province?.provinceID,
+      districtId: v.district?.districtID,
+      wardId: v.ward?.wardCode,
       pickupAddress: v.street?.trim(),
     };
     this.formSubmit.emit(value);

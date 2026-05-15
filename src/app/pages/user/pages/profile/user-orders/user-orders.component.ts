@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 import { PaginatorModule } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
@@ -10,7 +10,9 @@ import {
   ApiBaseService,
   CreatePaymentUrlRequest,
   OrderSummaryDto,
+  BooleanApiResponse,
 } from '../../../../../shared/api/generated/api-service-base.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-user-orders',
@@ -45,6 +47,7 @@ export class UserOrdersComponent implements OnInit {
     { label: 'Chờ lấy hàng', value: 'PROCESSING' },
     { label: 'Đang giao', value: 'SHIPPED' },
     { label: 'Đã giao', value: 'DELIVERED' },
+    { label: 'Hoàn thành', value: 'COMPLETED' },
     { label: 'Trả hàng', value: 'RETURNED' },
     { label: 'Đã hủy', value: 'CANCELLED' },
   ];
@@ -52,10 +55,15 @@ export class UserOrdersComponent implements OnInit {
   // Shipment tracking
   shipmentInfo: any = null;
 
-  constructor(private apiService: ApiBaseService, private http: HttpClient) {}
+  constructor(
+    private apiService: ApiBaseService,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
+  ) {}
 
   ngOnInit() {
-    this.loadOrders();
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadOrders();
+    }
   }
 
   loadOrders() {
@@ -135,7 +143,7 @@ export class UserOrdersComponent implements OnInit {
   }
 
   loadShipmentTracking(orderId: string) {
-    this.http.get<any>(`/api/Shipping/tracking/${orderId}`).subscribe({
+    this.apiService.tracking(orderId).subscribe({
       next: (res) => { if (res.success) this.shipmentInfo = res.data; },
     });
   }
@@ -146,6 +154,7 @@ export class UserOrdersComponent implements OnInit {
       PROCESSING: 'Chờ lấy hàng',
       SHIPPED: 'Đang giao',
       DELIVERED: 'Đã giao',
+      COMPLETED: 'Hoàn thành',
       RETURNED: 'Trả hàng',
       CANCELLED: 'Đã hủy',
     };
@@ -158,6 +167,7 @@ export class UserOrdersComponent implements OnInit {
       PROCESSING: 'bg-blue-100 text-blue-700',
       SHIPPED: 'bg-indigo-100 text-indigo-700',
       DELIVERED: 'bg-green-100 text-green-700',
+      COMPLETED: 'bg-emerald-100 text-emerald-700',
       RETURNED: 'bg-orange-100 text-orange-700',
       CANCELLED: 'bg-red-100 text-red-700',
     };
@@ -176,6 +186,28 @@ export class UserOrdersComponent implements OnInit {
           }
         },
         error: () => alert('Lỗi hệ thống khi tạo link thanh toán'),
+      });
+    }
+  }
+
+  confirmReceived(order: OrderSummaryDto) {
+    if (!order.id) return;
+    
+    if (confirm('Bạn xác nhận đã nhận được hàng và hài lòng với sản phẩm? Thao tác này sẽ giải phóng tiền cho người bán và không thể hoàn tác.')) {
+      this.isLoading = true;
+      this.apiService.confirmReceived(order.id).subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.loadOrders();
+          } else {
+            alert(res.message || 'Không thể xác nhận nhận hàng.');
+            this.isLoading = false;
+          }
+        },
+        error: (err) => {
+          alert('Lỗi hệ thống khi xác nhận nhận hàng.');
+          this.isLoading = false;
+        }
       });
     }
   }

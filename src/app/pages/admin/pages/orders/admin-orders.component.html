@@ -6,7 +6,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Quản lý toàn bộ đơn hàng</h1>
-      <p class="page-subtitle">{{ result.totalRecords | number }} đơn hàng trên toàn hệ thống</p>
+      <p class="page-subtitle">{{ (result.totalRecords || 0) | number }} đơn hàng trên toàn hệ thống</p>
     </div>
     <button class="btn-outline" (click)="loadOrders()">
       <i class="pi pi-refresh"></i> Làm mới
@@ -31,18 +31,21 @@
   </div>
 
   <!-- Empty -->
-  <div class="empty-state" *ngIf="!isLoading && result.items.length === 0">
+  <div class="empty-state" *ngIf="!isLoading && (!result.data || result.data.length === 0)">
     <div class="empty-icon"><i class="pi pi-inbox"></i></div>
     <h3>Không có đơn hàng nào</h3>
     <p>{{ selectedStatus ? 'Không có đơn hàng với trạng thái này' : 'Hệ thống chưa có đơn hàng nào' }}</p>
   </div>
 
   <!-- Orders list -->
-  <div class="orders-list" *ngIf="!isLoading && result.items.length > 0">
-    <div class="order-card" *ngFor="let order of result.items">
+  <div class="orders-list" *ngIf="!isLoading && (result.data && result.data.length > 0)">
+    <div class="order-card" *ngFor="let order of result.data">
       <div class="order-main">
         <div class="order-left">
           <div class="order-code">{{ order.orderCode }}</div>
+          <div class="order-shop text-[10px] text-blue-600 font-bold uppercase mb-1" *ngIf="order.shopName">
+             <i class="pi pi-shop mr-1"></i>{{ order.shopName }}
+          </div>
           <div class="order-product">{{ order.firstItemName }}</div>
           <div class="order-meta">
             <span><i class="pi pi-shopping-bag text-xs"></i> {{ order.totalItems }} sản phẩm</span>
@@ -77,10 +80,10 @@
   </div>
 
   <!-- Pagination -->
-  <div class="pagination-wrap" *ngIf="!isLoading && result.totalRecords > pageSize">
+  <div class="pagination-wrap" *ngIf="!isLoading && (result.totalRecords || 0) > pageSize">
     <p-paginator
       [rows]="pageSize"
-      [totalRecords]="result.totalRecords"
+      [totalRecords]="result.totalRecords || 0"
       [first]="(currentPage - 1) * pageSize"
       [rowsPerPageOptions]="[20, 50]"
       (onPageChange)="onPageChange($event)"
@@ -191,7 +194,7 @@
 
 <!-- ── Update Status Dialog ── -->
 <p-dialog
-  header="Cập nhật trạng thái đơn hàng (Admin)"
+  header="Quản trị đơn hàng (Admin)"
   [(visible)]="showStatusDialog"
   [modal]="true"
   [style]="{width: 'min(440px, 96vw)'}"

@@ -64,8 +64,8 @@ export class SellerFacade {
 
   // ── Products ──
 
-  getProducts(shopId: string, search?: string, page = 1, pageSize = 10): Observable<PagedResult<ProductDto>> {
-    return this.productRepo.getProducts(shopId, search, page, pageSize).pipe(
+  getProducts(shopId: string, search?: string, page = 1, pageSize = 10, status?: any): Observable<PagedResult<ProductDto>> {
+    return this.productRepo.getProducts(shopId, search, page, pageSize, status).pipe(
       catchError(() => of({ items: [], pageNumber: 1, pageSize, totalPages: 0, totalRecords: 0 })),
     );
   }

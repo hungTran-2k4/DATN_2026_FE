@@ -1,5 +1,5 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
@@ -33,13 +33,16 @@ export class UserHeaderComponent implements OnInit {
     public readonly authSession: AuthSessionService,
     private readonly api: ApiBaseService,
     private readonly router: Router,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
 
   ngOnInit(): void {
-    // Load cart và profile nếu đã đăng nhập
-    if (this.authSession.getSession()) {
-      this.cartService.loadCart().subscribe();
-      this.loadUserProfile();
+    if (isPlatformBrowser(this.platformId)) {
+      // Load cart và profile nếu đã đăng nhập
+      if (this.authSession.getSession()) {
+        this.cartService.loadCart().subscribe();
+        this.loadUserProfile();
+      }
     }
 
     this.authSession.currentUser$.subscribe((user) => {

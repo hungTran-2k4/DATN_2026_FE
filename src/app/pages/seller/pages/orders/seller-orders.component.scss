@@ -255,6 +255,13 @@
     &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
+.action-simulate {
+    background: #FFFBEB;
+    color: #D97706;
+    border-color: #FEF3C7;
+    &:hover { background: #FEF3C7; }
+}
+
 /* ── Badges ── */
 .badge {
     display: inline-flex;

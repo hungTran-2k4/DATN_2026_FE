@@ -40,20 +40,20 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div class="field">
             <label class="field-label">Tỉnh/Thành <span class="text-red-500">*</span></label>
-            <p-dropdown [options]="provinces" formControlName="provinceId" optionLabel="ProvinceName" optionValue="ProvinceID" 
-                      placeholder="Chọn Tỉnh/Thành" [filter]="true" filterBy="ProvinceName" class="w-full"
+            <p-dropdown [options]="provinces" formControlName="provinceId" optionLabel="provinceName" optionValue="provinceID" 
+                      placeholder="Chọn Tỉnh/Thành" [filter]="true" filterBy="provinceName" class="w-full"
                       (onChange)="onProvinceChange($event.value)"></p-dropdown>
           </div>
           <div class="field">
             <label class="field-label">Quận/Huyện <span class="text-red-500">*</span></label>
-            <p-dropdown [options]="districts" formControlName="districtId" optionLabel="DistrictName" optionValue="DistrictID" 
-                      placeholder="Chọn Quận/Huyện" [filter]="true" filterBy="DistrictName" class="w-full"
+            <p-dropdown [options]="districts" formControlName="districtId" optionLabel="districtName" optionValue="districtID" 
+                      placeholder="Chọn Quận/Huyện" [filter]="true" filterBy="districtName" class="w-full"
                       (onChange)="onDistrictChange($event.value)" [disabled]="!form.get('provinceId')?.value"></p-dropdown>
           </div>
           <div class="field">
             <label class="field-label">Phường/Xã <span class="text-red-500">*</span></label>
-            <p-dropdown [options]="wards" formControlName="wardId" optionLabel="WardName" optionValue="WardCode" 
-                      placeholder="Chọn Phường/Xã" [filter]="true" filterBy="WardName" class="w-full"
+            <p-dropdown [options]="wards" formControlName="wardId" optionLabel="wardName" optionValue="wardCode" 
+                      placeholder="Chọn Phường/Xã" [filter]="true" filterBy="wardName" class="w-full"
                       [disabled]="!form.get('districtId')?.value"></p-dropdown>
           </div>
         </div>
