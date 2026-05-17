@@ -19,8 +19,8 @@ export interface OrderPagedResult {
 export class SellerOrderRepository {
   constructor(private readonly api: ApiBaseService) {}
 
-  getShopOrders(shopId: string, status?: string, page = 1, pageSize = 20): Observable<OrderPagedResult> {
-    return this.api.orders2(shopId, status, page, pageSize).pipe(
+  getShopOrders(shopId: string, status?: string, page = 1, pageSize = 20, search?: string): Observable<OrderPagedResult> {
+    return this.api.orders2(shopId, status, search, page, pageSize).pipe(
       map((res) => ({
         items: res.data ?? [],
         pageNumber: res.pageNumber ?? 1,

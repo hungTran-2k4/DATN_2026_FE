@@ -121,7 +121,7 @@ app-root {
 
 .admin-kpi-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 12px;
 }
 
@@ -158,6 +158,11 @@ app-root {
   &.is-warn {
     background: linear-gradient(135deg, #fff6e8 0%, #ffffff 100%);
     border-color: #f4dfbc;
+  }
+
+  &.is-danger {
+    background: linear-gradient(135deg, #fff3f4 0%, #ffffff 100%);
+    border-color: #ffd8da;
   }
 }
 

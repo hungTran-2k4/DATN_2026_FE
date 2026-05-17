@@ -12,6 +12,28 @@
     </button>
   </div>
 
+  <!-- Search Bar -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <i class="pi pi-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchKeyword"
+        (keyup.enter)="onSearch()"
+        placeholder="Tìm nhanh theo mã đơn hàng (ví dụ: ORD-20260517-3931)..."
+        class="search-input"
+      />
+      <i
+        *ngIf="searchKeyword"
+        class="pi pi-times"
+        (click)="clearSearch()"
+      ></i>
+    </div>
+    <button class="btn-primary" (click)="onSearch()">
+      <i class="pi pi-search mr-1"></i> Tìm kiếm
+    </button>
+  </div>
+
   <!-- Status tabs -->
   <div class="status-tabs">
     <button

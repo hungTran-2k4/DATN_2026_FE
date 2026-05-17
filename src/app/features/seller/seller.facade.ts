@@ -90,8 +90,8 @@ export class SellerFacade {
 
   // ── Orders ──
 
-  getOrders(shopId: string, status?: string, page = 1, pageSize = 20): Observable<OrderPagedResult> {
-    return this.orderRepo.getShopOrders(shopId, status, page, pageSize).pipe(
+  getOrders(shopId: string, status?: string, page = 1, pageSize = 20, search?: string): Observable<OrderPagedResult> {
+    return this.orderRepo.getShopOrders(shopId, status, page, pageSize, search).pipe(
       catchError(() => of({ items: [], pageNumber: 1, pageSize, totalPages: 0, totalRecords: 0 })),
     );
   }

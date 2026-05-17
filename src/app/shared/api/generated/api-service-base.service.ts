@@ -4597,6 +4597,7 @@ export class ApiBaseService {
   orders2(
     shopId: string,
     status: string | undefined,
+    search: string | undefined,
     page: number | undefined,
     pageSize: number | undefined,
   ): Observable<OrderSummaryDtoIEnumerablePagedResponse> {
@@ -4608,6 +4609,10 @@ export class ApiBaseService {
       throw new globalThis.Error("The parameter 'status' cannot be null.");
     else if (status !== undefined)
       url_ += 'status=' + encodeURIComponent('' + status) + '&';
+    if (search === null)
+      throw new globalThis.Error("The parameter 'search' cannot be null.");
+    else if (search !== undefined)
+      url_ += 'search=' + encodeURIComponent('' + search) + '&';
     if (page === null)
       throw new globalThis.Error("The parameter 'page' cannot be null.");
     else if (page !== undefined)
@@ -4705,6 +4710,7 @@ export class ApiBaseService {
    */
   all(
     status: string | undefined,
+    search: string | undefined,
     page: number | undefined,
     pageSize: number | undefined,
   ): Observable<OrderSummaryDtoIEnumerablePagedResponse> {
@@ -4713,6 +4719,10 @@ export class ApiBaseService {
       throw new globalThis.Error("The parameter 'status' cannot be null.");
     else if (status !== undefined)
       url_ += 'status=' + encodeURIComponent('' + status) + '&';
+    if (search === null)
+      throw new globalThis.Error("The parameter 'search' cannot be null.");
+    else if (search !== undefined)
+      url_ += 'search=' + encodeURIComponent('' + search) + '&';
     if (page === null)
       throw new globalThis.Error("The parameter 'page' cannot be null.");
     else if (page !== undefined)

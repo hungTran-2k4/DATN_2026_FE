@@ -67,6 +67,8 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
   pageSize = 20;
   skeletons = Array(5).fill(null);
 
+  searchKeyword = '';
+
   // Detail dialog
   showDetail = false;
   selectedOrder: OrderDto | null = null;
@@ -166,6 +168,7 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
         this.selectedStatus || undefined,
         this.currentPage,
         this.pageSize,
+        this.searchKeyword.trim() || undefined,
       )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -177,6 +180,17 @@ export class SellerOrdersComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
       });
+  }
+
+  onSearch(): void {
+    this.currentPage = 1;
+    this.loadOrders();
+  }
+
+  clearSearch(): void {
+    this.searchKeyword = '';
+    this.currentPage = 1;
+    this.loadOrders();
   }
 
   onTabChange(status: string): void {

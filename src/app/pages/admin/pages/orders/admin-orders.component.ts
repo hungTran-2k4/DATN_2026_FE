@@ -61,6 +61,8 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   pageSize = 20;
   skeletons = Array(5).fill(null);
 
+  searchKeyword = '';
+
   // Detail dialog
   showDetail = false;
   selectedOrder: OrderDto | null = null;
@@ -118,7 +120,12 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   loadOrders(): void {
     this.isLoading = true;
     this.api
-      .all(this.selectedStatus || undefined, this.currentPage, this.pageSize)
+      .all(
+        this.selectedStatus || undefined,
+        this.searchKeyword.trim() || undefined,
+        this.currentPage,
+        this.pageSize,
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: OrderSummaryDtoIEnumerablePagedResponse) => {
@@ -129,6 +136,17 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
       });
+  }
+
+  onSearch(): void {
+    this.currentPage = 1;
+    this.loadOrders();
+  }
+
+  clearSearch(): void {
+    this.searchKeyword = '';
+    this.currentPage = 1;
+    this.loadOrders();
   }
 
   onTabChange(status: string): void {

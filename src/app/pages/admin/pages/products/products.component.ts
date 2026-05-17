@@ -73,6 +73,7 @@ export class AdminProductsPageComponent {
   private readonly defaultQuery = new GetProductsQuery({
     page: 1,
     pageSize: 10,
+    includeInactive: true,
   });
 
   products$: Observable<ProductDto[]>;
@@ -81,6 +82,7 @@ export class AdminProductsPageComponent {
     total: number;
     published: number;
     pendingOrDraft: number;
+    inactiveOrRejected: number;
   }>;
 
   categories: CategoryDto[] = [];
@@ -322,6 +324,51 @@ export class AdminProductsPageComponent {
     });
   }
 
+  toggleProductStatus(product: ProductDto): void {
+    const isCurrentlyActive = product.status?.toLowerCase() !== 'inactive';
+    const targetStatus = isCurrentlyActive ? 'Inactive' : 'Active';
+    const actionLabel = isCurrentlyActive ? 'vô hiệu hóa' : 'kích hoạt lại';
+
+    this.confirmationService.confirm({
+      message: `Bạn có chắc chắn muốn ${actionLabel} sản phẩm "${product.name}" không?`,
+      header: 'Xác nhận thay đổi',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        const command = new UpdateProductCommand({
+          id: product.id,
+          name: product.name ?? '',
+          sku: product.sku ?? '',
+          slug: product.slug ?? '',
+          summary: product.summary ?? '',
+          description: product.description ?? '',
+          categoryId: product.categoryId,
+          brandId: product.brandId,
+          status: targetStatus,
+          shopId: product.shopId,
+          baseAttributes: product.baseAttributes ?? '{}',
+        });
+
+        this.api.productsPUT(product.id!, product.shopId ?? undefined, command).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Thành công',
+              detail: `Đã ${actionLabel} sản phẩm thành công.`,
+            });
+            this.reloadProducts();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Lỗi',
+              detail: `Không thể ${actionLabel} sản phẩm.`,
+            });
+          }
+        });
+      }
+    });
+  }
+
   onKeywordChange(): void {
     this.filteredProducts$ = this.products$.pipe(
       map((products) => this.applySearch(products)),
@@ -342,6 +389,10 @@ export class AdminProductsPageComponent {
         pendingOrDraft: products.filter((p) => {
           const value = p.status?.toLowerCase() ?? '';
           return value.includes('pending') || value.includes('draft');
+        }).length,
+        inactiveOrRejected: products.filter((p) => {
+          const value = p.status?.toLowerCase() ?? '';
+          return value.includes('inactive') || value.includes('rejected');
         }).length,
       })),
     );
