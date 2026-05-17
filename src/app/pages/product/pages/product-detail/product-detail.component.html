@@ -266,40 +266,83 @@
           <!-- Reviews -->
           <div *ngIf="activeTab === 'reviews'">
             <!-- Rating summary -->
-            <div class="flex items-center gap-8 mb-6 pb-6 border-b border-gray-100" *ngIf="reviews.length > 0">
-              <div class="text-center">
-                <div class="text-5xl font-black text-amber-500">{{ averageRating.toFixed(1) }}</div>
-                <div class="flex gap-0.5 justify-center mt-1">
+            <div class="flex flex-col sm:flex-row items-start gap-8 mb-8 pb-8 border-b border-gray-100" *ngIf="reviews.length > 0">
+              <!-- Left: Overall score -->
+              <div class="text-center sm:min-w-[140px]">
+                <div class="text-5xl font-black text-amber-500 leading-none">{{ averageRating.toFixed(1) }}</div>
+                <div class="flex gap-0.5 justify-center mt-2 mb-1">
                   <i *ngFor="let s of getRatingStars(5)" class="pi text-sm"
-                    [ngClass]="s <= averageRating ? 'pi-star-fill text-amber-400' : 'pi-star text-gray-300'"></i>
+                    [style.color]="averageRating >= s - 0.75 ? '#fbbf24' : '#e5e7eb'"
+                    [ngClass]="{
+                      'pi-star-fill': averageRating >= s - 0.25,
+                      'pi-star-half-fill': averageRating >= s - 0.75 && averageRating < s - 0.25,
+                      'pi-star': averageRating < s - 0.75
+                    }"></i>
                 </div>
-                <div class="text-xs text-gray-400 mt-1">{{ reviewsTotal }} đánh giá</div>
+                <div class="text-xs text-gray-400 font-medium">{{ reviewsTotal }} đánh giá</div>
+              </div>
+
+              <!-- Right: Rating distribution bars -->
+              <div class="flex-1 w-full space-y-1.5">
+                <div *ngFor="let star of [5,4,3,2,1]" class="flex items-center gap-2">
+                  <span class="text-xs text-gray-500 w-8 text-right font-medium">{{ star }} <i class="pi pi-star-fill text-[10px] text-amber-400"></i></span>
+                  <div class="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500"
+                         [style.width.%]="getStarPercentage(star)"
+                         [ngClass]="star >= 4 ? 'bg-amber-400' : star === 3 ? 'bg-yellow-300' : 'bg-orange-300'">
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-gray-400 w-8">{{ getStarCount(star) }}</span>
+                </div>
               </div>
             </div>
 
             <!-- Review list -->
-            <div class="space-y-5" *ngIf="reviews.length > 0">
-              <div *ngFor="let review of reviews" class="flex gap-4 pb-5 border-b border-gray-50 last:border-none">
-                <div class="w-10 h-10 rounded-full bg-user-primary/10 flex items-center justify-center shrink-0 text-user-primary font-bold text-sm">
+            <div class="space-y-0" *ngIf="reviews.length > 0">
+              <div *ngFor="let review of reviews; let last = last"
+                   class="flex gap-4 py-5"
+                   [ngClass]="!last ? 'border-b border-gray-50' : ''">
+                <!-- Avatar -->
+                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold text-sm shadow-sm"
+                     [ngClass]="(review.rating ?? 0) >= 4 ? 'bg-emerald-100 text-emerald-700' : (review.rating ?? 0) >= 3 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-600'">
                   {{ (review.userName || 'U')[0].toUpperCase() }}
                 </div>
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-1">
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-3 mb-1.5">
                     <span class="font-bold text-sm text-gray-800">{{ review.userName || 'Người dùng' }}</span>
-                    <div class="flex gap-0.5">
-                      <i *ngFor="let s of getRatingStars(5)" class="pi text-xs"
-                        [ngClass]="s <= (review.rating ?? 0) ? 'pi-star-fill text-amber-400' : 'pi-star text-gray-300'"></i>
-                    </div>
-                    <span class="text-xs text-gray-400">{{ review.createdAt | date:'dd/MM/yyyy' }}</span>
+                    <span class="text-[10px] text-gray-300">|</span>
+                    <span class="text-[10px] text-gray-400">{{ review.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                   </div>
-                  <p class="text-sm text-gray-600 leading-relaxed">{{ review.comment }}</p>
+                  <!-- Stars -->
+                  <div class="flex gap-0.5 mb-2">
+                    <i *ngFor="let s of getRatingStars(5)" class="pi text-xs"
+                      [ngClass]="s <= (review.rating ?? 0) ? 'pi-star-fill text-amber-400' : 'pi-star text-gray-200'"></i>
+                    <span class="text-[10px] ml-1 font-bold"
+                          [ngClass]="(review.rating ?? 0) >= 4 ? 'text-emerald-600' : (review.rating ?? 0) >= 3 ? 'text-amber-600' : 'text-red-500'">
+                      {{ (review.rating ?? 0) >= 5 ? 'Tuyệt vời' : (review.rating ?? 0) >= 4 ? 'Hài lòng' : (review.rating ?? 0) >= 3 ? 'Bình thường' : 'Không hài lòng' }}
+                    </span>
+                  </div>
+                  <!-- Comment -->
+                  <p class="text-sm text-gray-600 leading-relaxed" *ngIf="review.comment">{{ review.comment }}</p>
+                  <!-- Images -->
+                  <div class="flex flex-wrap gap-2 mt-3" *ngIf="review.images && review.images.length > 0">
+                    <div *ngFor="let img of review.images"
+                         class="w-20 h-20 rounded-lg overflow-hidden border border-gray-100 cursor-pointer hover:shadow-md hover:border-user-primary transition-all group">
+                      <img [src]="img" alt="Review image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div *ngIf="reviews.length === 0" class="text-center py-12">
-              <i class="pi pi-star text-4xl text-gray-200 mb-3 block"></i>
-              <p class="text-gray-400 text-sm">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+            <!-- Empty state -->
+            <div *ngIf="reviews.length === 0" class="text-center py-16">
+              <div class="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="pi pi-star text-3xl text-amber-300"></i>
+              </div>
+              <h4 class="text-gray-700 font-bold mb-1">Chưa có đánh giá nào</h4>
+              <p class="text-gray-400 text-sm">Hãy mua sản phẩm và là người đầu tiên đánh giá!</p>
             </div>
           </div>
 

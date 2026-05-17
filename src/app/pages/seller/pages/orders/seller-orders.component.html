@@ -293,6 +293,22 @@
         </button>
       </div>
     </div>
+    
+    <!-- GHN Pick Shift Selection (Only when preparing to PROCESS/SHIP) -->
+    <div class="field" *ngIf="newStatus === 'PROCESSING' && pickShifts.length > 0">
+      <label class="field-label">Ca lấy hàng GHN (Tùy chọn)</label>
+      <p-dropdown
+        [options]="pickShifts"
+        [(ngModel)]="selectedPickShiftId"
+        placeholder="Chọn ca lấy hàng GHN..."
+        [showClear]="true"
+        styleClass="w-full"
+      ></p-dropdown>
+      <small class="text-gray-400 mt-1 block">
+        Nếu không chọn, GHN sẽ tự động sắp xếp ca lấy hàng gần nhất.
+      </small>
+    </div>
+
     <div class="field">
       <label class="field-label">Ghi chú (tùy chọn)</label>
       <textarea

@@ -75,6 +75,14 @@
           <i class="pi pi-check-circle"></i> Đã nhận được hàng
         </button>
 
+        <!-- Nút Đánh giá nếu đơn hàng đã COMPLETED và chưa đánh giá hết toàn bộ -->
+        <button pButton 
+                 *ngIf="order.orderStatus === 'COMPLETED' && !orderReviewStatusMap[order.id!]"
+                 (click)="directReview(order); $event.stopPropagation()"
+                 class="bg-amber-500 text-white border-0 hover:bg-amber-600 px-4 py-2 text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2">
+           <i class="pi pi-star-fill"></i> Đánh giá
+         </button>
+
         <!-- Nút Thanh toán ngay nếu là VNPAY và đang pending -->
         <button pButton 
                 *ngIf="order.paymentMethod === 'VNPAY' && order.paymentStatus !== 'PAID' && order.orderStatus !== 'CANCELLED' && order.orderStatus !== 'COMPLETED'"
@@ -198,7 +206,23 @@
                    <span class="mx-2 text-gray-200">|</span>
                    <span>{{ formatPrice(item.unitPrice) }}</span>
                 </div>
-                <p class="text-sm font-extrabold text-gray-900">{{ formatPrice(item.subTotal) }}</p>
+                <div class="flex flex-col items-end gap-2">
+                    <p class="text-sm font-extrabold text-gray-900">{{ formatPrice(item.subTotal) }}</p>
+                    <!-- Trạng thái Đánh giá nếu đơn hàng đã hoàn thành -->
+                    <ng-container *ngIf="selectedOrder.orderStatus === 'COMPLETED'">
+                      <!-- Đã đánh giá -->
+                      <span *ngIf="item.isReviewed" 
+                            class="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded border border-gray-200 select-none flex items-center gap-1">
+                        <i class="pi pi-check text-[10px]"></i> Đã đánh giá
+                      </span>
+                      <!-- Chưa đánh giá -->
+                      <button *ngIf="!item.isReviewed"
+                              (click)="openReviewDialog(item, selectedOrder); $event.stopPropagation()"
+                              class="text-[10px] font-bold text-user-primary hover:bg-emerald-50 px-2 py-1 rounded border border-user-primary transition-colors">
+                        <i class="pi pi-star-fill text-[10px] mr-1"></i> Đánh giá
+                      </button>
+                    </ng-container>
+                </div>
               </div>
             </div>
           </div>
@@ -228,6 +252,83 @@
           <span class="font-bold block text-green-800 mb-1">Ghi chú của bạn:</span>
           {{ selectedOrder.customerNote }}
         </div>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- ── Review Dialog ── -->
+  <p-dialog
+    header="Đánh giá sản phẩm"
+    [(visible)]="showReviewDialog"
+    [modal]="true"
+    [style]="{width: 'min(450px, 94vw)'}"
+    [draggable]="false"
+    [resizable]="false"
+    appendTo="body"
+  >
+    <div *ngIf="reviewItem" class="flex flex-col gap-5 py-2">
+      <div class="flex gap-4 p-3 bg-gray-50 rounded-xl">
+        <img *ngIf="reviewItem.variantImageUrl" [src]="reviewItem.variantImageUrl" class="w-16 h-16 object-cover rounded-lg border border-gray-100" />
+        <div class="flex-1 min-w-0">
+          <h5 class="text-sm font-bold text-gray-800 line-clamp-2 leading-snug">{{ reviewItem.productNameSnapshot }}</h5>
+          <p class="text-[10px] text-gray-500 mt-1" *ngIf="reviewItem.variantName">Phân loại: {{ reviewItem.variantName }}</p>
+        </div>
+      </div>
+
+      <div class="text-center py-2 flex flex-col items-center justify-center">
+        <p class="text-sm font-bold text-gray-700 mb-3">Vui lòng chọn số sao đánh giá</p>
+        <div class="flex justify-center w-full py-1">
+          <p-rating [(ngModel)]="reviewRating" [stars]="5" class="custom-rating"></p-rating>
+        </div>
+        <p class="text-xs mt-2" [ngClass]="reviewRating >= 4 ? 'text-emerald-600' : 'text-amber-600'">
+            {{ getRatingText(reviewRating) }}
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-gray-700">Chia sẻ cảm nhận của bạn</label>
+        <textarea 
+            rows="4" 
+            pInputTextarea 
+            [(ngModel)]="reviewComment" 
+            placeholder="Sản phẩm tuyệt vời, đóng gói chắc chắn..."
+            class="w-full text-sm rounded-xl border-gray-200 focus:border-user-primary p-3"
+        ></textarea>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-gray-700">Hình ảnh thực tế (tối đa 5 ảnh)</label>
+        <div class="flex flex-wrap gap-2">
+            <!-- Preview uploaded images -->
+            <div *ngFor="let preview of reviewImagePreviews; let i = index"
+                 class="w-20 h-20 rounded-xl overflow-hidden border border-gray-200 relative group">
+              <img [src]="preview" class="w-full h-full object-cover" />
+              <button (click)="removeReviewImage(i)"
+                      class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <i class="pi pi-times text-[8px]"></i>
+              </button>
+            </div>
+            <!-- Add more button -->
+            <button *ngIf="reviewImagePreviews.length < 5"
+                    (click)="reviewFileInput.click()"
+                    class="w-20 h-20 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-user-primary hover:text-user-primary transition-all cursor-pointer">
+                <i class="pi pi-camera text-xl"></i>
+                <span class="text-[10px] mt-1">Thêm ảnh</span>
+            </button>
+        </div>
+        <input #reviewFileInput type="file" accept="image/*" multiple class="hidden" (change)="onReviewImagesSelected($event)" />
+      </div>
+
+      <div class="flex gap-3 mt-4">
+        <button pButton 
+                class="p-button-outlined p-button-secondary flex-1 justify-center py-2.5 font-bold"
+                (click)="showReviewDialog = false">Hủy</button>
+        <button pButton 
+                class="bg-user-primary border-none flex-1 justify-center py-2.5 font-bold text-white shadow-lg shadow-user-primary/20"
+                [disabled]="reviewRating === 0 || isSubmittingReview"
+                (click)="submitReview()">
+            <i class="pi pi-spin pi-spinner mr-2" *ngIf="isSubmittingReview"></i> Gửi đánh giá
+        </button>
       </div>
     </div>
   </p-dialog>

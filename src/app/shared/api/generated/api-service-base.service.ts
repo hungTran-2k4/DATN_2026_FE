@@ -15217,8 +15217,7 @@ export class CreatePaymentUrlRequest implements ICreatePaymentUrlRequest {
       this.orderId = _data['orderId'];
       if (Array.isArray(_data['orderIds'])) {
         this.orderIds = [] as any;
-        for (let item of _data['orderIds'])
-          this.orderIds!.push(item);
+        for (let item of _data['orderIds']) this.orderIds!.push(item);
       }
     }
   }
@@ -15235,8 +15234,7 @@ export class CreatePaymentUrlRequest implements ICreatePaymentUrlRequest {
     data['orderId'] = this.orderId;
     if (Array.isArray(this.orderIds)) {
       data['orderIds'] = [];
-      for (let item of this.orderIds)
-        data['orderIds'].push(item);
+      for (let item of this.orderIds) data['orderIds'].push(item);
     }
     return data;
   }
@@ -17546,6 +17544,8 @@ export class ProductDto implements IProductDto {
   baseAttributes?: string | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
+  averageRating?: number;
+  reviewCount?: number;
   images?: ProductImageDto[] | undefined;
   variants?: ProductVariantDto[] | undefined;
 
@@ -17578,6 +17578,8 @@ export class ProductDto implements IProductDto {
       this.updatedAt = _data['updatedAt']
         ? new Date(_data['updatedAt'].toString())
         : (undefined as any);
+      this.averageRating = _data['averageRating'];
+      this.reviewCount = _data['reviewCount'];
       if (Array.isArray(_data['images'])) {
         this.images = [] as any;
         for (let item of _data['images'])
@@ -17618,6 +17620,8 @@ export class ProductDto implements IProductDto {
     data['updatedAt'] = this.updatedAt
       ? this.updatedAt.toISOString()
       : (undefined as any);
+    data['averageRating'] = this.averageRating;
+    data['reviewCount'] = this.reviewCount;
     if (Array.isArray(this.images)) {
       data['images'] = [];
       for (let item of this.images)
@@ -17647,6 +17651,8 @@ export interface IProductDto {
   baseAttributes?: string | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
+  averageRating?: number;
+  reviewCount?: number;
   images?: ProductImageDto[] | undefined;
   variants?: ProductVariantDto[] | undefined;
 }

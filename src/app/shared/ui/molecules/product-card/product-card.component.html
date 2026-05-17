@@ -27,8 +27,15 @@
     </h3>
 
     <!-- Rating -->
-    <div class="rating-stars">
-      <i class="pi pi-star-fill" *ngFor="let i of [1,2,3,4,5]"></i>
+    <div class="rating-stars" *ngIf="data.rating && data.rating > 0">
+      <i *ngFor="let i of [1,2,3,4,5]" class="pi"
+         [style.color]="(data.rating || 0) >= i - 0.75 ? '#fbbf24' : '#e5e7eb'"
+         [ngClass]="{
+           'pi-star-fill': (data.rating || 0) >= i - 0.25,
+           'pi-star-half-fill': (data.rating || 0) >= i - 0.75 && (data.rating || 0) < i - 0.25,
+           'pi-star': (data.rating || 0) < i - 0.75
+         }"></i>
+      <span class="review-count" *ngIf="data.reviewCount">({{ data.reviewCount }})</span>
     </div>
 
     <!-- Pricing Section -->

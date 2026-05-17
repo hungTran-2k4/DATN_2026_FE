@@ -10,6 +10,7 @@ export interface ProductCardData {
   discount?: number;
   image: string;
   rating?: number;
+  reviewCount?: number;
   soldCount?: number;
   totalStock?: number;
   category?: string;

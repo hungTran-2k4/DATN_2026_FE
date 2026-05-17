@@ -113,14 +113,21 @@
 
 .rating-stars {
   display: flex;
+  align-items: center;
   gap: 2px;
   
   i {
     font-size: 10px;
     @media (min-width: 640px) {
-      font-size: 12px;
+      font-size: 11px;
     }
-    color: #fbbf24; // amber-400
+  }
+  
+  .review-count {
+    font-size: 10px;
+    color: #9ca3af; // gray-400
+    margin-left: 4px;
+    font-weight: 500;
   }
 }
 

@@ -211,7 +211,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       discount: discount,
       image: mainImg,
       category: product.categoryId ?? '',
-      rating: 4.5, // TODO: Map actual rating from ProductRatingDto if available
+      rating: product.averageRating ?? 0,
+      reviewCount: product.reviewCount ?? 0,
     };
   }
 

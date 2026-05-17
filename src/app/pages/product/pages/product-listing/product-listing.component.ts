@@ -377,7 +377,9 @@ export class ProductListingComponent implements OnInit, OnDestroy {
       price: variant?.price ?? 0,
       image: this.getMainImage(product),
       category: categoryName || product.categoryId, // Fallback to ID if name not found
-      variantId: variant?.id
+      variantId: variant?.id,
+      rating: product.averageRating ?? 0,
+      reviewCount: product.reviewCount ?? 0,
     };
   }
 }

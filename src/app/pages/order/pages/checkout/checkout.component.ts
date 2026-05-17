@@ -2,7 +2,7 @@ import { Component, OnInit, signal, effect, PLATFORM_ID, Inject } from '@angular
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { DialogModule } from 'primeng/dialog';
@@ -85,6 +85,7 @@ export class CheckoutComponent implements OnInit {
     private apiService: ApiBaseService,
     private cartService: CartService,
     private router: Router,
+    private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
   ) {}
 
@@ -123,12 +124,43 @@ export class CheckoutComponent implements OnInit {
   }
 
   loadCartData() {
-    this.cartService.loadCart().subscribe((cart) => {
-      if (cart) {
-        this.cartItems = (cart.groups || []).flatMap((g) => g.items || []);
-        this.merchandiseSubtotal = cart.grandTotal || 0;
-        this.updateTotal();
-      }
+    this.route.queryParams.subscribe((params) => {
+      const isBuyNow = params['buyNow'] === 'true';
+      const variantId = params['variantId'];
+      const buyNowQty = Number(params['quantity'] || 1);
+
+      this.cartService.loadCart().subscribe((cart) => {
+        if (cart) {
+          let items = (cart.groups || []).flatMap((g) => g.items || []);
+
+          if (isBuyNow && variantId) {
+            // Tìm sản phẩm mua ngay trong giỏ hàng
+            const targetItem = items.find((i: any) => i.variantId === variantId);
+
+            // Nếu tìm thấy và số lượng trong DB khác với số lượng mua ngay (bị cộng dồn)
+            if (targetItem && targetItem.quantity !== buyNowQty) {
+              // Đồng bộ số lượng trong DB giỏ hàng về đúng số lượng mua ngay để backend checkout chuẩn
+              this.cartService.updateQuantity(targetItem.id!, buyNowQty).subscribe(() => {
+                this.loadCartData(); // Load lại dữ liệu sau khi DB đã được đồng bộ
+              });
+              return; // Dừng lại ở lượt chạy này, đợi chạy lại ở lần callback tiếp theo
+            }
+
+            // Lọc ra đúng sản phẩm được chọn mua ngay
+            items = items.filter((i: any) => i.variantId === variantId);
+            // Tính toán lại tổng tiền hàng cho riêng sản phẩm đó
+            this.merchandiseSubtotal = items.reduce(
+              (sum, i: any) => sum + (i.unitPrice || 0) * (i.quantity || 0),
+              0,
+            );
+          } else {
+            this.merchandiseSubtotal = cart.grandTotal || 0;
+          }
+
+          this.cartItems = items;
+          this.updateTotal();
+        }
+      });
     });
   }
 

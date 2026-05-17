@@ -279,7 +279,13 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       next: (ok) => {
         this.isAddingToCart = false;
         if (ok) {
-           this.router.navigate(['/checkout']);
+            this.router.navigate(['/checkout'], {
+             queryParams: {
+               buyNow: 'true',
+               variantId: this.selectedVariant?.id,
+               quantity: this.quantity
+             }
+           });
         } else {
           this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xử lý yêu cầu.' });
         }
@@ -291,12 +297,24 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   // ── Reviews ──
 
   get averageRating(): number {
+    // Prefer the pre-calculated value from the product entity (accurate across ALL reviews)
+    if (this.product?.averageRating) return this.product.averageRating;
+    // Fallback: calculate from loaded reviews (may be partial)
     if (!this.reviews.length) return 0;
     return this.reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / this.reviews.length;
   }
 
   getRatingStars(rating: number): number[] {
     return Array.from({ length: 5 }, (_, i) => i + 1);
+  }
+
+  getStarCount(star: number): number {
+    return this.reviews.filter(r => (r.rating ?? 0) === star).length;
+  }
+
+  getStarPercentage(star: number): number {
+    if (this.reviews.length === 0) return 0;
+    return (this.getStarCount(star) / this.reviews.length) * 100;
   }
 
   // ── Helpers ──

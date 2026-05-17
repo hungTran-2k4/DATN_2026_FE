@@ -180,4 +180,51 @@
       display: none;
     }
   }
+
+  /* ── Custom Rating Stars ── */
+  .custom-rating {
+    display: block !important;
+    width: auto !important;
+    margin: 0 auto !important;
+    
+    .p-rating {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 8px !important;
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+
+      .p-rating-item {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        outline: none !important;
+
+        .p-rating-icon {
+          font-size: 2.2rem !important;
+          color: #cbd5e1 !important; /* Màu xám nhạt khi chưa được chọn */
+          transition: all 0.2s ease-in-out !important;
+          
+          &.pi-star-fill,
+          &.pi-star {
+            font-family: 'primeicons' !important;
+          }
+        }
+
+        &.p-rating-item-active .p-rating-icon,
+        &.p-highlight .p-rating-icon,
+        .pi-star-fill {
+          color: #fbbf24 !important; /* Màu vàng hổ phách chuẩn thương mại điện tử */
+        }
+
+        &:hover .p-rating-icon {
+          transform: scale(1.2) !important;
+          color: #fbbf24 !important;
+        }
+      }
+    }
+  }
 }
